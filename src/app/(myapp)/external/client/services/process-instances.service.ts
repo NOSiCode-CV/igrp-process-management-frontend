@@ -48,8 +48,8 @@ export const getProcessInstances = async (
   })();
 
   const response = await httpClient.processes.getProcessInstances({
-    page,
-    size,
+    //page,
+    //size,
     number: filters?.number,
     procReleaseKey: filters?.processKey,
     status: mappedStatus,
