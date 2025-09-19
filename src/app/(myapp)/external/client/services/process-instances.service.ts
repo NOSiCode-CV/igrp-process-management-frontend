@@ -47,6 +47,8 @@ export const getProcessInstances = async (
     return allowedStatuses.includes(raw as ClientStatus) ? (raw as ClientStatus) : undefined;
   })();
 
+  console.log(page, size)
+
   const response = await httpClient.processes.getProcessInstances({
     //page,
     //size,
