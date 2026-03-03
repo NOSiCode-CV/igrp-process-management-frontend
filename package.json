@@ -1,6 +1,7 @@
 {
   "name": "process-management-frontend",
   "version": "0.0.1-alpha.5",
+  "displayName": "iGRP Process Management",
   "description": "Process Management Frontend for IGRP",
   "scripts": {
     "dev": "next dev --turbopack",
@@ -17,8 +18,8 @@
     "@igrp/framework-next-ui": "0.1.0-beta.91",
     "@igrp/igrp-framework-react-design-system": "0.1.0-beta.91",
     "@igrp/platform-access-management-client-ts": "0.1.0-beta.63",
-    "@igrp/platform-process-management-client-ts": "0.1.0-beta.12",
-    "@igrp/platform-process-management-types": "0.1.0-beta.13",
+    "@igrp/platform-process-management-client-ts": "0.1.0-beta.16",
+    "@igrp/platform-process-management-types": "0.1.0-beta.16",
     "@tanstack/react-query": "^5.90.20",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
