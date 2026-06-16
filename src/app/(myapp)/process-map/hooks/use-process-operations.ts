@@ -19,7 +19,7 @@ import {
   associateProcessToArea,
   removeProcessFromArea,
 } from "../../client/area-process";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 export function useProcessOperations(
   refreshData: () => void,
@@ -35,13 +35,14 @@ export function useProcessOperations(
   } | null>(null);
 
   const { igrpToast } = useIGRPToast();
+  const queryClient = useQueryClient();
 
   const selectProcess = useCallback((process: Process) => {
     setSelectedProcess(process);
   }, []);
 
   const { data, isLoading: loading } = useQuery({
-    queryKey: ["all-processes"],
+    queryKey: ["all-processes-map"],
     queryFn: async () => {
       const response = await getProcesses({ filterByCurrentUser: true });
       const sortedContent = [...(response.content ?? [])].sort((a, b) =>
@@ -92,6 +93,12 @@ export function useProcessOperations(
 
         // Clear pending process start
         setPendingProcessStart(null);
+
+        // Starting a process (and claiming its first task) changes these lists
+        queryClient.invalidateQueries({ queryKey: ["process-instances"] });
+        queryClient.invalidateQueries({ queryKey: ["tasks"] });
+        queryClient.invalidateQueries({ queryKey: ["my-tasks"] });
+        queryClient.invalidateQueries({ queryKey: ["available-tasks"] });
 
         igrpToast({
           type: "success",
@@ -147,7 +154,7 @@ export function useProcessOperations(
         return null;
       }
     },
-    [pendingProcessStart],
+    [pendingProcessStart, queryClient],
   );
 
   const handleRemoveProcess = async (

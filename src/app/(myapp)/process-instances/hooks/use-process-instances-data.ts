@@ -14,6 +14,7 @@ export function useProcessInstancesData() {
     queryFn: () => {
       return getProcessInstances(filters as Partial<ProcessInstancesFilters>);
     },
+    staleTime: 0,
     refetchOnWindowFocus: true,
     refetchOnMount: true,
     retryDelay: 1000,
