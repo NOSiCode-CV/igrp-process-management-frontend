@@ -30,6 +30,7 @@ export function useAvailableTasksData() {
         dateTo: filtersToUse.dateTo || undefined,
       });
     },
+    staleTime: 0,
     refetchOnWindowFocus: true,
     refetchOnMount: true,
     retryDelay: 1000,
@@ -69,6 +70,8 @@ export function useAvailableTasksData() {
 
   const refetchTasks = () => {
     queryClient.invalidateQueries({ queryKey: ["available-tasks"] });
+    // Claiming/releasing a task moves it between lists, so refresh My Tasks too
+    queryClient.invalidateQueries({ queryKey: ["my-tasks"] });
   };
 
   return {

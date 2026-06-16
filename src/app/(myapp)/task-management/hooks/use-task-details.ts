@@ -46,6 +46,9 @@ export const useTaskDetails = (taskId: string) => {
 
   const refetchTask = useCallback(() => {
     queryClient.refetchQueries({ queryKey: ["task-details", taskId] });
+    // Claiming/releasing/delegating a task changes both task lists
+    queryClient.invalidateQueries({ queryKey: ["my-tasks"] });
+    queryClient.invalidateQueries({ queryKey: ["available-tasks"] });
   }, [queryClient, taskId]);
 
   // Add unclaim task handler

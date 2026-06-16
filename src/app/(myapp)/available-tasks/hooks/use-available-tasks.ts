@@ -82,7 +82,7 @@ export function useAvailableTasks() {
         };
       }
     },
-    [fetchTasks],
+    [refetchTasks],
   );
 
   const handleSearch = (searchTerm: string) => {

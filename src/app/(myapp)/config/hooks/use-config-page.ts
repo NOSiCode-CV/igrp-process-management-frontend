@@ -86,7 +86,6 @@ export function useConfigPage({
   const handleSaveUserTask = async (request: CreateProcessArtifactRequest) => {
     const processDefinitionId = processSelected?.id;
     if (!processDefinitionId) return;
-    console.log("request", request);
     userTasksConfig.patchEditedTask(request.key, request);
   };
 

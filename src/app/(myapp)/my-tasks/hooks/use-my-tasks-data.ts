@@ -48,6 +48,7 @@ export function useMyTasksData() {
 
       return getMyTasks(mappedFilters);
     },
+    staleTime: 0,
     refetchOnWindowFocus: true,
     refetchOnMount: true,
     retryDelay: 1000,
@@ -104,6 +105,8 @@ export function useMyTasksData() {
 
   const refetchMyTasks = () => {
     queryClient.invalidateQueries({ queryKey: ["my-tasks"] });
+    // Releasing a task moves it back to the available pool, so refresh that list too
+    queryClient.invalidateQueries({ queryKey: ["available-tasks"] });
   };
 
   return {

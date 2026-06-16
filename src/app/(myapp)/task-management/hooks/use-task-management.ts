@@ -38,6 +38,7 @@ export function useTaskManagement() {
 
       return getTasks(cleanFilters);
     },
+    staleTime: 0,
     refetchOnWindowFocus: true,
     refetchOnMount: true,
     retryDelay: 1000,
@@ -175,6 +176,9 @@ export function useTaskManagement() {
 
         // Refresh tasks after successful assignment
         await queryClient.refetchQueries({ queryKey: ["tasks"] });
+        // Assigning moves the task between user lists, so refresh those too
+        queryClient.invalidateQueries({ queryKey: ["my-tasks"] });
+        queryClient.invalidateQueries({ queryKey: ["available-tasks"] });
 
         // Close modal
         handleCloseAssignModal();
