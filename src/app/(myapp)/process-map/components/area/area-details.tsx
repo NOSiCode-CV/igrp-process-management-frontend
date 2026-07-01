@@ -42,7 +42,7 @@ function AreaDetails({
           <IGRPSeparator />
 
           <div className="space-y-2">
-            <IGRPLabel label="Assigned Processes" />
+            <IGRPLabel label="Processos Atribuídos" />
             {processes && processes.length > 0 ? (
               <div className="space-y-2">
                 {processes.map((process, index) => {
@@ -100,7 +100,7 @@ function AreaDetails({
             iconName="FolderTree"
             className="h-12 w-12 mx-auto mb-3 opacity-50"
           />
-          <p>Select an area to view details</p>
+          <p>Selecione uma área para ver detalhes</p>
         </div>
       )}
     </>

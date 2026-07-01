@@ -33,23 +33,34 @@ export async function refreshAccessToken(token: JWT): Promise<JWT> {
       return { ...token, error: "RefreshAccessTokenError" };
     }
 
-    const refreshResponse = await fetch(
-      `${issuer}/protocol/openid-connect/token`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: new URLSearchParams({
-          client_id: clientId,
-          client_secret: clientSecret,
-          grant_type: "refresh_token",
-          refresh_token: token.refreshToken || "",
-        }),
-      },
-    );
+    // Cap the refresh request so a slow/unreachable Keycloak can't hang the
+    // caller (e.g. getIGRPProcessClient) indefinitely.
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
 
-    const bodyText = await refreshResponse.text();
+    let bodyText: string;
+    let refreshResponse: Response;
+    try {
+      refreshResponse = await fetch(
+        `${issuer}/protocol/openid-connect/token`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          body: new URLSearchParams({
+            client_id: clientId,
+            client_secret: clientSecret,
+            grant_type: "refresh_token",
+            refresh_token: token.refreshToken || "",
+          }),
+          signal: controller.signal,
+        },
+      );
+      bodyText = await refreshResponse.text();
+    } finally {
+      clearTimeout(timeoutId);
+    }
 
     if (!refreshResponse.ok) {
       console.error(

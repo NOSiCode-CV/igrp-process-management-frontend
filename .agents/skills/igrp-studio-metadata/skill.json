@@ -1,0 +1,18 @@
+{
+  "name": "igrp-studio-metadata",
+  "version": "1.2.0",
+  "framework": "nextjs",
+  "description": "Author iGRP Studio JSON metadata files (pages, components, process steps) that compile correctly through the iGRP engine into Next.js/React code. Use when creating or editing files under `.igrpstudio/pages/`, `.igrpstudio/components/`, or `.igrpstudio/process/` — or when troubleshooting generated code under `src/app/(igrp)/(generated)/`.",
+  "tags": ["igrp-studio", "metadata", "authoring", "nextjs"],
+  "author": "NOSI",
+  "license": "ISC",
+  "dependencies": {},
+  "files": [
+    "SKILL.md",
+    "component-reference.md",
+    "patterns.md",
+    "process-steps.md",
+    "project-conventions.md",
+    "troubleshooting.md"
+  ]
+}

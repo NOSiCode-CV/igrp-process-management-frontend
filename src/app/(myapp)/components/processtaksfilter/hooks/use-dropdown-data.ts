@@ -72,25 +72,15 @@ export function useDropdownData(filters: FilterState, isProcess?: boolean) {
     queryFn: async () => {
       if (!filters.areaId) return [];
 
-      const processPromises = [];
-
-      // Always fetch processes from the main area
-      processPromises.push(getAreaProcesses(filters.areaId));
-
-      // If subarea is selected, also fetch processes from subarea
-      if (filters.subareaId) {
-        processPromises.push(getAreaProcesses(filters.subareaId));
-      }
-
-      const processResponses = await Promise.all(processPromises);
-
-      // Merge all processes from area and subarea
-      const allProcesses = processResponses.flatMap(
-        (response) => response.content,
-      );
+      // Use the most specific scope: the subarea when selected, otherwise the
+      // area. Merging both would surface the parent area's processes while a
+      // subarea is selected, which looks like processes from other areas.
+      const scopeId = filters.subareaId || filters.areaId;
+      const response = await getAreaProcesses(scopeId);
+      const processes = response.content || [];
 
       // Remove duplicates based on processKey
-      const uniqueProcesses = allProcesses.filter(
+      const uniqueProcesses = processes.filter(
         (process, index, self) =>
           index === self.findIndex((p) => p.processKey === process.processKey),
       );

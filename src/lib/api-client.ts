@@ -2,13 +2,8 @@ import { ProcessManagementClient } from "@igrp/platform-process-management-clien
 import { getIGRPProcessClientConfig } from "./api-config";
 import { getAccessToken, refreshAccessToken } from "./auth-helpers";
 
-let clientInstance: ProcessManagementClient | null = null;
-
 export async function getIGRPProcessClient(): Promise<ProcessManagementClient> {
-  // Always create a fresh client instance to ensure we have the latest configuration
-  clientInstance = null;
-  // Always get fresh config to ensure we have the latest token
-  const { baseUrl, timeout = 45000 } = getIGRPProcessClientConfig();
+  const { baseUrl, timeout } = getIGRPProcessClientConfig();
 
   let token = await getAccessToken();
 
@@ -35,23 +30,14 @@ export async function getIGRPProcessClient(): Promise<ProcessManagementClient> {
     throw new Error("Access token not available");
   }
 
-  // Prepare headers with authentication
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     Accept: "application/json",
     Authorization: `Bearer ${token.accessToken}`,
   };
 
-  // Create new client instance with current token
-  clientInstance = ProcessManagementClient.create({
-    baseUrl,
-    timeout,
-    headers,
-  });
-
-  return clientInstance;
-}
-
-export function resetIGRPProcessClient() {
-  clientInstance = null;
+  // Build a fresh client per call. Never cache at module scope: in Next.js the
+  // module is shared across all requests/users, so a cached client would leak
+  // one user's bearer token to another.
+  return ProcessManagementClient.create({ baseUrl, timeout, headers });
 }

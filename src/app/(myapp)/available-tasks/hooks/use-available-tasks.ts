@@ -1,4 +1,4 @@
-import { useMemo, useCallback } from "react";
+import { useMemo, useCallback, useRef } from "react";
 import { useAvailableTasksData } from "./use-available-tasks-data";
 import { claimTask } from "../../client/task";
 import { TaskTableRow } from "../types";
@@ -66,9 +66,22 @@ export function useAvailableTasks() {
     });
   }, [tasksState.tasks, getPriorityBadge]);
 
+  // Tracks the task currently being claimed. The "Assumir" button
+  // (IGRPDataTableButtonLink) has no loading/disabled prop, so we guard here to
+  // stop rapid multi-clicks from firing duplicate claim requests.
+  const claimingTaskIdRef = useRef<string | null>(null);
+
   // Claim task function
   const handleClaimTask = useCallback(
     async (taskId: string) => {
+      // A claim is already in flight — ignore repeated clicks
+      if (claimingTaskIdRef.current) {
+        return {
+          success: false,
+          error: "Aguarde, a tarefa anterior ainda está a ser assumida.",
+        };
+      }
+      claimingTaskIdRef.current = taskId;
       try {
         await claimTask(taskId);
         // Refresh tasks after claiming
@@ -80,6 +93,8 @@ export function useAvailableTasks() {
           error:
             error instanceof Error ? error.message : "Erro ao assumir tarefa",
         };
+      } finally {
+        claimingTaskIdRef.current = null;
       }
     },
     [refetchTasks],

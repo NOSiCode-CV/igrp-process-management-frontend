@@ -32,9 +32,9 @@ export default function CandidateGroups({
 
   return (
     <div className="grid gap-2">
-      <IGRPLabel>Candidate Groups</IGRPLabel>
+      <IGRPLabel>Grupos Candidatos</IGRPLabel>
       <p className="text-xs text-muted-foreground">
-        Select groups that can claim this task
+        Selecione os grupos que podem reclamar esta tarefa
       </p>
 
       {/* Selected groups */}
@@ -78,7 +78,7 @@ export default function CandidateGroups({
       {/* Add custom group */}
       <div className="flex gap-2">
         <IGRPInputText
-          placeholder="Add custom group..."
+          placeholder="Adicionar grupo personalizado..."
           value={newGroupInput}
           onChange={(e) => setNewGroupInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleAddCustomGroup()}

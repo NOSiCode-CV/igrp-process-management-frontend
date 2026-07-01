@@ -72,6 +72,7 @@ export default {
     "components/filter-actives",
     "components/empty",
     "config/components/process-item",
+    "config/components/process-list",
     "config/components/add-item",
     "config/components/add-checklist-item",
     "config/components/selected-items",

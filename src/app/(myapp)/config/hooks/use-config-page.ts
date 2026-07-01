@@ -1,6 +1,11 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import {
   getProcesses,
   updateProcessArtifact,
@@ -12,6 +17,7 @@ import type {
 } from "@igrp/platform-process-management-types";
 import { useIGRPToast } from "@igrp/igrp-framework-react-design-system";
 import { useProcessConfig } from "./use-process-config";
+import { useBusinessGroups } from "../../access-management/use-business-groups";
 
 const SAVE_SUCCESS = {
   type: "success" as const,
@@ -37,6 +43,16 @@ export function useConfigPage({
   const processConfig = useProcessConfig({ processSelected });
   const { igrpToast } = useIGRPToast();
   const queryClient = useQueryClient();
+
+  // Candidate groups sourced from access-management (DEPARTMENT.ROLE). Mapped to
+  // the AddChecklistItem shape ({ key, name, processKey }); empty when
+  // access-management is not configured, so the custom-group input stays.
+  const { groupOptions } = useBusinessGroups();
+  const availableGroups = groupOptions.map((g) => ({
+    key: g.value,
+    name: g.name,
+    processKey: g.value,
+  }));
   const {
     assignGroups,
     numberingConfig,
@@ -53,6 +69,15 @@ export function useConfigPage({
         version: `v${process.version}`,
       })) as Process[];
     },
+    // Reload on mount and retry on the transient backend timeouts we've seen,
+    // but keep showing the previous list while a refetch/search is in flight so
+    // it never blanks out (the query key includes filterProcess, so searching
+    // would otherwise drop the list to empty until the new fetch resolves).
+    staleTime: 0,
+    refetchOnMount: true,
+    retry: 2,
+    retryDelay: 1000,
+    placeholderData: keepPreviousData,
   });
 
   const loadAllProcesses = () => {
@@ -91,6 +116,7 @@ export function useConfigPage({
 
   return {
     allProcesses: data ?? [],
+    availableGroups,
     loading,
     loadAllProcesses,
     assignGroups: processConfig.assignGroups,

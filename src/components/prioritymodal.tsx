@@ -62,6 +62,7 @@ export default function Prioritymodal({
   const [selectpriorityOptions, setSelectpriorityOptions] = useState<
     IGRPOptionsProps[]
   >([]);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   const { igrpToast } = useIGRPToast();
 
@@ -91,7 +92,12 @@ export default function Prioritymodal({
             formRef={formform1Ref}
             className={cn("")}
             onSubmit={async (data) => {
-              await onSave(data);
+              setIsSubmitting(true);
+              try {
+                await onSave(data);
+              } finally {
+                setIsSubmitting(false);
+              }
             }}
             defaultValues={form1Data}
           >
@@ -109,9 +115,9 @@ export default function Prioritymodal({
                   id={`priority`}
                   label={`Prioridade`}
                   variant={`single`}
-                  placeholder={`Select an option...`}
+                  placeholder={`Selecione uma opção...`}
                   required={true}
-                  selectLabel={`No option found`}
+                  selectLabel={`Nenhuma opção encontrada`}
                   showSearch={true}
                   showIcon={false}
                   iconName={`CornerDownRight`}
@@ -142,6 +148,9 @@ export default function Prioritymodal({
                 size={`default`}
                 showIcon={false}
                 className={cn()}
+                loading={isSubmitting}
+                loadingText={`A iniciar...`}
+                disabled={isSubmitting}
                 onClick={() => formform1Ref.current?.submit()}
               >
                 Confirmar
