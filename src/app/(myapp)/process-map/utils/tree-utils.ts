@@ -16,60 +16,60 @@ export function buildProcessTree(
     applicationBase: string,
     level: number = 0,
     parentId?: string,
-  ): ExtendedArea {
-    const areaNode: ExtendedArea = {
+  ): ExtendedArea | null {
+    // Add processes as children — only the active processes the current user
+    // can access (matched against allProcesses by release id).
+    const areaProcesses = area.process || [];
+    const processNodes: ExtendedArea[] = areaProcesses
+      .filter(
+        (process: Process) =>
+          process.status === "ACTIVE" &&
+          allProcesses.some((p) => p.id === process.releaseId),
+      )
+      .map((process: Process) => ({
+        ...process,
+        id: `process-${process.id}`,
+        name: process.name || process.processKey || "Unnamed Process",
+        type: "process",
+        level: level + 1,
+        parentId: area.id,
+        data: process,
+        hasChildren: false,
+        isLoaded: true,
+        applicationBase: applicationBase,
+        code: "",
+      }));
+
+    // Add subareas as children (recursively), dropping the ones the user has no
+    // access to.
+    const subareaNodes: ExtendedArea[] = (area.subareas || [])
+      .map((subarea) =>
+        processArea(subarea, subarea.applicationBase, level + 1, area.id),
+      )
+      .filter((node): node is ExtendedArea => node !== null);
+
+    // Hide areas with no accessible processes and no visible subareas — if the
+    // user can't access anything under an area, the area shouldn't appear.
+    if (processNodes.length === 0 && subareaNodes.length === 0) {
+      return null;
+    }
+
+    return {
       ...area,
       type: level === 0 ? "area" : "subarea",
       level,
       parentId,
       data: area,
-      children: [],
-      hasChildren: true, // Assume areas can have children (subareas or processes)
-      isLoaded: false, // Will be set to true when children are loaded
+      children: [...processNodes, ...subareaNodes],
+      hasChildren: true,
+      isLoaded: true,
       applicationBase: applicationBase,
     };
-
-    // Add processes as children (processes are always loaded with the area)
-    const areaProcesses = area.process || [];
-    if (areaProcesses && areaProcesses.length > 0) {
-      // Filter only active processes
-
-      const processNodes: ExtendedArea[] = areaProcesses
-        .filter(
-          (process: Process) =>
-            process.status === "ACTIVE" &&
-            allProcesses.some((p) => p.id === process.releaseId),
-        )
-        .map((process: Process) => ({
-          ...process,
-          id: `process-${process.id}`,
-          name: process.name || process.processKey || "Unnamed Process",
-          type: "process",
-          level: level + 1,
-          parentId: area.id,
-          data: process,
-          hasChildren: false,
-          isLoaded: true,
-          applicationBase: applicationBase,
-          code: "",
-        }));
-      areaNode.children = [...processNodes];
-    }
-
-    // Add subareas as children (if they exist in the hierarchy)
-    if (area.subareas && area.subareas.length > 0) {
-      const subareaNodes = area.subareas.map((subarea) =>
-        processArea(subarea, subarea.applicationBase, level + 1, area.id),
-      );
-      areaNode.children = [...(areaNode.children || []), ...subareaNodes];
-      areaNode.isLoaded = true; // Mark as loaded if subareas are present
-    }
-
-    return areaNode;
   }
 
   areas.forEach((area) => {
-    treeNodes.push(processArea(area, area.applicationBase, 0));
+    const node = processArea(area, area.applicationBase, 0);
+    if (node) treeNodes.push(node);
   });
 
   return treeNodes;

@@ -1,0 +1,11 @@
+{
+  "skills": {
+    "igrp-studio-metadata": {
+      "version": "1.2.0",
+      "framework": "nextjs",
+      "source": "https://sonatype.nosi.cv/repository/igrp-templates/@igrp/skills/",
+      "dependencies": {},
+      "installedAt": "2026-06-29T17:54:55.061Z"
+    }
+  }
+}

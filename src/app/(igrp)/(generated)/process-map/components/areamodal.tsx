@@ -235,9 +235,9 @@ export default function Areamodal({ open, setOpen, isEditing, formData, onFormCh
                 id={`applicationBase`}
                 label={`Aplicação`}
                 variant={`single`}
-                placeholder={`Select an option...`}
+                placeholder={`Selecione uma opção...`}
                 required={true}
-                selectLabel={`No option found`}
+                selectLabel={`Nenhuma opção encontrada`}
                 showSearch={true}
                 showIcon={false}
                 iconName={`CornerDownRight`}
@@ -261,7 +261,7 @@ export default function Areamodal({ open, setOpen, isEditing, formData, onFormCh
                 label={`Nome`}
                 showIcon={false}
                 required={true}
-                placeholder={`e.g., Finance & Accounting`}
+                placeholder={`ex.: Finanças e Contabilidade`}
                 className={cn()}
 
 
@@ -273,7 +273,7 @@ export default function Areamodal({ open, setOpen, isEditing, formData, onFormCh
                   label={`Código`}
                   showIcon={false}
                   required={true}
-                  placeholder={`e.g., FIN & RH`}
+                  placeholder={`ex.: FIN & RH`}
                   className={cn('', 'col-span-1',)}
 
 
@@ -295,7 +295,7 @@ export default function Areamodal({ open, setOpen, isEditing, formData, onFormCh
                 label={`Descrição`}
                 rows={3}
                 required={false}
-                placeholder={`Pesquena descriçåo da área`}
+                placeholder={`Breve descrição da área`}
                 className={cn()}
 
 
@@ -303,8 +303,8 @@ export default function Areamodal({ open, setOpen, isEditing, formData, onFormCh
               </IGRPTextarea>
               <IGRPSelect
                 id={`parentId`}
-                label={`Área Pai (Optional)`}
-                placeholder={`Select an option...`}
+                label={`Área Pai (Opcional)`}
+                placeholder={`Selecione uma opção...`}
                 className={cn()}
 
                 options={options?.areas || []}

@@ -25,10 +25,29 @@ export async function middleware(request: NextRequest) {
 
     const token = await getToken({ req: request });
 
-    if (token?.error === "RefreshAccessTokenError") {
-      return NextResponse.redirect(
-        new URL("/login", process.env.NEXTAUTH_URL_INTERNAL ?? request.url),
+    // `getToken` only decodes the JWT cookie here — it does NOT run the `jwt`
+    // callback or refresh the access token. So we must detect an expired session
+    // directly, otherwise a stale cookie (expired accessToken, no error flag yet)
+    // falls through and the page crashes on the first authenticated API call
+    // (e.g. fetchMenus -> 401) instead of redirecting to /login.
+    const expiresAt =
+      typeof token?.expiresAt === "number" ? token.expiresAt : undefined;
+    const isExpired = expiresAt !== undefined && expiresAt < Date.now();
+
+    if (
+      !token ||
+      token.error === "RefreshAccessTokenError" ||
+      isExpired
+    ) {
+      const loginUrl = new URL(
+        "/login",
+        process.env.NEXTAUTH_URL_INTERNAL ?? request.url,
       );
+      loginUrl.searchParams.set(
+        "callbackUrl",
+        `${pathname}${request.nextUrl.search}`,
+      );
+      return NextResponse.redirect(loginUrl);
     }
   }
 

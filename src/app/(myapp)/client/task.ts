@@ -10,7 +10,6 @@ import { getIGRPProcessClient } from "@/lib/api-client";
 import { IGRPOptionsProps } from "@igrp/igrp-framework-react-design-system";
 import { TaskManagementFilters } from "@/app/(myapp)/task-management/types";
 import { DEFAULT_PAGE_SIZE } from "@/app/(myapp)/utils/shared";
-import { Cousine } from "next/font/google";
 
 /**
  * Fetches a paginated list of tasks with optional filters.
@@ -22,14 +21,21 @@ import { Cousine } from "next/font/google";
 export const getTasks = async (
   filters?: Omit<TaskManagementFilters, "page" | "size">,
 ): Promise<PaginatedResponse<Task>> => {
-  const { variables, processType, ...rest } = filters || {};
+  const { variables, processType, processNumber, user, status, dateFrom, dateTo } =
+    filters || {};
 
   const processManagementClient = await getIGRPProcessClient();
+  // Only forward fields the API supports; unknown params (areaId/subareaId/
+  // organic) can interfere with backend filtering.
   const params = {
-    ...rest,
+    processNumber: processNumber || undefined,
+    processReleaseKey: processType || undefined,
+    user: user || undefined,
+    status: status || undefined,
+    dateFrom: dateFrom || undefined,
+    dateTo: dateTo || undefined,
     page: 0,
     size: DEFAULT_PAGE_SIZE,
-    processReleaseKey: processType || undefined,
     filterByCurrentUser: true,
   };
   const response = await processManagementClient.tasks.getTasks(params, {
@@ -88,14 +94,26 @@ export const getTasksByUser = async (
 export const getAvailableTasks = async (
   params: TaskManagementFilters,
 ): Promise<PaginatedResponse<Task>> => {
+  const { processNumber, processType, user, dateFrom, dateTo } = params;
   const processManagementClient = await getIGRPProcessClient();
-  const response = await processManagementClient.tasks.getAvailableTasks({
-    ...params,
+  // Only forward fields the API actually supports; sending unknown params
+  // (areaId/subareaId/organic/variables) can interfere with backend filtering.
+  // NOTE: the API filters by `processReleaseKey` (see docs/api-collections.json);
+  // the SDK's TaskQueryParams type omits it, so we build an untyped object to
+  // avoid the excess-property check on the SDK call.
+  const searchParams = {
+    processNumber: processNumber || undefined,
+    processReleaseKey: processType || undefined,
+    user: user || undefined,
+    dateFrom: dateFrom || undefined,
+    dateTo: dateTo || undefined,
     status: "CREATED",
     page: 0,
     size: DEFAULT_PAGE_SIZE,
     filterByCurrentUser: true,
-  });
+  };
+  const response =
+    await processManagementClient.tasks.getAvailableTasks(searchParams);
   return response.data;
 };
 

@@ -60,7 +60,7 @@ function AddChecklistItem({
         </ScrollArea>
       ) : (
         <div className="border rounded-md p-3 py-6 border-dashed flex items-center justify-center text-center text-muted-foreground">
-          <IGRPLabel label="Any group available, use the custom group" />
+          <IGRPLabel label="Sem grupos disponíveis, use o grupo personalizado" />
         </div>
       )}
     </div>

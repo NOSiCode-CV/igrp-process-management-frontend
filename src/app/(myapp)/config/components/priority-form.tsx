@@ -41,12 +41,12 @@ function PriorityForm({
         <IGRPTablePrimitive>
           <IGRPTableHeaderPrimitive>
             <IGRPTableRowPrimitive>
-              <IGRPTableHeadPrimitive>Label</IGRPTableHeadPrimitive>
+              <IGRPTableHeadPrimitive>Rótulo</IGRPTableHeadPrimitive>
               <IGRPTableHeadPrimitive className="w-32">
-                Value
+                Valor
               </IGRPTableHeadPrimitive>
               <IGRPTableHeadPrimitive className="w-32">
-                Color
+                Cor
               </IGRPTableHeadPrimitive>
               <IGRPTableHeadPrimitive className="w-16"></IGRPTableHeadPrimitive>
             </IGRPTableRowPrimitive>
@@ -76,7 +76,7 @@ function PriorityForm({
                 <IGRPTableCellPrimitive>
                   <IGRPInputColor
                     defaultValue="#ED6C02"
-                    placeholder="Color (e.g., #ED6C02)" //text-success-500 #00FF00
+                    placeholder="Cor (ex.: #ED6C02)" //text-success-500 #00FF00
                     value={option.color}
                     onChange={(value) =>
                       updatePriorityOption(index, "color", value)
@@ -107,24 +107,24 @@ function PriorityForm({
 
       {/* Add New Priority Option */}
       <div className="space-y-2">
-        <IGRPLabel label="Add Priority Option"></IGRPLabel>
+        <IGRPLabel label="Adicionar Opção de Prioridade"></IGRPLabel>
         <div className="flex gap-2">
           <IGRPInputText
-            placeholder="Label (e.g., High)"
+            placeholder="Rótulo (ex.: Alta)"
             value={newPriorityLabel}
             onChange={(e) => setNewPriorityLabel(e.target.value)}
             className="flex-1"
           />
           <IGRPInputText
             type="number"
-            placeholder="Value (e.g., 1)"
+            placeholder="Valor (ex.: 1)"
             value={newPriorityValue}
             onChange={(e) => setNewPriorityValue(e.target.value)}
             className="w-32"
           />
           <IGRPInputColor
             defaultValue="#ED6C02"
-            placeholder="Color (e.g., #ED6C02)" //green #00FF00
+            placeholder="Cor (ex.: #ED6C02)" //green #00FF00
             value={newPriorityColor || "#ED6C02"}
             onChange={(value) => setNewPriorityColor(value)}
             className="w-32"

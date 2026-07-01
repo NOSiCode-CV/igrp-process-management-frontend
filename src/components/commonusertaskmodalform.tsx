@@ -30,6 +30,8 @@ import {
   IGRPButton,
 } from "@igrp/igrp-framework-react-design-system";
 import { PRIORITY_OPTIONS } from "@/app/(myapp)/config/constants";
+import { useBusinessGroups } from "@/app/(myapp)/access-management/use-business-groups";
+import { useBusinessUsers } from "@/app/(myapp)/access-management/use-business-users";
 
 export default function Commonusertaskmodalform({
   open,
@@ -52,7 +54,9 @@ export default function Commonusertaskmodalform({
 
   const form1 = z.object({
     user: z.string().optional(),
+    userCustom: z.string().optional(),
     candidateGroups: z.string().optional(),
+    candidateGroupsCustom: z.string().optional(),
     priority: z.string().optional(),
     note: z.string().optional(),
   });
@@ -61,7 +65,9 @@ export default function Commonusertaskmodalform({
 
   const initForm1: z.infer<Form1ZodType> = {
     user: ``,
+    userCustom: ``,
     candidateGroups: ``,
+    candidateGroupsCustom: ``,
     priority: ``,
     note: ``,
   };
@@ -77,20 +83,18 @@ export default function Commonusertaskmodalform({
   const [selectpriorityOptions, setSelectpriorityOptions] = useState<
     IGRPOptionsProps[]
   >([]);
+  const [selectcandidateGroupsOptions, setSelectcandidateGroupsOptions] =
+    useState<IGRPOptionsProps[]>([]);
 
   const [atribuirTask, setAtribuirTask] = useState<string>("user");
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   const { igrpToast } = useIGRPToast();
+  const { groupOptions } = useBusinessGroups();
+  const { userOptions } = useBusinessUsers();
 
   useEffect(() => {
-    // Populate select options with dummy data
-    const dummyUsers = [
-      { value: "demo@nosi.cv	", label: "demo@nosi.cv" },
-      { value: "igrp@nosi.cv", label: "igrp@nosi.cv" },
-      { value: "Sistema", label: "Sistema" },
-    ];
     setSelectpriorityOptions(PRIORITY_OPTIONS);
-    setSelectuserOptions(dummyUsers);
 
     setRadioatribuirTaskOptions([
       { value: "user", label: "Utilizador" },
@@ -99,6 +103,19 @@ export default function Commonusertaskmodalform({
 
     setAtribuirTask("user");
   }, []);
+
+  useEffect(() => {
+    setSelectuserOptions(userOptions);
+  }, [userOptions]);
+
+  useEffect(() => {
+    setSelectcandidateGroupsOptions(
+      groupOptions.map((g) => ({
+        value: g.value,
+        label: `${g.name} (${g.value})`,
+      })),
+    );
+  }, [groupOptions]);
 
   return (
     <div className={cn("component")}>
@@ -118,7 +135,21 @@ export default function Commonusertaskmodalform({
             formRef={formform1Ref}
             className={cn("")}
             onSubmit={async (data) => {
-              onSave({ ...data, assigneTo: atribuirTask });
+              const cg =
+                (data.candidateGroupsCustom || "").trim() ||
+                data.candidateGroups;
+              const usr = (data.userCustom || "").trim() || data.user;
+              setIsSubmitting(true);
+              try {
+                await onSave({
+                  ...data,
+                  user: usr,
+                  candidateGroups: cg,
+                  assigneTo: atribuirTask,
+                });
+              } finally {
+                setIsSubmitting(false);
+              }
             }}
             defaultValues={form1Data}
           >
@@ -140,7 +171,7 @@ export default function Commonusertaskmodalform({
                     variant={`default`}
                     size={`md`}
                     gridSize={`default`}
-                    label={`Atruibuir tarefa a:`}
+                    label={`Atribuir tarefa a:`}
                     required={true}
                     className={cn("col-span-1")}
                     onValueChange={(e) => {
@@ -155,9 +186,9 @@ export default function Commonusertaskmodalform({
                     id={`user`}
                     label={`Utilizador`}
                     variant={`single`}
-                    placeholder={`Select an option...`}
+                    placeholder={`Selecione uma opção...`}
                     required={true}
-                    selectLabel={`No option found`}
+                    selectLabel={`Nenhuma opção encontrada`}
                     showSearch={true}
                     showIcon={false}
                     iconName={`CornerDownRight`}
@@ -166,13 +197,39 @@ export default function Commonusertaskmodalform({
                     options={selectuserOptions}
                   ></IGRPCombobox>
                 )}
-                {atribuirTask === "group" && (
+                {userRequired && atribuirTask === "user" && (
                   <IGRPInputText
+                    id={`userCustom`}
+                    label={`ou Utilizador personalizado`}
+                    showIcon={false}
+                    required={false}
+                    placeholder={`ex: utilizador@nosi.cv`}
+                    className={cn("col-span-1")}
+                  ></IGRPInputText>
+                )}
+                {atribuirTask === "group" && (
+                  <IGRPCombobox
                     id={`candidateGroups`}
                     label={`Grupo`}
-                    showIcon={false}
+                    variant={`single`}
+                    placeholder={`Selecione um grupo...`}
                     required={true}
-                    placeholder={`ex: ADMIN,USER`}
+                    selectLabel={`Nenhuma opção encontrada`}
+                    showSearch={true}
+                    showIcon={false}
+                    iconName={`CornerDownRight`}
+                    className={cn("col-span-1")}
+                    onChange={() => {}}
+                    options={selectcandidateGroupsOptions}
+                  ></IGRPCombobox>
+                )}
+                {atribuirTask === "group" && (
+                  <IGRPInputText
+                    id={`candidateGroupsCustom`}
+                    label={`ou Grupo personalizado`}
+                    showIcon={false}
+                    required={false}
+                    placeholder={`ex: DSIP.ATENDEDOR`}
                     className={cn("col-span-1")}
                   ></IGRPInputText>
                 )}
@@ -181,9 +238,9 @@ export default function Commonusertaskmodalform({
                     id={`priority`}
                     label={`Prioridade`}
                     variant={`single`}
-                    placeholder={`Select an option...`}
+                    placeholder={`Selecione uma opção...`}
                     required={false}
-                    selectLabel={`No option found`}
+                    selectLabel={`Nenhuma opção encontrada`}
                     showSearch={true}
                     showIcon={false}
                     iconName={`CornerDownRight`}
@@ -216,6 +273,9 @@ export default function Commonusertaskmodalform({
                 size={`default`}
                 showIcon={false}
                 className={cn()}
+                loading={isSubmitting}
+                loadingText={`A submeter...`}
+                disabled={isSubmitting}
                 onClick={() => formform1Ref.current?.submit()}
               >
                 Submeter
