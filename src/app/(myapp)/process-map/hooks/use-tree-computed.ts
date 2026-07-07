@@ -12,6 +12,14 @@ export function useTreeComputed(
     return buildProcessTree(areas, allProcesses);
   }, [areas]);
 
+  // Management view: every area must show (no pruning, no access filter).
+  const manageNodes = useMemo(() => {
+    return buildProcessTree(areas, allProcesses, {
+      pruneEmpty: false,
+      filterByAccess: false,
+    });
+  }, [areas]);
+
   const flatNodes = useMemo(() => {
     return flattenTreeNodes(treeNodes, expandedNodes);
   }, [treeNodes, expandedNodes]);
@@ -48,6 +56,7 @@ export function useTreeComputed(
 
   return {
     treeNodes,
+    manageNodes,
     flatNodes,
     totalProcesses,
     totalAreas,
