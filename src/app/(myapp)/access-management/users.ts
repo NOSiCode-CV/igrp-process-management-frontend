@@ -18,8 +18,9 @@ function getM2MClient(): AccessManagementClient {
   return AccessManagementClient.create(
     { baseUrl: process.env.IGRP_ACCESS_MANAGEMENT_API || "" },
     {
-      serviceId: process.env.IGRP_M2M_SERVICE_ID || "",
-      token: process.env.IGRP_M2M_TOKEN || "",
+      clientId: process.env.IGRP_M2M_CLIENT_ID || "",
+      clientSecret: process.env.IGRP_M2M_CLIENT_SECRET || "",
+      serviceId: process.env.IGRP_SERVICE_ID || "",
     },
   );
 }
