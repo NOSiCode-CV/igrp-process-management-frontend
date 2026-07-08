@@ -85,7 +85,6 @@ export default function Taskprocessfilter({
     handleFiltersChange,
     handleCandidateGroupsChange,
     handleCandidateUsersChange,
-    handleNameChange,
     handlePriorityChange,
     resetFilters,
   } = useProcessTasksFilter(
@@ -269,17 +268,6 @@ export default function Taskprocessfilter({
             ' gap-4 px-3 mt-4',
           )}
         >
-          <IGRPInputText
-            id={`Name`}
-            label={`Nome da Tarefa`}
-            showIcon={false}
-            required={false}
-            placeholder={`ex: Validar documento`}
-            className={cn('col-span-1')}
-            onChange={(e) => handleNameChange(e.target.value)}
-            value={filters.name}
-          ></IGRPInputText>
-
           <IGRPCombobox
             id={`Priority`}
             label={`Prioridade`}
