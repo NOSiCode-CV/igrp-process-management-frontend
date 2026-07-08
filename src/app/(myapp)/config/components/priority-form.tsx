@@ -91,6 +91,7 @@ function PriorityForm({
                     onClick={() => removePriorityOption(index)}
                     className="h-8 w-8 text-destructive"
                     iconName="Trash"
+                    aria-label="Eliminar prioridade"
                   ></IGRPButton>
                 </TableCell>
               </TableRow>
@@ -134,6 +135,7 @@ function PriorityForm({
             onClick={addPriorityOption}
             size="icon"
             iconName="Plus"
+            aria-label="Adicionar prioridade"
           ></IGRPButton>
         </div>
       </div>

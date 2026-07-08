@@ -23,6 +23,7 @@ export function ExpandButton({
           variant="ghost"
           size="icon"
           iconName={isExpanded ? "ChevronDown" : "ChevronRight"}
+          aria-label={isExpanded ? "Recolher" : "Expandir"}
           className="p-1 hover:bg-muted rounded w-6 h-6"
           iconClassName="w-6 h-6 text-muted-foreground"
         />

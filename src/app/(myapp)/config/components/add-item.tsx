@@ -44,6 +44,7 @@ function AddItem({
           }}
           size="icon"
           iconName="Plus"
+          aria-label="Adicionar"
         />
       </div>
     </div>

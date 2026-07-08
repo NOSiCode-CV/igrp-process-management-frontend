@@ -124,7 +124,7 @@ export function ActionsItem({
       />
       <IGRPDropdownMenu>
         <IGRPDropdownMenuTrigger asChild>
-          <IGRPButton variant="outline">
+          <IGRPButton variant="outline" aria-label="Abrir menu">
             <IGRPIcon iconName="EllipsisVertical" />
           </IGRPButton>
         </IGRPDropdownMenuTrigger>

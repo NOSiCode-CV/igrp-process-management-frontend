@@ -182,6 +182,7 @@ function FilterData({
                     size="icon"
                     className="h-8 w-8 text-muted-foreground hover:text-destructive"
                     onClick={() => removeVariableFilter(filter.id)}
+                    aria-label="Remover filtro"
                   >
                     <IGRPIcon iconName="X" />
                   </IGRPButton>

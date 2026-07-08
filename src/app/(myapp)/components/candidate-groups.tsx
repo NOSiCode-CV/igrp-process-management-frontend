@@ -90,6 +90,7 @@ export default function CandidateGroups({
           size="icon"
           onClick={handleAddCustomGroup}
           disabled={!newGroupInput.trim()}
+          aria-label="Adicionar grupo"
         >
           <IGRPIcon iconName="Plus" />
         </IGRPButton>

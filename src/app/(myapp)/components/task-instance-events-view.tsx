@@ -190,6 +190,7 @@ export function TaskInstanceEventsView({
                           className="h-5 w-5 p-0 shrink-0"
                           onClick={(e) => e.stopPropagation()}
                           iconName="Info"
+                          aria-label="Ver observações"
                         />
                       </PopoverTrigger>
                       <PopoverContent

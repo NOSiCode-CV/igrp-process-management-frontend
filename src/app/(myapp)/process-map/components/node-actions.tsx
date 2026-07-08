@@ -41,6 +41,7 @@ export function NodeActions({ node, onStartProcess }: NodeActionsProps) {
       <IGRPButton
         onClick={handleStartProcess}
         title="Iniciar processo"
+        aria-label="Iniciar processo"
         iconName={"Play"}
         size={"icon"}
         iconClassName="text-green-600 hover:text-green-800"

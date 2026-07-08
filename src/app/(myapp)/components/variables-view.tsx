@@ -85,6 +85,7 @@ export function VariablesView({ variables }: VariablesViewProps) {
                       row.toggleExpanded();
                     }}
                     iconName={isExpanded ? "ChevronDown" : "ChevronRight"}
+                    aria-label={isExpanded ? "Recolher" : "Expandir"}
                   />
                 </div>
               );
