@@ -96,11 +96,9 @@ export const getAvailableTasks = async (
 ): Promise<PaginatedResponse<Task>> => {
   const { processNumber, processType, user, dateFrom, dateTo } = params;
   const processManagementClient = await getIGRPProcessClient();
-  // Only forward fields the API actually supports; sending unknown params
+  // Only forward fields the API supports; sending unknown params
   // (areaId/subareaId/organic/variables) can interfere with backend filtering.
-  // NOTE: the API filters by `processReleaseKey` (see docs/api-collections.json);
-  // the SDK's TaskQueryParams type omits it, so we build an untyped object to
-  // avoid the excess-property check on the SDK call.
+  // `processReleaseKey` is a first-class filter as of client 0.1.0-beta.19.
   const searchParams = {
     processNumber: processNumber || undefined,
     processReleaseKey: processType || undefined,

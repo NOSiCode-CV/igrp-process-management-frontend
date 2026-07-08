@@ -47,11 +47,8 @@ export function useProcessMap(
   });
 
   // Computed tree values
-  const { treeNodes, flatNodes, totalProcesses, totalAreas } = useTreeComputed(
-    areas,
-    expandedNodes,
-    allProcesses?.content ?? [],
-  );
+  const { treeNodes, manageNodes, flatNodes, totalProcesses, totalAreas } =
+    useTreeComputed(areas, expandedNodes, allProcesses?.content ?? []);
 
   // Search functionality
   const { searchTerm, setSearchTerm, filteredNodes, clearSearch } =
@@ -187,7 +184,8 @@ export function useProcessMap(
     },
 
     manageAreas: {
-      areas: filteredNodes,
+      // Manage view shows every area (unpruned), unlike the filtered "Ver Mapa".
+      areas: manageNodes,
       expandedNodes,
       options: {
         applications: applicationsOptions,

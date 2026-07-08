@@ -30,11 +30,11 @@ importers:
         specifier: 0.1.0-beta.63
         version: 0.1.0-beta.63
       '@igrp/platform-process-management-client-ts':
-        specifier: 0.1.0-beta.16
-        version: 0.1.0-beta.16
+        specifier: 0.1.0-beta.19
+        version: 0.1.0-beta.19
       '@igrp/platform-process-management-types':
-        specifier: 0.1.0-beta.16
-        version: 0.1.0-beta.16
+        specifier: 0.1.0-beta.19
+        version: 0.1.0-beta.19
       '@tanstack/react-query':
         specifier: ^5.90.20
         version: 5.90.21(react@19.2.3)
@@ -227,11 +227,11 @@ packages:
   '@igrp/platform-access-management-client-ts@0.1.0-beta.63':
     resolution: {integrity: sha512-RhxxTRTFZxzRMNWQaoZbaTCdKyY8k4Mv6N282qXnE2irW3n5VX4mo/wdrRisMkz0csx3lSwVN43lPW4ORyUfqA==}
 
-  '@igrp/platform-process-management-client-ts@0.1.0-beta.16':
-    resolution: {integrity: sha512-q2ZXymMyHQh1tWYnfSu4Zzk3wReP6ETROPJkwqCRqzaRBu0240k4+9Cva+QCmDmWDiVeeB32l5MYFOk8bh+kUA==}
+  '@igrp/platform-process-management-client-ts@0.1.0-beta.19':
+    resolution: {integrity: sha512-4OFRiXIrJRo/9cbNoPEzsy7vsZU5sj5+kR859idYxv94T91+kDOD79Fg5+BvpR/sN2Y7VTWU9B+mPmevlTLRMQ==}
 
-  '@igrp/platform-process-management-types@0.1.0-beta.16':
-    resolution: {integrity: sha512-g+tGPKlezhWv1JRvCdWl1caMnTVnYwojlpK1B11Un9vhPDRecepFm7j5BduZFUWVF35usBBn/dnUaivwhRbLDw==}
+  '@igrp/platform-process-management-types@0.1.0-beta.19':
+    resolution: {integrity: sha512-ZX7ipIiUay/Nccjae35dc1PmlbWusn7oq4QCwshz9Kr+HAPJOCLx/5QXmGKPtyvzc/Vza7/ryL+yLy62II1raQ==}
     engines: {node: '>=20.x.x'}
 
   '@img/colour@1.1.0':
@@ -1974,11 +1974,11 @@ snapshots:
 
   '@igrp/platform-access-management-client-ts@0.1.0-beta.63': {}
 
-  '@igrp/platform-process-management-client-ts@0.1.0-beta.16':
+  '@igrp/platform-process-management-client-ts@0.1.0-beta.19':
     dependencies:
-      '@igrp/platform-process-management-types': 0.1.0-beta.16
+      '@igrp/platform-process-management-types': 0.1.0-beta.19
 
-  '@igrp/platform-process-management-types@0.1.0-beta.16': {}
+  '@igrp/platform-process-management-types@0.1.0-beta.19': {}
 
   '@img/colour@1.1.0':
     optional: true

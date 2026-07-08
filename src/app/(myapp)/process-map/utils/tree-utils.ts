@@ -8,7 +8,11 @@ import { ExtendedArea } from "../types";
 export function buildProcessTree(
   areas: ExtendedArea[],
   allProcesses: Process[],
+  options: { pruneEmpty?: boolean; filterByAccess?: boolean } = {},
 ): ExtendedArea[] {
+  // "Ver Mapa" prunes areas with no accessible processes; "Gerir Área" needs
+  // every area to show, so it passes pruneEmpty/filterByAccess = false.
+  const { pruneEmpty = true, filterByAccess = true } = options;
   const treeNodes: ExtendedArea[] = [];
 
   function processArea(
@@ -17,14 +21,15 @@ export function buildProcessTree(
     level: number = 0,
     parentId?: string,
   ): ExtendedArea | null {
-    // Add processes as children — only the active processes the current user
-    // can access (matched against allProcesses by release id).
+    // Add active processes as children. When filtering by access, keep only the
+    // ones the current user can reach (matched against allProcesses by release id).
     const areaProcesses = area.process || [];
     const processNodes: ExtendedArea[] = areaProcesses
       .filter(
         (process: Process) =>
           process.status === "ACTIVE" &&
-          allProcesses.some((p) => p.id === process.releaseId),
+          (!filterByAccess ||
+            allProcesses.some((p) => p.id === process.releaseId)),
       )
       .map((process: Process) => ({
         ...process,
@@ -50,7 +55,8 @@ export function buildProcessTree(
 
     // Hide areas with no accessible processes and no visible subareas — if the
     // user can't access anything under an area, the area shouldn't appear.
-    if (processNodes.length === 0 && subareaNodes.length === 0) {
+    // Skipped when pruneEmpty is false (management view shows all areas).
+    if (pruneEmpty && processNodes.length === 0 && subareaNodes.length === 0) {
       return null;
     }
 
