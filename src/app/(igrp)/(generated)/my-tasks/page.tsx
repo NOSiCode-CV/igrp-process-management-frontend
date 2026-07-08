@@ -247,6 +247,7 @@ export default function PageMytasksComponent() {
       <div className={cn(' border rounded-lg')}>
         <TaskProcessFilter
           showTaskFilters={true}
+          hideCandidateUsers={true}
           onSearch={handleSearchSubmit}
           onApplyFilters={handleApplyFilters}
           onResetFilters={handleResetFilters}

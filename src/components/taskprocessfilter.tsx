@@ -28,6 +28,7 @@ export default function Taskprocessfilter({
   onFiltersChange,
   isProcess,
   showTaskFilters,
+  hideCandidateUsers,
 }: {
   onSearch: (searchTerm: string) => void;
   onApplyFilters: (filters: any) => void;
@@ -35,6 +36,7 @@ export default function Taskprocessfilter({
   onFiltersChange: (filters: any) => void;
   isProcess?: boolean;
   showTaskFilters?: boolean;
+  hideCandidateUsers?: boolean;
 }) {
   const [selectStatusOptions, setSelectStatusOptions] = useState<IGRPOptionsProps[]>([]);
   const [selectAreaOptions, setSelectAreaOptions] = useState<IGRPOptionsProps[]>([]);
@@ -302,22 +304,24 @@ export default function Taskprocessfilter({
             value={filters.candidateGroups}
           ></IGRPCombobox>
 
-          <IGRPCombobox
-            id={`CandidateUsers`}
-            label={`Utilizador Candidato`}
-            variant={`single`}
-            placeholder={`Selecione um utilizador...`}
-            selectLabel={`No option found`}
-            showSearch={true}
-            showIcon={false}
-            iconName={`CornerDownRight`}
-            className={cn('col-span-1')}
-            onChange={(selected) =>
-              handleCandidateUsersChange(Array.isArray(selected) ? selected[0] : selected)
-            }
-            options={selectCandidateUsersOptions}
-            value={filters.candidateUsers}
-          ></IGRPCombobox>
+          {!hideCandidateUsers && (
+            <IGRPCombobox
+              id={`CandidateUsers`}
+              label={`Utilizador Candidato`}
+              variant={`single`}
+              placeholder={`Selecione um utilizador...`}
+              selectLabel={`No option found`}
+              showSearch={true}
+              showIcon={false}
+              iconName={`CornerDownRight`}
+              className={cn('col-span-1')}
+              onChange={(selected) =>
+                handleCandidateUsersChange(Array.isArray(selected) ? selected[0] : selected)
+              }
+              options={selectCandidateUsersOptions}
+              value={filters.candidateUsers}
+            ></IGRPCombobox>
+          )}
         </div>
       )}
       {showFilter && (
