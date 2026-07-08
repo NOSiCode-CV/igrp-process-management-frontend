@@ -51,7 +51,9 @@ export function TaskInformation({
             {/* Left column */}
             <div className="space-y-3">
               <div className="flex justify-between">
-                <span className="text-sm text-muted-foreground">Responsável</span>
+                <span className="text-sm text-muted-foreground">
+                  Responsável
+                </span>
                 <span className="text-sm font-medium">
                   {assignedBy || "Não atribuído"}
                 </span>
@@ -92,7 +94,9 @@ export function TaskInformation({
 
               {task.formKey && (
                 <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">Formulário</span>
+                  <span className="text-sm text-muted-foreground">
+                    Formulário
+                  </span>
                   <span className="text-sm font-mono">{task.formKey}</span>
                 </div>
               )}
@@ -139,9 +143,7 @@ export function TaskInformation({
                     className="h-4 w-4 text-muted-foreground"
                   />
                   <div className="flex-1 flex justify-between">
-                    <span className="text-sm text-muted-foreground">
-                      Prazo
-                    </span>
+                    <span className="text-sm text-muted-foreground">Prazo</span>
                     <span className="text-sm flex items-center gap-2">
                       {format(task.dueDate, "MMM d, yyyy HH:mm")}
                       {new Date() > new Date(task.dueDate) && (

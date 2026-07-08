@@ -41,11 +41,7 @@ export default function CandidateGroups({
       {selectedCandidateGroupsState.length > 0 && (
         <div className="flex flex-wrap gap-1 p-2 border rounded-md bg-muted/30">
           {selectedCandidateGroupsState.map((group) => (
-            <IGRPBadge
-              key={group}
-              variant="soft"
-              className="gap-1 pr-1"
-            >
+            <IGRPBadge key={group} variant="soft" className="gap-1 pr-1">
               {group}
               <button
                 onClick={() => handleRemoveGroup(group)}

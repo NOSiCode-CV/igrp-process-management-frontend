@@ -42,12 +42,8 @@ function PriorityForm({
           <TableHeader>
             <TableRow>
               <TableHead>Rótulo</TableHead>
-              <TableHead className="w-32">
-                Valor
-              </TableHead>
-              <TableHead className="w-32">
-                Cor
-              </TableHead>
+              <TableHead className="w-32">Valor</TableHead>
+              <TableHead className="w-32">Cor</TableHead>
               <TableHead className="w-16"></TableHead>
             </TableRow>
           </TableHeader>

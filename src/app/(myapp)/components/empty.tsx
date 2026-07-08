@@ -25,9 +25,7 @@ function Empty({
             <IGRPIcon iconName="Settings" />
           </EmptyMedia>
           <EmptyTitle>{title}</EmptyTitle>
-          <EmptyDescription>
-            {description}
-          </EmptyDescription>
+          <EmptyDescription>{description}</EmptyDescription>
         </EmptyHeader>
       </EmptyRoot>
     </div>

@@ -25,8 +25,8 @@ function ProcessList({
   if (loading && list.length === 0) {
     return (
       <div className="flex items-center justify-center gap-2 p-6 text-sm text-muted-foreground">
-        <IGRPIcon iconName="LoaderCircle" className="h-4 w-4 animate-spin" />
-        A carregar processos...
+        <IGRPIcon iconName="LoaderCircle" className="h-4 w-4 animate-spin" />A
+        carregar processos...
       </div>
     );
   }

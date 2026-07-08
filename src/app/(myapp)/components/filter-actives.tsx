@@ -1,8 +1,5 @@
 import { FilterState } from "./processtaksfilter/hooks/use-dropdown-data";
-import {
-  IGRPBadge,
-  IGRPIcon,
-} from "@igrp/igrp-framework-react-design-system";
+import { IGRPBadge, IGRPIcon } from "@igrp/igrp-framework-react-design-system";
 
 function FilterActives({
   filters,

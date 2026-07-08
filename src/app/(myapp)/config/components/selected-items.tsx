@@ -1,7 +1,4 @@
-import {
-  IGRPBadge,
-  IGRPIcon,
-} from "@igrp/igrp-framework-react-design-system";
+import { IGRPBadge, IGRPIcon } from "@igrp/igrp-framework-react-design-system";
 
 export function SelectedItems({
   items,
