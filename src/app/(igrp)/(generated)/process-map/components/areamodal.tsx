@@ -181,6 +181,7 @@ export default function Areamodal({
   const processesItems = (allProcesses || []).map((process: any) => ({
     ...process,
     key: process.id,
+    name: process.name || process.processKey,
   }));
 
   const itemsChecked = (formData.processes || []).map((process: any) => ({
