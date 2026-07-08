@@ -1,49 +1,32 @@
-import { IGRPLayout } from "@igrp/framework-next";
+import { IGRPLayoutFull, igrpGetClaims } from "@igrp/framework-next";
 import type { IGRPLayoutConfigArgs } from "@igrp/framework-next-types";
-import { createConfig } from "@igrp/template-config";
+import { IGRPSectionPermissions } from "@igrp/framework-next-ui";
 
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
+import { createConfig } from "@/igrp.template.config";
+import { getLayoutConfig, verifySession } from "@/lib/dal";
+import { IGRPQueryProvider } from "@/providers/query-provider";
 
-import { configLayout } from "@/actions/igrp/layout";
-import { isPreviewMode as checkPreviewMode } from "@/lib/utils";
-import { QueryProvider } from "@/components/providers";
+// Every route under this layout is authenticated and reads the session
+// (cookies/headers) per request, so it can never be statically prerendered.
+// Declaring it dynamic skips the build-time prerender attempt that would
+// otherwise trip Next's `headers()` bailout.
+export const dynamic = "force-dynamic";
 
 export default async function IGRPRootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const layoutConfig = await configLayout();
+  await verifySession();
+
+  const layoutConfig = await getLayoutConfig();
   const config = await createConfig(layoutConfig as IGRPLayoutConfigArgs);
-
-  const { layout, previewMode } = config;
-  const { session } = layout || {};
-
-  const envPreviewMode = checkPreviewMode();
-  const isPreviewMode = envPreviewMode || previewMode;
-
-  const headersList = await headers();
-  const currentPath =
-    headersList.get("x-pathname") ||
-    headersList.get("x-next-url") ||
-    headersList.get("referer") ||
-    "";
-
-  const baseUrl = process.env.NEXTAUTH_URL_INTERNAL || process.env.NEXTAUTH_URL;
-
-  const urlLogin = "/login";
-
-  const resolvedBaseUrl = baseUrl || "http://localhost:3000";
-  const loginPath = new URL(urlLogin || "/", resolvedBaseUrl).pathname;
-
-  const isAlreadyOnLogin = currentPath.startsWith(loginPath);
-
-  if (!isPreviewMode && session === null && urlLogin && !isAlreadyOnLogin) {
-    redirect(urlLogin);
-  }
+  // verifySession() above seeds the per-request access-client config that igrpGetClaims() reads.
+  const claims = await igrpGetClaims();
 
   return (
-    <IGRPLayout config={config}>
-      <QueryProvider>{children}</QueryProvider>
-    </IGRPLayout>
+    <IGRPSectionPermissions state={claims}>
+      <IGRPQueryProvider>
+        <IGRPLayoutFull config={config}>{children}</IGRPLayoutFull>
+      </IGRPQueryProvider>
+    </IGRPSectionPermissions>
   );
 }

@@ -1,13 +1,35 @@
 "use client";
 
-import { IGRPGlobalError } from "@igrp/framework-next-ui";
+// Segment-level error boundary for the `(igrp)` route group.
+//
+// Rendered *inside* `(igrp)/layout.tsx`, so the header + sidebar chrome stay
+// visible. Use `IGRPSegmentError` (not `IGRPGlobalError`) to fit that slot.
+// Errors thrown by `(igrp)/layout.tsx` itself propagate higher — the root
+// `error.tsx` / `global-error.tsx` catches those.
 
-export default function GlobalError({
+import { useEffect } from "react";
+
+import { IGRPSegmentError } from "@igrp/framework-next-ui";
+
+import { resolveErrorCopy } from "@/config/error-messages";
+import { reportError } from "@/lib/report-error";
+
+export default function IgrpSegmentError({
   error,
   reset,
 }: {
   error: Error & { digest?: string };
   reset: () => void;
 }) {
-  return <IGRPGlobalError error={error} reset={reset} />;
+  useEffect(() => {
+    reportError(error, { segment: "(igrp)" });
+  }, [error]);
+
+  return (
+    <IGRPSegmentError
+      error={error}
+      reset={reset}
+      resolveCopy={resolveErrorCopy}
+    />
+  );
 }

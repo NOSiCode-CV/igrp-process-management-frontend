@@ -3,71 +3,84 @@ import type {
   IGRPConfigArgs,
   IGRPLayoutConfigArgs,
 } from "@igrp/framework-next-types";
+
 import { fontVariables } from "@/lib/fonts";
-import { isPreviewMode } from "@/lib/utils";
+import { isAuthBypass } from "@/lib/utilities";
 import { getMockApps } from "@/temp/applications/use-mock-apps";
+import { IGRP_DEFAULT_MENU } from "@/temp/menus/menus";
 import { getMockMenus } from "@/temp/menus/use-mock-menus";
-import { getMockMenusFooter } from "@/temp/menus/use-mock-menus-footer";
 import { getMockUser } from "@/temp/users/use-mock-user";
+
 import { getPackageJson } from "./lib/config/get-pkj";
-import { getSessionArgs } from "./lib/config/get-session-args";
 import { getRoutes } from "./lib/config/get-routes";
+import { getSessionArgs } from "./lib/config/get-session-args";
 
 export function createConfig(
   config: IGRPLayoutConfigArgs,
 ): Promise<IGRPConfigArgs> {
-  const user = getMockUser().mockUser;
-  const menu = getMockMenus().mockMenus;
-  const footerMenu = getMockMenusFooter().mockMenusFooter;
-  const apps = getMockApps().mockApps;
+  // Mock data + framework preview behavior apply under EITHER bypass mode
+  // (IGRP_PREVIEW_MODE=true or AUTH_PROVIDER=none) — they must behave the same.
+  const bypass = isAuthBypass();
 
   const routes = getRoutes();
   const appRoutes = routes?.appRoutes ?? [];
   const paramMapBody = routes?.paramMapBody ?? "";
 
-  const igrpSyncAccess = process.env.IGRP_SYNC_ACCESS === "true";
-
   return igrpBuildConfig({
     appCode: process.env.IGRP_APP_CODE || "",
-    previewMode: isPreviewMode(),
-    syncAccess: igrpSyncAccess,
+    previewMode: bypass,
+    syncAccess: process.env.IGRP_SYNC_ACCESS === "true",
     appInformation: getPackageJson(),
     layoutMockData: {
-      getHeaderData: async () => ({
-        user: user,
-        showBreadcrumb: true,
-        showSearch: true,
-        showNotifications: true,
-        showUser: true,
-        showThemeSwitcher: true,
-        showIGRPSidebarTrigger: true,
-        showIGRPHeaderTitle: true,
-        showIGRPHeaderLogo: true,
-      }),
-      getSidebarData: async () => ({
-        menuItems: menu,
-        footerItems: footerMenu,
-        user: user,
-        defaultOpen: true,
-        showAppSwitcher: true,
-        apps: apps,
-        appCenterUrl: process.env.NEXT_IGRP_APP_CENTER_URL || "",
-      }),
+      getHeaderData: async () => {
+        const user = bypass ? getMockUser().mockUser : undefined;
+        return {
+          user: user,
+          userProfileUrl: process.env.NEXT_PUBLIC_IGRP_PROFILE_URL || "",
+          notificationsUrl: process.env.NEXT_PUBLIC_IGRP_NOTIFICATION_URL || "",
+          showBreadcrumb: true,
+          showSearch: true,
+          showNotifications: true,
+          showUser: true,
+          showThemeSwitcher: true,
+          showIGRPSidebarTrigger: true,
+          showIGRPHeaderTitle: false,
+          showIGRPHeaderLogo: true,
+          showSettings: true,
+          settingsUrl: process.env.NEXT_PUBLIC_IGRP_SETTINGS_URL || "",
+        };
+      },
+      getSidebarData: async () => {
+        const user = bypass ? getMockUser().mockUser : undefined;
+        const menu = bypass ? getMockMenus().mockMenus : undefined;
+        const apps = bypass ? getMockApps().mockApps : undefined;
+        return {
+          menuItems: menu ?? [],
+          user: user,
+          defaultOpen: true,
+          showAppSwitcher: true,
+          apps: apps ?? [],
+          appCenterUrl: process.env.NEXT_IGRP_APP_CENTER_URL || "",
+          showMenuSearch: true,
+          showNotifications: true,
+        };
+      },
     },
     font: fontVariables,
-    showSidebar: true,
-    showHeader: true,
 
     layout: {
       ...config,
     },
     apiManagementConfig: {
       baseUrl: process.env.IGRP_ACCESS_MANAGEMENT_API || "",
-      m2mServiceId: process.env.IGRP_M2M_SERVICE_ID || "",
-      m2mToken: process.env.IGRP_M2M_TOKEN || "",
+      serviceId: process.env.IGRP_SERVICE_ID || "",
+      m2mClientId: process.env.IGRP_M2M_CLIENT_ID || "",
+      m2mClientSecret: process.env.IGRP_M2M_CLIENT_SECRET || "",
       syncOnCodeMenus: process.env.IGRP_SYNC_ON_CODE_MENUS === "true",
-      appRoutes: igrpSyncAccess ? appRoutes : [],
-      paramMapBody: igrpSyncAccess ? paramMapBody : "",
+      syncOnCodeMenuRoles: process.env.IGRP_SYNC_ON_CODE_MENU_ROLES !== "false",
+      onCodeMenus: IGRP_DEFAULT_MENU,
+      appRoutes,
+      paramMapBody,
     },
     toasterConfig: {
       showToaster: true,
@@ -75,7 +88,6 @@ export function createConfig(
       richColors: true,
       closeButton: true,
     },
-    showSettings: true,
     sessionArgs: getSessionArgs(),
   });
 }

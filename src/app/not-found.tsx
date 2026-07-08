@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+
 import { IGRPTemplateNotFound } from "@igrp/framework-next-ui";
 
 export const metadata: Metadata = {
