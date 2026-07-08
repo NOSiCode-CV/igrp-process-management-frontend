@@ -12,26 +12,26 @@ A "process" in iGRP is a BPMN flow (defined in iGRP Process Studio). Each user-t
 
 ```
 BPMN diagram (in Process Studio)            ───▶  one process per project
-  └─ User Task "Pedido"  formKey: ui:form:pedido@1   ───▶  one .igrpstudio/process/<processKey>/pedido.v1.json
-  └─ User Task "Cálculo" formKey: ui:form:calculo@1  ───▶  one .igrpstudio/process/<processKey>/calculo.v1.json
-  └─ User Task "Autorização" formKey: ui:form:autorizacao@1 ───▶  ... etc
+  └─ User Task "Intake"  formKey: ui:form:intake@1   ───▶  one .igrpstudio/process/<processKey>/intake.v1.json
+  └─ User Task "Review" formKey: ui:form:review@1  ───▶  one .igrpstudio/process/<processKey>/review.v1.json
+  └─ User Task "Approve" formKey: ui:form:approve@1 ───▶  ... etc
 ```
 
 The `formKey` from the API (`ui:form:<step>@<version>`) directly maps to the JSON filename (`<step>.v<version>.json`):
 
 | API `formKey`           | JSON file path                                              |
 |--------------------------|-------------------------------------------------------------|
-| `ui:form:pedido@1`       | `.igrpstudio/process/<processKey>/pedido.v1.json`           |
-| `ui:form:calculo@1`      | `.igrpstudio/process/<processKey>/calculo.v1.json`          |
-| `ui:form:autorizacao@2`  | `.igrpstudio/process/<processKey>/autorizacao.v2.json`      |
-| `calculo` (no `ui:form:` prefix) | Treat as `calculo.v1` — the engine still resolves it; raise with backend if you suspect the `formKey` is mistyped in the BPMN. |
+| `ui:form:intake@1`       | `.igrpstudio/process/<processKey>/intake.v1.json`           |
+| `ui:form:review@1`      | `.igrpstudio/process/<processKey>/review.v1.json`          |
+| `ui:form:approve@2`  | `.igrpstudio/process/<processKey>/approve.v2.json`      |
+| `calculo` (no `ui:form:` prefix) | Treat as `review.v1` — the engine still resolves it; raise with backend if you suspect the `formKey` is mistyped in the BPMN. |
 
 The engine (`IGRPProcessProvider` + `IGRPProcessPage` from `@igrp/platform-process-management-client-ui`) resolves the step at runtime from the URL segments:
 
 ```
 src/app/(igrp)/(generated)/process/[...process]/page.tsx
 URL: /process/<processKey>/<processInstanceId>/<userTaskKey>/<userTaskInstanceId>
-                                                ^^^^^^^^^^^ form.page → e.g. "pedido.v1"
+                                                ^^^^^^^^^^^ form.page → e.g. "intake.v1"
                 ↓ dynamic import
 src/app/(igrp)/(generated)/process/[...process]/(<processKey>)/<step>.v<n>.tsx
 ```
@@ -45,9 +45,9 @@ That generated `.tsx` is produced by the engine from `.igrpstudio/process/<proce
 ```
 .igrpstudio/process/<processKey>/
   ├── <processKey>.json              # ROOT — process descriptor (see §3)
-  ├── pedido.v1.json                 # one step file per BPMN user task
-  ├── calculo.v1.json
-  └── autorizacao.v1.json
+  ├── intake.v1.json                 # one step file per BPMN user task
+  ├── review.v1.json
+  └── approve.v1.json
 ```
 
 The companion runtime files live under `src/app/(myapp)/process/`:
@@ -75,16 +75,16 @@ Single-line minified. Shape:
   "processKey": "P3.1.1",
   "name": "P3.1.1",
   "processVersion": "2",
-  "description": "Pedido de Subsídio de Doença",
+  "description": "Sample business process",
   "id": "<10-char alphanum unique>",
   "steps": [
-    {"id": "<10-char>", "key": "pedido.v1",       "name": "Pedido"},
-    {"id": "<10-char>", "key": "calculo.v1",      "name": "Calculo"},
-    {"id": "<10-char>", "key": "autorizacao.v1",  "name": "Autorizacao"},
+    {"id": "<10-char>", "key": "intake.v1",     "name": "Intake"},
+    {"id": "<10-char>", "key": "review.v1",     "name": "Review"},
+    {"id": "<10-char>", "key": "approve.v1",    "name": "Approve"},
 
-    {"id": "<10-char>", "key": "pedido.v1",       "name": "Task_pedido"},
-    {"id": "<10-char>", "key": "calculo.v1",      "name": "Task_calculo"},
-    {"id": "<10-char>", "key": "autorizacao.v1",  "name": "Task_autorizacao"}
+    {"id": "<10-char>", "key": "intake.v1",     "name": "Task_intake"},
+    {"id": "<10-char>", "key": "review.v1",     "name": "Task_review"},
+    {"id": "<10-char>", "key": "approve.v1",    "name": "Task_approve"}
   ]
 }
 ```
@@ -112,16 +112,16 @@ Top-level skeleton:
 ```json
 {
   "type": "processStep",
-  "key": "pedido.v1",
+  "key": "intake.v1",
   "processKey": "P3.1.1",
   "processVersion": "2",
   "version": "1",
-  "name": "Task_pedido",
-  "description": "Pedido",
+  "name": "Task_intake",
+  "description": "Intake",
   "id": "<10-char unique, must equal one of the Task_* ids in the root file>",
   "forceDynamic": false,
   "projectArtifactId": "",
-  "taskKey": "Task_pedido",
+  "taskKey": "Task_intake",
   "artifactVariables": [],
   "args": [
     {
@@ -162,11 +162,11 @@ Top-level skeleton:
 |---|---|
 | `args` | MUST contain `{ name: "config", type: "IGRPStepComponentConfig", isInterface: true }`. The engine generates the React component as `function Task_X({ config }: { config: IGRPStepComponentConfig })`. Missing this → step crashes at runtime with `config is undefined`. |
 | `imports` | MUST include the import for `IGRPStepComponentConfig` AND `IGRPStepMethods` — the engine references `IGRPStepMethods` in the auto-emitted `stepMethods` block (see §8). Even though *you* never write `onRegisterMethods` directly, the type must be in scope. |
-| `name` | MUST match a `Task_*` entry in the root file's `steps[]` AND be the React function name (PascalCase preserved). Convention: `Task_<lowercaseStep>` (e.g. `Task_pedido`, `Task_calculo`). |
+| `name` | MUST match a `Task_*` entry in the root file's `steps[]` AND be the React function name (PascalCase preserved). Convention: `Task_<lowercaseStep>` (e.g. `Task_intake`, `Task_review`). |
 | `id` | MUST equal the `id` of the matching `Task_*` entry in the root descriptor. The engine uses this to wire the step. |
 | `key` | `<step>.v<version>` — must match the filename and the API's `formKey`. |
 | `taskKey` | Mirror of `name` (legacy duplication). Keep it equal to `name`. |
-| `functions[]` | MUST contain `handleSave` and `handleComplete`. **Their `code` body must call into the hook**, e.g. `"return await saveStepPedido()"` / `"return await completeStepPedido()"`. The names `saveStep<Step>` / `completeStep<Step>` are destructured from the process hook in `onLoad.fnCode` (§7) — they are **not** declared by the JSON. **Do NOT use `code: "null"` (placeholder)** — the engine emits `handleSave()` directly from the auto-generated `stepMethods.saveStep` wrapper, and a `null` body returns `undefined` which the engine interprets as a failed save. |
+| `functions[]` | MUST contain `handleSave` and `handleComplete`. **Their `code` body must call into the hook**, e.g. `"return await saveStepIntake()"` / `"return await completeStepIntake()"`. The names `saveStep<Step>` / `completeStep<Step>` are destructured from the process hook in `onLoad.fnCode` (§7) — they are **not** declared by the JSON. **Do NOT use `code: "null"` (placeholder)** — the engine emits `handleSave()` directly from the auto-generated `stepMethods.saveStep` wrapper, and a `null` body returns `undefined` which the engine interprets as a failed save. |
 | **Engine auto-emits `IGRPStepMethods`** | When the `functions[]` array contains `handleSave` and/or `handleComplete`, the engine **automatically generates** a `const stepMethods: IGRPStepMethods = { saveStep: …, completeStep: … }` block plus `useEffect(() => { onRegisterMethods?.(stepMethods); }, []);` in the TSX. **You do NOT add this `useEffect` to `onLoad.fnCode`.** Your job is just to declare `handleSave`/`handleComplete` in `functions[]`. |
 
 ---
@@ -177,7 +177,7 @@ Same rules as page/component (uppercase names, fields match API keys). One type 
 
 For process steps, the form is the **submission payload** for the BPMN task variable. Spring `LocalDate` fields → `type: "date"` with `defaultValue: "new Date()"` for required ones, `""` for optional, and the standard `YYYY-MM-DD` normalization in the submit handler.
 
-`formList` for repeating sub-rows uses `type: "object"` + `isList: true` + nested `fields[]` (see existing `actividadesEconomicas`, `enderecos`, `contactos` in `P1.1.1/pedido.v1.json` for the canonical shape).
+`formList` for repeating sub-rows uses `type: "object"` + `isList: true` + nested `fields[]` — the same shape as the "Nested fields (object / array types)" section in `SKILL.md`. Repeatable groups like `addresses[]`, `contacts[]`, `items[]` all follow this pattern.
 
 ---
 
@@ -187,7 +187,7 @@ Recurring state variables (declare only the ones the step actually uses):
 
 | State | Purpose |
 |---|---|
-| `currentContribuinte` (`any`, optional) | Selected/loaded subject of the process |
+| `currentEntity` (`any`, optional) | Selected/loaded subject of the process |
 | `cardDetails1Items` (`any`, default `[]`) | Detail card rows shown in the header |
 | `pdfViewer1FileUrl` (`string`, optional) | PDF preview URL |
 | `selectedTab` (`string`, default `"'tab1'"`) | Active tab when using `IGRPTabs` |
@@ -203,7 +203,7 @@ The root MUST be a single node with `componentName: "processStep"`. Its `childre
 
 ```json
 "components": {
-  "id": "processstep_Task_pedido",
+  "id": "processstep_Task_intake",
   "componentName": "processStep",
   "label": "Process Step",
   "tag": "processStep_<10-char>",
@@ -237,9 +237,9 @@ Many existing processes delegate to a hand-written React component that owns the
 ```json
 "children": [{
   "id": "registofospedido_pkgl24",
-  "tag": "RegistoFosPedido1",
-  "componentName": "RegistoFosPedido",
-  "label": "Registo Fos Pedido",
+  "tag": "FullStepComponent1",
+  "componentName": "FullStepComponent",
+  "label": "Full Step Component",
   "type": "group",
   "children": [],
   "interactions": {},
@@ -250,14 +250,14 @@ Many existing processes delegate to a hand-written React component that owns the
 }]
 ```
 
-The custom component (e.g. `RegistoFosPedido`) lives under `src/app/(myapp)/components/` and accepts `{ config }: { config: IGRPStepComponentConfig }`. Use this pattern when:
+The custom component (e.g. `FullStepComponent`) lives under `src/app/(myapp)/components/` and accepts `{ config }: { config: IGRPStepComponentConfig }`. Use this pattern when:
 - The step has many fields and complex cross-field logic
 - The same UI is reused across multiple processes
 - You need granular control over `IGRPFormHandle.current` and the submit flow
 
 ### 7.B — Inline tabs/forms inside the JSON
 
-For simpler steps, declare the UI directly: usually `IGRPTabs` with one tab per logical section, each tab containing a `form` whose `dataType` references an entry in `types[]`. See `P1.1.1/pedido.v1.json` for the gold reference (it uses `tabs`, `form`, `formList`, `combobox`, `inputDatePickerSingle`, `inputHidden`, `pdfViewer`, etc., all inline).
+For simpler steps, declare the UI directly: usually `IGRPTabs` with one tab per logical section, each tab containing a `form` whose `dataType` references an entry in `types[]`. See `P1.1.1/intake.v1.json` for the gold reference (it uses `tabs`, `form`, `formList`, `combobox`, `inputDatePickerSingle`, `inputHidden`, `pdfViewer`, etc., all inline).
 
 The validation checklist from `SKILL.md` §"Validation checklist" applies as-is to forms inside processStep.
 
@@ -272,9 +272,9 @@ The BPMN engine drives the step lifecycle. When the user clicks **Save** / **Com
 ```js
 const {
   // Step methods consumed by the JSON's handleSave/handleComplete bodies
-  saveStepPedido,
-  completeStepPedido,
-  loadStepPedido,
+  saveStepIntake,
+  completeStepIntake,
+  loadStepIntake,
   // Loaders & helpers used inside the JSX / state setters
   optionsMotivosUtente,
   optionsTiposDocumentoProcesso,
@@ -284,14 +284,14 @@ const {
   formRef: formform1Ref,
   formSchema: form1,
   setFormData: setForm1Data,
-  step: "pedido",
+  step: "intake",
   process: { ...config, variables: variables },
 });
 
 // Trigger initial load when BPMN variables arrive
 useEffect(() => {
   if (variables) {
-    loadStepPedido();
+    loadStepIntake();
   }
 }, [variables]);
 
@@ -307,7 +307,7 @@ useEffect(() => {
 - **Do NOT** add `useEffect(() => onRegisterMethods?.(...))` here — engine auto-emits it from the `handleSave`/`handleComplete` declarations (§4). Adding it manually causes `Identifier 'stepMethods' has already been declared` or double-registration.
 - State setters in `useEffect` only — bare-body calls cause infinite re-renders (same rule as pages).
 - `processKey`, `processInstanceId`, `userTaskInstanceId`, `variables`, `onRegisterMethods` are all destructured from the auto-generated `config` arg. **Do NOT redeclare them.** Pass `config` (or `{ ...config, variables }`) into the hook so it has the full BPMN context.
-- The hook decodes `variables` (often base64-JSON) to seed initial form values inside `loadStepPedido()`. See `decodeBase64Json` in `lib/utils`.
+- The hook decodes `variables` (often base64-JSON) to seed initial form values inside `loadStepIntake()`. See `decodeBase64Json` in `lib/utils`.
 
 ## 8.1. The hook contract (`useProcessX_Y_Z`) — what to expose
 
@@ -318,10 +318,10 @@ type ProcessSharedParams = {
   formRef: React.RefObject<IGRPFormHandle<any>>;
   formSchema: z.ZodSchema<any>;
   setFormData: (data: any) => void;
-  step: 'pedido' | 'calculo' | 'autorizacao' | ...;
+  step: '<step1>' | '<step2>' | '<stepN>';
   process: IGRPStepComponentConfig & { variables?: any };
   // Optional callbacks the step provides:
-  onUtenteLoaded?: (utente: any) => void;
+  onEntityLoaded?: (entity: any) => void;
   onPdfUrl?: (url: string) => void;
   // ... whatever the family of processes needs
 };
@@ -374,17 +374,17 @@ So `handleSave` / `handleComplete` only need to *return* the `StepMethodResult`.
 | Method | What it returns | Typical use |
 |---|---|---|
 | `getFormDataForTask()` | Form data of the **current** task | `loadStep<Step>` to pre-fill the form on retake/draft |
-| `getVariableForTask(name)` | A single BPMN variable | Read cross-step refs (`idUtenteFalecido`, `decision`, etc.) |
-| `getFormDataByTaskKey(taskKey)` | Form data of **another** task in the same instance | Show summary of previous step (e.g. Cálculo reads Pedido) |
+| `getVariableForTask(name)` | A single BPMN variable | Read cross-step refs (`entityId`, `decision`, etc.) |
+| `getFormDataByTaskKey(taskKey)` | Form data of **another** task in the same instance | Show summary of previous step (e.g. Review reads Intake) |
 
 **🔑 The `taskKey` parameter is the JSON's `taskKey` field, NOT the file `key`.**
 
 | ✅ Correct | ❌ Wrong |
 |---|---|
-| `getFormDataByTaskKey("Task_pedido")` | `getFormDataByTaskKey("pedido.v1")` |
-| `getFormDataByTaskKey("Task_calculo")` | `getFormDataByTaskKey("calculo.v1")` |
+| `getFormDataByTaskKey("Task_intake")` | `getFormDataByTaskKey("intake.v1")` |
+| `getFormDataByTaskKey("Task_review")` | `getFormDataByTaskKey("review.v1")` |
 
-The convention `Task_<step>` is set in the JSON root: `"taskKey": "Task_pedido", "name": "Task_pedido"`. Pass that string verbatim. Using the file `key` (`"pedido.v1"`) silently returns `undefined`.
+The convention `Task_<step>` is set in the JSON root: `"taskKey": "Task_intake", "name": "Task_intake"`. Pass that string verbatim. Using the file `key` (`"intake.v1"`) silently returns `undefined`.
 
 ### 8.2. Save vs Complete — separation of concerns
 
@@ -395,13 +395,13 @@ The convention `Task_<step>` is set in the JSON root: `"taskKey": "Task_pedido",
 
 **`forms[]` carries the form payload** — the engine persists it per task. On the next step, `getFormDataForTask()` from `useIGRPProcessContext` returns it back. **You do NOT need a separate `taskPedido` (or `task<Step>`) base64-encoded BPMN variable** for the form payload; the engine's task-data API already round-trips it.
 
-**`variables[]` is only for cross-step references** that other steps need without re-fetching the full form (e.g. an `idUtenteFalecido` that the Cálculo step uses to call `GET /subsidios/luto/valor`). Keep this list minimal.
+**`variables[]` is only for cross-step references** that other steps need without re-fetching the full form (e.g. an `entityId` that a downstream calculation step uses to fetch a related value from the backend). Keep this list minimal.
 
-> ⚠️ Older hooks (`use-process-utente-shared.ts`, `use-process-contribuinte-shared.ts`, `use-process-agregado-shared.ts`) emit `taskPedido` as a base64 BPMN variable and decode it on RECTIFICAR retakes. **That pattern is being phased out** — new hooks should rely on `getFormDataForTask()` only. Don't replicate the encode/decode dance.
+> ⚠️ Older hooks in some codebases emit a `task<Step>` base64 BPMN variable and decode it on retake cycles. **That pattern is being phased out** — new hooks should rely on `getFormDataForTask()` only. Don't replicate the encode/decode dance.
 
 ### 8.3. Family-shared hook pattern
 
-For families of processes that share the same step shape (e.g. all *agregado* processes: P1.2.10 to P1.2.13), put the implementation in `use-process-<family>-shared.ts` and have each `use-process-<X.Y.Z>.ts` thin-wrap it with process-specific `processKey` + callbacks:
+For families of processes that share the same step shape (multiple process keys with the same underlying flow), put the implementation in `use-process-<family>-shared.ts` and have each `use-process-<X.Y.Z>.ts` thin-wrap it with process-specific `processKey` + callbacks:
 
 ```ts
 // use-process-3.1.1.ts (thin wrapper, ~30 lines)
@@ -414,7 +414,7 @@ export const useProcess3_1_1 = (params: ProcessSharedParams) =>
   );
 ```
 
-Reference: `use-process-agregado-shared.ts` + `use-process-1.2.10.ts` / `1.2.11.ts` / etc.
+Reference shape: a `use-process-<family>-shared.ts` implementing the flow, plus thin per-process wrappers (`use-process-<X.Y.Z>.ts`) that only supply the process-specific `processKey` + callbacks.
 
 ---
 
@@ -424,9 +424,9 @@ Reference: `use-process-agregado-shared.ts` + `use-process-1.2.10.ts` / `1.2.11.
 |---|---|---|
 | Folder | `<processKey>` (uppercase, dots) | `P3.1.1` |
 | Root file | `<processKey>.json` | `P3.1.1.json` |
-| Step file | `<lowercaseStep>.v<n>.json` | `pedido.v1.json` |
-| Step JSON `name` | `Task_<lowercaseStep>` | `Task_pedido` |
-| Step JSON `taskKey` | mirror of `name` | `Task_pedido` |
+| Step file | `<lowercaseStep>.v<n>.json` | `intake.v1.json` |
+| Step JSON `name` | `Task_<lowercaseStep>` | `Task_intake` |
+| Step JSON `taskKey` | mirror of `name` | `Task_intake` |
 | Type names | `Pascal/UppercaseFirst` | `FormPedidoDoenca` |
 | Hook file | `use-process-<X.Y.Z>.ts` (dots) | `use-process-3.1.1.ts` |
 | Hook export | `useProcessX_Y_Z` (underscores, no `P`) | `useProcess3_1_1` |
@@ -438,18 +438,16 @@ Reference: `use-process-agregado-shared.ts` + `use-process-1.2.10.ts` / `1.2.11.
 
 When `componentName` is NOT a built-in (i.e. not in the engine's component reference), the engine treats it as a custom React component and emits an import from `src/app/(myapp)/components/<folder>/<componentName-kebab-case>.tsx`. Two conditions must hold:
 
-1. **File exists** at the kebab-case path (e.g. `componentName: "SearchFalecido"` → `src/app/(myapp)/components/search/search-falecido.tsx`). Without it: yellow zebra-tape placeholder + missing import.
+1. **File exists** at the kebab-case path (e.g. `componentName: "SearchEntity"` → `src/app/(myapp)/components/search/search-entity.tsx`). Without it: yellow zebra-tape placeholder + missing import.
 2. **`id` starts with `<componentName-lowercase>_`** (see §9.1). Without it: same placeholder + the engine falls into a broken code path that emits stray `;` after every JSX element in the file.
 
-Custom component file naming convention (verified by inspection of `src/app/(myapp)/components/search/`):
-- componentName `SearchUtente` → `search-utente.tsx` — **preferred default** for any "pesquisa de utente" flow (returns full Utente DTO including `tiposUtente: [{ id, codigo, descricao, ... }]` so per-utente combos pull options from the result, not the global parametrização — see `project-conventions.md` §`tipoUtenteId`).
-- componentName `SearchFalecido` → `search-falecido.tsx` — funeral-style flows (P3.2.7 etc.)
-- componentName `SearchNIF` → `search-nif.tsx`
-- ~~componentName `SearchUtenteBeneficiario`~~ → **legacy**, do not use in new flows. The "filter to BENEFICIARIO only" semantic is now expressed by the per-utente `tiposUtente` array returned by `SearchUtente` — the calling step picks the relevant tipo (or rejects in `validateStep<X>`) instead of pre-filtering the list.
-- componentName `ProcessRectificationView` → resolved from `@/components/processrectificationview` (a different root)
-- componentName `UploadState` → `upload-state.tsx` directly under `components/` (not under `search/`)
+Custom component file naming convention:
+- **PascalCase `componentName`** in the JSON → **kebab-case file** on disk: `SearchEntity` → `search-entity.tsx`.
+- **Location:** under `src/app/(myapp)/components/<category>/` where `<category>` is a topical folder (e.g. `search/` for search dialogs, `forms/` for form fragments, or directly under `components/` for uncategorised widgets).
+- **Registration path** in `igrp.config.ts` mirrors the folder layout: `"components/search/search-entity"`.
+- When a widget returns a rich DTO (e.g. `Entity` with a nested array of related items), downstream comboboxes should pull options **from the returned DTO**, not from a global parametrização endpoint — the per-entity subset is authoritative for that entity.
 
-The folder isn't predictable from the componentName — the engine seems to scan multiple known directories. **When adding a new custom component, mirror the closest existing pattern** (e.g. for searches, add to `components/search/`; for upload-related, to `components/`) and re-export from the folder's `index.ts` if applicable.
+**When adding a new custom component, mirror the closest existing pattern** (e.g. for searches, add to `components/search/`; for upload-related, to `components/`) and re-export from the folder's `index.ts` if applicable.
 
 ## 9.1. ⚠️ `id` naming convention (engine resolves imports from this!)
 
@@ -460,14 +458,14 @@ The engine reads the `id` prefix to resolve which file to import for **custom** 
 **Rule:** every component's `id` MUST be `<componentName-in-lowercase>_<unique-suffix>`. The `componentId` references inside `types[].fields[]` must mirror the same.
 
 ```
-✅ "id":"searchfalecido_falec327"          for componentName: "SearchFalecido"
-✅ "id":"combobox_tpsub327"                for componentName: "combobox"
-✅ "id":"inputdatepickersingle_dtnasc"     for componentName: "inputDatePickerSingle"
-✅ "id":"processrectificationview_xyz"     for componentName: "ProcessRectificationView"
+✅ "id":"searchentity_ent327"              for componentName: "SearchEntity"
+✅ "id":"combobox_typ327"                  for componentName: "combobox"
+✅ "id":"inputdatepickersingle_dtstart"    for componentName: "inputDatePickerSingle"
+✅ "id":"processreviewview_xyz"            for componentName: "ProcessReviewView"
 
-❌ "id":"src_falec327"  → engine emits placeholder, no import for SearchFalecido
-❌ "id":"cbx_tpsub"     → triggers broken code path with stray `;`
-❌ "id":"dtp_dtnasc"    → broken
+❌ "id":"src_ent327"    → engine emits placeholder, no import for SearchEntity
+❌ "id":"cbx_typ"       → triggers broken code path with stray `;`
+❌ "id":"dtp_dtstart"   → broken
 ```
 
 This applies to ALL component types in process step JSONs — not just the custom ones. Following the convention everywhere is the safe default.
@@ -521,8 +519,8 @@ Reference shape:
 
 ```json
 {
-  "id": "processrectificationview_main",
-  "componentName": "ProcessRectificationView",
+  "id": "processreviewview_main",
+  "componentName": "ProcessReviewView",
   "tag": "rectificationView1",
   "properties": {
     "commonProperties": { "generateReference": false }
@@ -534,13 +532,13 @@ Reference shape:
 ```
 
 **Rules (identical to pages — repeated here so the process author doesn't have to cross-reference):**
-- `id` MUST start with the lowercased `componentName` (`processrectificationview_*` ✅). The engine resolves the import path from the `id` prefix.
+- `id` MUST start with the lowercased `componentName` (`processreviewview_*` ✅). The engine resolves the import path from the `id` prefix.
 - The `.tsx` lives at `src/app/(myapp)/components/<kebab-name>/<kebab-name>.tsx` (e.g. `process-rectification-view/process-rectification-view.tsx`).
 - The component MUST be registered in `src/app/igrp.config.ts` under `components: [...]`. Without registration → yellow placeholder.
 - Custom components used by process steps are typically `scope: "app"` in their own `.igrpstudio/components/<Name>.json` manifest (they're cross-process, not page-bound).
-- Pass step-level data via `properties` — the engine forwards every property verbatim as a JSX prop (`properties.title: "Pedido"` → `<ProcessRectificationView title="Pedido" />`).
+- Pass step-level data via `properties` — the engine forwards every property verbatim as a JSX prop (`properties.title: "Intake"` → `<ProcessReviewView title="Intake" />`).
 
-When the step is **entirely** a custom React component (no engine-composed form, just a single component owning the whole UI), the step JSON is minimal: one component in `children`, empty `types`, empty `states`, and the hook handles `handleSave`/`handleComplete` referencing methods exposed by the custom component (see P2.1.1's `RegistoFosPedido` for the canonical pattern).
+When the step is **entirely** a custom React component (no engine-composed form, just a single component owning the whole UI), the step JSON is minimal: one component in `children`, empty `types`, empty `states`, and the hook handles `handleSave`/`handleComplete` referencing methods exposed by the custom component (see P2.1.1's `FullStepComponent` for the canonical pattern).
 
 ---
 
@@ -657,11 +655,11 @@ This shape pairs naturally with the soft-validation pattern for hidden fields do
 
 ## 12. Quick-start template — new process step
 
-When the user gives you an API artifact `{ taskKey: "Activity_X", name: "Pedido", formKey: "ui:form:pedido@1" }`:
+When the user gives you an API artifact `{ taskKey: "Activity_X", name: "Intake", formKey: "ui:form:intake@1" }`:
 
 1. Folder: `.igrpstudio/process/<processKey>/`
 2. Root file: `<processKey>.json` with steps array (two entries per artifact: human label + `Task_<step>`)
-3. Step file: `pedido.v1.json` with skeleton (§4) + `types[]` + minimal `components` tree
+3. Step file: `intake.v1.json` with skeleton (§4) + `types[]` + minimal `components` tree
 4. Hook: `src/app/(myapp)/process/use-process-<X.Y.Z>.ts` exporting `useProcessX_Y_Z` returning `{ handleSave, handleComplete, ... }`
 5. Step `functions[]`: declare `handleSave`/`handleComplete` with `code: "return await saveStep<Step>()"` / `"return await completeStep<Step>()"`. Step `onLoad.fnCode`: destructure those names from `useProcessX_Y_Z(...)`. **Do NOT** add `onRegisterMethods` `useEffect` — engine auto-emits.
 6. Run engine to generate TSX, then `npx next build` to verify
@@ -670,9 +668,9 @@ When the user gives you an API artifact `{ taskKey: "Activity_X", name: "Pedido"
 
 ## 13. References
 
-- Working examples to copy from:
-  - `.igrpstudio/process/P1.1.1/` — full inline form with tabs, formList, combobox loaders (richest reference)
-  - `.igrpstudio/process/P2.1.1/` — minimal step that delegates to a custom React component (`RegistoFosPedido`)
-  - `.igrpstudio/process/P1.2.7/` — uses `useProcess1_2_7` hook pattern
+- Working examples to copy from: pick the closest existing process step under `.igrpstudio/process/<processKey>/` in your project.
+  - **Richest reference**: a step with an inline `IGRPTabs` + multiple `form`s + `formList` + `combobox` loaders wired via `useMultipleComboBoxOptions`.
+  - **Delegate-to-custom-component reference**: a minimal step whose only child is a single custom React component (`FullStepComponent`) — see §9 above.
+  - **Hook wrapper reference**: a step whose `use-process-<X.Y.Z>.ts` thin-wraps a shared family hook (`use-process-<family>-shared.ts`).
 - Engine code: `@igrp/platform-process-management-client-ui` exports `IGRPProcessProvider`, `IGRPProcessPage`, `IGRPStepComponentConfig`, `IGRPStepMethods`
 - Layout/router: `src/app/(igrp)/(generated)/process/[...process]/{layout.tsx,page.tsx}` (DO NOT edit — generated)
