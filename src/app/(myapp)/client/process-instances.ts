@@ -19,6 +19,7 @@ import {
 export const getProcessInstances = async (filters?: {
   processType?: string;
   processNumber?: string;
+  name?: string;
   status?:
     | "CREATED"
     | "RUNNING"
@@ -42,6 +43,8 @@ export const getProcessInstances = async (filters?: {
       dateFrom: rest?.dateFrom || undefined,
       dateTo: rest?.dateTo || undefined,
       number: rest?.processNumber,
+      // `name` is a first-class instance filter as of client 0.1.0-beta.19
+      name: rest?.name || undefined,
       procReleaseKey: rest?.processType || undefined,
     },
     { variables },

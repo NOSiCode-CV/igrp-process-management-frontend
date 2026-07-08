@@ -30,6 +30,11 @@ export interface FilterState {
   dateTo: string | null;
   organic: string;
   user: string;
+  // Filters added in client 0.1.0-beta.19
+  candidateGroups?: string;
+  candidateUsers?: string;
+  name?: string;
+  priority?: number;
   variables: VariableFilter[];
   isProcess?: boolean;
 }

@@ -21,8 +21,19 @@ import { DEFAULT_PAGE_SIZE } from "@/app/(myapp)/utils/shared";
 export const getTasks = async (
   filters?: Omit<TaskManagementFilters, "page" | "size">,
 ): Promise<PaginatedResponse<Task>> => {
-  const { variables, processType, processNumber, user, status, dateFrom, dateTo } =
-    filters || {};
+  const {
+    variables,
+    processType,
+    processNumber,
+    user,
+    status,
+    dateFrom,
+    dateTo,
+    candidateGroups,
+    candidateUsers,
+    name,
+    priority,
+  } = filters || {};
 
   const processManagementClient = await getIGRPProcessClient();
   // Only forward fields the API supports; unknown params (areaId/subareaId/
@@ -34,6 +45,10 @@ export const getTasks = async (
     status: status || undefined,
     dateFrom: dateFrom || undefined,
     dateTo: dateTo || undefined,
+    candidateGroups: candidateGroups || undefined,
+    candidateUsers: candidateUsers || undefined,
+    name: name || undefined,
+    priority: priority ?? undefined,
     page: 0,
     size: DEFAULT_PAGE_SIZE,
     filterByCurrentUser: true,
@@ -94,7 +109,17 @@ export const getTasksByUser = async (
 export const getAvailableTasks = async (
   params: TaskManagementFilters,
 ): Promise<PaginatedResponse<Task>> => {
-  const { processNumber, processType, user, dateFrom, dateTo } = params;
+  const {
+    processNumber,
+    processType,
+    user,
+    dateFrom,
+    dateTo,
+    candidateGroups,
+    candidateUsers,
+    name,
+    priority,
+  } = params;
   const processManagementClient = await getIGRPProcessClient();
   // Only forward fields the API supports; sending unknown params
   // (areaId/subareaId/organic/variables) can interfere with backend filtering.
@@ -105,6 +130,10 @@ export const getAvailableTasks = async (
     user: user || undefined,
     dateFrom: dateFrom || undefined,
     dateTo: dateTo || undefined,
+    candidateGroups: candidateGroups || undefined,
+    candidateUsers: candidateUsers || undefined,
+    name: name || undefined,
+    priority: priority ?? undefined,
     status: "CREATED",
     page: 0,
     size: DEFAULT_PAGE_SIZE,

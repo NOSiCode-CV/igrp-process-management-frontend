@@ -81,8 +81,11 @@ export function useProcessInstances() {
   }, [processInstancesState.processInstances, getPriorityBadge]);
 
   const handleSearch = (searchTerm: string) => {
-    // Update filters - query will automatically refetch when filters change
-    updateFilters({ processType: searchTerm });
+    // Free-text search filters process instances by name (client 0.1.0-beta.19).
+    // NOTE: previously this wrote into `processType`, which mapped to
+    // procReleaseKey — both breaking the search and corrupting the
+    // "Tipo Processo" combo.
+    updateFilters({ name: searchTerm });
   };
 
   return {
