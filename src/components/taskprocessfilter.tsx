@@ -129,7 +129,7 @@ export default function Taskprocessfilter({
           submitIcon={`ArrowRight`}
           required={false}
           submitButtonLabel={`Pesquisar`}
-          placeholder={`Pesquise por...`}
+          placeholder={`Pesquisar por nome ou nº processo`}
           className={cn('py-1 flex-1 max-w-sm')}
           setValueChange={(value) => setSearchTerm(value)}
           onSearch={handleSearchSubmit}
