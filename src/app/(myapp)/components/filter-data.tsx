@@ -114,9 +114,10 @@ function FilterData({
                   className="flex items-end gap-2 p-3 rounded-lg border border-border bg-secondary/50"
                 >
                   <div className="flex-1 space-y-1.5">
-                    <IGRPLabel className="text-xs text-muted-foreground">
-                      Variável
-                    </IGRPLabel>
+                    <IGRPLabel
+                      label="Variável"
+                      className="text-xs text-muted-foreground"
+                    />
                     {availableVariableNames &&
                     availableVariableNames.length > 0 ? (
                       <IGRPCombobox
@@ -146,9 +147,10 @@ function FilterData({
                   </div>
 
                   <div className="w-[120px] space-y-1.5">
-                    <IGRPLabel className="text-xs text-muted-foreground">
-                      Operador
-                    </IGRPLabel>
+                    <IGRPLabel
+                      label="Operador"
+                      className="text-xs text-muted-foreground"
+                    />
                     <IGRPCombobox
                       value={filter.operator}
                       onChange={(v) =>
@@ -161,9 +163,10 @@ function FilterData({
                   </div>
 
                   <div className="flex-1 space-y-1.5">
-                    <IGRPLabel className="text-xs text-muted-foreground">
-                      Valor
-                    </IGRPLabel>
+                    <IGRPLabel
+                      label="Valor"
+                      className="text-xs text-muted-foreground"
+                    />
                     <Input
                       className="h-8 text-sm"
                       placeholder="Digite o valor..."

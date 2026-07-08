@@ -32,7 +32,7 @@ export default function CandidateGroups({
 
   return (
     <div className="grid gap-2">
-      <IGRPLabel>Grupos Candidatos</IGRPLabel>
+      <IGRPLabel label="Grupos Candidatos" />
       <p className="text-xs text-muted-foreground">
         Selecione os grupos que podem reclamar esta tarefa
       </p>

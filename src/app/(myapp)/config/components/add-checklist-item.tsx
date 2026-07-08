@@ -1,6 +1,7 @@
 import {
   IGRPCheckbox,
   IGRPLabel,
+  Label,
   ScrollArea,
 } from "@igrp/igrp-framework-react-design-system";
 
@@ -31,7 +32,7 @@ function AddChecklistItem({
                 key={index}
                 className="flex items-center justify-between py-1"
               >
-                <IGRPLabel
+                <Label
                   htmlFor={`process-${index}`}
                   className="flex-1 cursor-pointer"
                 >
@@ -41,7 +42,7 @@ function AddChecklistItem({
                       {group.processKey}
                     </p>
                   </div>
-                </IGRPLabel>
+                </Label>
                 <IGRPCheckbox
                   id={`process-group-${group}`}
                   checked={isItemChecked(group)}

@@ -37,9 +37,10 @@ export function TaskInformation({
           {task.description && (
             <>
               <div>
-                <IGRPLabel className="text-muted-foreground">
-                  Descrição
-                </IGRPLabel>
+                <IGRPLabel
+                  label="Descrição"
+                  className="text-muted-foreground"
+                />
                 <p className="text-sm mt-1">{task.description}</p>
               </div>
               <IGRPSeparator />
@@ -174,9 +175,10 @@ export function TaskInformation({
           </div>
           <IGRPSeparator />
           <div>
-            <IGRPLabel className="text-muted-foreground">
-              Instância do Processo
-            </IGRPLabel>
+            <IGRPLabel
+              label="Instância do Processo"
+              className="text-muted-foreground"
+            />
             <div className="mt-2 flex items-center justify-between">
               <div>
                 <div className="text-sm font-medium">{task.processName}</div>
