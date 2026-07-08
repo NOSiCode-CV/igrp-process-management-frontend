@@ -1,7 +1,7 @@
 import {
-  IGRPBadgePrimitive,
+  IGRPBadge,
   IGRPButton,
-  IGRPCheckboxPrimitive,
+  IGRPCheckbox,
   IGRPIcon,
   IGRPInputText,
   IGRPLabel,
@@ -41,9 +41,9 @@ export default function CandidateGroups({
       {selectedCandidateGroupsState.length > 0 && (
         <div className="flex flex-wrap gap-1 p-2 border rounded-md bg-muted/30">
           {selectedCandidateGroupsState.map((group) => (
-            <IGRPBadgePrimitive
+            <IGRPBadge
               key={group}
-              variant="secondary"
+              variant="soft"
               className="gap-1 pr-1"
             >
               {group}
@@ -53,7 +53,7 @@ export default function CandidateGroups({
               >
                 <IGRPIcon iconName="X" />
               </button>
-            </IGRPBadgePrimitive>
+            </IGRPBadge>
           ))}
         </div>
       )}
@@ -66,7 +66,7 @@ export default function CandidateGroups({
             className="flex items-center gap-2 p-2 hover:bg-muted/50 cursor-pointer border-b last:border-b-0"
             onClick={() => handleToggleGroup(group)}
           >
-            <IGRPCheckboxPrimitive
+            <IGRPCheckbox
               checked={selectedCandidateGroupsState.includes(group)}
               onCheckedChange={() => handleToggleGroup(group)}
             />

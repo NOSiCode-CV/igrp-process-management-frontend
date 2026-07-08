@@ -1,6 +1,6 @@
 import { FilterState } from "./processtaksfilter/hooks/use-dropdown-data";
 import {
-  IGRPBadgePrimitive,
+  IGRPBadge,
   IGRPIcon,
 } from "@igrp/igrp-framework-react-design-system";
 
@@ -57,7 +57,7 @@ function FilterActives({
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-sm text-muted-foreground">Active filters:</span>
           {dateFrom && (
-            <IGRPBadgePrimitive variant="secondary" className="gap-1.5 pr-1.5">
+            <IGRPBadge variant="soft" className="gap-1.5 pr-1.5">
               <IGRPIcon iconName="Calendar" />
               <span>
                 {dateFrom}
@@ -69,14 +69,14 @@ function FilterActives({
               >
                 <IGRPIcon iconName="X" />
               </button>
-            </IGRPBadgePrimitive>
+            </IGRPBadge>
           )}
           {variables
             .filter((f) => f.value !== "")
             .map((filter) => (
-              <IGRPBadgePrimitive
+              <IGRPBadge
                 key={filter.id}
-                variant="secondary"
+                variant="soft"
                 className="gap-1.5 pr-1.5"
               >
                 <span className="font-mono text-xs">{filter.name}</span>
@@ -90,7 +90,7 @@ function FilterActives({
                 >
                   <IGRPIcon iconName="X" />
                 </button>
-              </IGRPBadgePrimitive>
+              </IGRPBadge>
             ))}
         </div>
       )}

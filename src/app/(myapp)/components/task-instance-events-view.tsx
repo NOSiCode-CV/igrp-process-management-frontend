@@ -6,11 +6,11 @@ import {
   IGRPDataTable,
   IGRPDataTableFacetedFilterFn,
   IGRPCopyTo,
-  IGRPBadgePrimitive,
+  IGRPBadge,
   IGRPButton,
-  IGRPPopoverPrimitive,
-  IGRPPopoverTriggerPrimitive,
-  IGRPPopoverContentPrimitive,
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
 } from "@igrp/igrp-framework-react-design-system";
 import { TaskInstanceEvent } from "@igrp/platform-process-management-types";
 import { format } from "date-fns";
@@ -92,13 +92,13 @@ export function TaskInstanceEventsView({
               const iconName = getEventTypeIcon(eventType);
               return (
                 <div className="flex items-center gap-2">
-                  <IGRPBadgePrimitive
+                  <IGRPBadge
                     variant="outline"
                     className={`text-[10px] px-1.5 py-0 flex items-center gap-1 ${getEventTypeColor(eventType)}`}
                   >
                     <IGRPIcon iconName={iconName} className="h-3 w-3" />
                     {getEventTypeLabel(eventType)}
-                  </IGRPBadgePrimitive>
+                  </IGRPBadge>
                 </div>
               );
             },
@@ -111,12 +111,12 @@ export function TaskInstanceEventsView({
               const event = row.original;
               return (
                 <div className="flex items-center gap-2">
-                  <IGRPBadgePrimitive
+                  <IGRPBadge
                     variant="outline"
                     className="text-[10px] px-1.5 py-0 text-muted-foreground"
                   >
                     {getStatusLabel(event.status)}
-                  </IGRPBadgePrimitive>
+                  </IGRPBadge>
                 </div>
               );
             },
@@ -182,8 +182,8 @@ export function TaskInstanceEventsView({
                     <span className="text-sm text-foreground truncate">
                       {event.obs}
                     </span>
-                    <IGRPPopoverPrimitive>
-                      <IGRPPopoverTriggerPrimitive asChild>
+                    <Popover>
+                      <PopoverTrigger asChild>
                         <IGRPButton
                           variant="ghost"
                           size="icon"
@@ -191,8 +191,8 @@ export function TaskInstanceEventsView({
                           onClick={(e) => e.stopPropagation()}
                           iconName="Info"
                         />
-                      </IGRPPopoverTriggerPrimitive>
-                      <IGRPPopoverContentPrimitive
+                      </PopoverTrigger>
+                      <PopoverContent
                         className="w-80"
                         onClick={(e) => e.stopPropagation()}
                       >
@@ -202,8 +202,8 @@ export function TaskInstanceEventsView({
                             {event.obs}
                           </p>
                         </div>
-                      </IGRPPopoverContentPrimitive>
-                    </IGRPPopoverPrimitive>
+                      </PopoverContent>
+                    </Popover>
                     <IGRPCopyTo value={event.obs} />
                   </div>
                 </div>

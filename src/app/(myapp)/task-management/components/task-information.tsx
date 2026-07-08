@@ -1,10 +1,9 @@
 import {
   IGRPBadge,
-  IGRPBadgePrimitive,
   IGRPColorVariants,
   IGRPCopyTo,
   IGRPIcon,
-  IGRPLabelPrimitive,
+  IGRPLabel,
   IGRPLink,
   IGRPSeparator,
 } from "@igrp/igrp-framework-react-design-system";
@@ -38,9 +37,9 @@ export function TaskInformation({
           {task.description && (
             <>
               <div>
-                <IGRPLabelPrimitive className="text-muted-foreground">
+                <IGRPLabel className="text-muted-foreground">
                   Descrição
-                </IGRPLabelPrimitive>
+                </IGRPLabel>
                 <p className="text-sm mt-1">{task.description}</p>
               </div>
               <IGRPSeparator />
@@ -78,13 +77,13 @@ export function TaskInformation({
                   </span>
                   <div className="flex flex-wrap gap-1 justify-end">
                     {candidateGroups.map((group) => (
-                      <IGRPBadgePrimitive
+                      <IGRPBadge
                         key={group}
                         variant="outline"
                         className="text-xs"
                       >
                         {group}
-                      </IGRPBadgePrimitive>
+                      </IGRPBadge>
                     ))}
                   </div>
                 </div>
@@ -175,9 +174,9 @@ export function TaskInformation({
           </div>
           <IGRPSeparator />
           <div>
-            <IGRPLabelPrimitive className="text-muted-foreground">
+            <IGRPLabel className="text-muted-foreground">
               Instância do Processo
-            </IGRPLabelPrimitive>
+            </IGRPLabel>
             <div className="mt-2 flex items-center justify-between">
               <div>
                 <div className="text-sm font-medium">{task.processName}</div>

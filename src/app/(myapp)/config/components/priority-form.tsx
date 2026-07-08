@@ -4,12 +4,12 @@ import {
   IGRPInputText,
   IGRPLabel,
   IGRPSeparator,
-  IGRPTableBodyPrimitive,
-  IGRPTableCellPrimitive,
-  IGRPTableHeaderPrimitive,
-  IGRPTableHeadPrimitive,
-  IGRPTablePrimitive,
-  IGRPTableRowPrimitive,
+  TableBody,
+  TableCell,
+  TableHeader,
+  TableHead,
+  Table,
+  TableRow,
 } from "@igrp/igrp-framework-react-design-system";
 
 function PriorityForm({
@@ -38,23 +38,23 @@ function PriorityForm({
   return (
     <>
       {(priorityOptions || []).length > 0 ? (
-        <IGRPTablePrimitive>
-          <IGRPTableHeaderPrimitive>
-            <IGRPTableRowPrimitive>
-              <IGRPTableHeadPrimitive>Rótulo</IGRPTableHeadPrimitive>
-              <IGRPTableHeadPrimitive className="w-32">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Rótulo</TableHead>
+              <TableHead className="w-32">
                 Valor
-              </IGRPTableHeadPrimitive>
-              <IGRPTableHeadPrimitive className="w-32">
+              </TableHead>
+              <TableHead className="w-32">
                 Cor
-              </IGRPTableHeadPrimitive>
-              <IGRPTableHeadPrimitive className="w-16"></IGRPTableHeadPrimitive>
-            </IGRPTableRowPrimitive>
-          </IGRPTableHeaderPrimitive>
-          <IGRPTableBodyPrimitive>
+              </TableHead>
+              <TableHead className="w-16"></TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {(priorityOptions || []).map((option: any, index: number) => (
-              <IGRPTableRowPrimitive key={index}>
-                <IGRPTableCellPrimitive>
+              <TableRow key={index}>
+                <TableCell>
                   <IGRPInputText
                     value={option.label}
                     onChange={(e) =>
@@ -62,8 +62,8 @@ function PriorityForm({
                     }
                     className="h-8"
                   />
-                </IGRPTableCellPrimitive>
-                <IGRPTableCellPrimitive>
+                </TableCell>
+                <TableCell>
                   <IGRPInputText
                     type="number"
                     value={option.value}
@@ -72,8 +72,8 @@ function PriorityForm({
                     }
                     className="h-8"
                   />
-                </IGRPTableCellPrimitive>
-                <IGRPTableCellPrimitive>
+                </TableCell>
+                <TableCell>
                   <IGRPInputColor
                     defaultValue="#ED6C02"
                     placeholder="Cor (ex.: #ED6C02)" //text-success-500 #00FF00
@@ -81,10 +81,10 @@ function PriorityForm({
                     onChange={(value) =>
                       updatePriorityOption(index, "color", value)
                     }
-                    showHexValue={true}
+                    format="hex"
                   />
-                </IGRPTableCellPrimitive>
-                <IGRPTableCellPrimitive>
+                </TableCell>
+                <TableCell>
                   <IGRPButton
                     variant="ghost"
                     size="icon"
@@ -92,11 +92,11 @@ function PriorityForm({
                     className="h-8 w-8 text-destructive"
                     iconName="Trash"
                   ></IGRPButton>
-                </IGRPTableCellPrimitive>
-              </IGRPTableRowPrimitive>
+                </TableCell>
+              </TableRow>
             ))}
-          </IGRPTableBodyPrimitive>
-        </IGRPTablePrimitive>
+          </TableBody>
+        </Table>
       ) : (
         <p className="text-sm text-muted-foreground text-center py-4">
           No priority options defined
@@ -128,7 +128,7 @@ function PriorityForm({
             value={newPriorityColor || "#ED6C02"}
             onChange={(value) => setNewPriorityColor(value)}
             className="w-32"
-            showHexValue={true}
+            format="hex"
           />
           <IGRPButton
             onClick={addPriorityOption}

@@ -1,27 +1,27 @@
 import { ProcessManagementClient } from "@igrp/platform-process-management-client-ts";
+
+import { auth } from "@/lib/auth";
+
 import { getIGRPProcessClientConfig } from "./api-config";
-import { getAccessToken, refreshAccessToken } from "./auth-helpers";
 
 export async function getIGRPProcessClient(): Promise<ProcessManagementClient> {
   const { baseUrl, timeout } = getIGRPProcessClientConfig();
 
-  let token = await getAccessToken();
+  // The framework refreshes the OIDC access token inside the NextAuth `jwt`
+  // callback, so the JWT returned here is already current. A failed refresh is
+  // surfaced via `token.error` rather than requiring a manual refresh call.
+  const token = await auth.getAccessToken();
 
-  // Check if token is missing or expired
+  // Check if token is missing
   if (!token) {
     console.error("[API Client] No token available");
     throw new Error("Authentication token not available");
   }
 
-  // Check if token is expired and refresh if needed
-  if (token.expiresAt && token.expiresAt < Date.now()) {
-    console.log("[API Client] Token expired, refreshing...");
-    token = await refreshAccessToken(token);
-
-    if (token.error) {
-      console.error("[API Client] Failed to refresh token:", token.error);
-      throw new Error("Failed to refresh authentication token");
-    }
+  // Refresh failed upstream (in the jwt callback) — treat as unauthenticated.
+  if (token.error) {
+    console.error("[API Client] Failed to refresh token:", token.error);
+    throw new Error("Failed to refresh authentication token");
   }
 
   // Ensure we have an access token

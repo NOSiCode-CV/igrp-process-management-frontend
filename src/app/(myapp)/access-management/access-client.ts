@@ -1,5 +1,6 @@
-import { getAccessToken } from "@/lib/auth-helpers";
 import { AccessManagementClient } from "@igrp/platform-access-management-client-ts";
+
+import { auth } from "@/lib/auth";
 
 /**
  * Builds a fresh AccessManagementClient per call with the current user's token.
@@ -12,7 +13,7 @@ import { AccessManagementClient } from "@igrp/platform-access-management-client-
  */
 export async function getClientAccess(): Promise<AccessManagementClient> {
   const baseUrl = process.env.IGRP_ACCESS_MANAGEMENT_API || "";
-  const token = await getAccessToken();
+  const token = await auth.getAccessToken();
 
   const headers: Record<string, string> = {
     "Content-Type": "application/json",

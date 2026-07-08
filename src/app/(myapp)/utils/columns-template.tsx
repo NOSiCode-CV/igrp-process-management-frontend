@@ -1,5 +1,5 @@
 import {
-  IGRPBadgePrimitive,
+  IGRPBadge,
   IGRPCopyTo,
   IGRPIcon,
   IGRPDataTableCellBadge,
@@ -57,9 +57,9 @@ export const getPriorityTemplate = (
 ) => {
   if (opts.badgeStyle) {
     return (
-      <IGRPBadgePrimitive style={opts.badgeStyle}>
+      <IGRPBadge style={opts.badgeStyle}>
         {opts.label ?? priorityValue}
-      </IGRPBadgePrimitive>
+      </IGRPBadge>
     );
   }
   return <></>;
@@ -176,9 +176,9 @@ export const getProgressTemplate = (progress: string, status: string) => {
 export const getBusinessKeyTemplate = (businessKey: string) => {
   return (
     <div className="flex items-center gap-1.5">
-      <IGRPBadgePrimitive variant="secondary" className="font-mono text-xs">
+      <IGRPBadge variant="soft" className="font-mono text-xs">
         {businessKey}
-      </IGRPBadgePrimitive>
+      </IGRPBadge>
       <IGRPCopyTo
         value={businessKey}
         tooltipMessage="Copy Business Key"
@@ -258,14 +258,14 @@ export const getCandidateGroupsTemplate = (candidateGroups: string[]) => {
   return (
     <div className="flex flex-wrap gap-1">
       {groups.slice(0, 2).map((group) => (
-        <IGRPBadgePrimitive key={group} variant="secondary" className="text-xs">
+        <IGRPBadge key={group} variant="soft" className="text-xs">
           {group}
-        </IGRPBadgePrimitive>
+        </IGRPBadge>
       ))}
       {candidateGroups.length > 2 && (
-        <IGRPBadgePrimitive variant="outline" className="text-xs">
+        <IGRPBadge variant="outline" className="text-xs">
           +{candidateGroups.length - 2}
-        </IGRPBadgePrimitive>
+        </IGRPBadge>
       )}
     </div>
   );

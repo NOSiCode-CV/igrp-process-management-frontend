@@ -1,10 +1,10 @@
 import {
   cn,
-  IGRPEmptyDescriptionPrimitive,
-  IGRPEmptyHeaderPrimitive,
-  IGRPEmptyMediaPrimitive,
-  IGRPEmptyPrimitive,
-  IGRPEmptyTitlePrimitive,
+  Empty as EmptyRoot,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
   IGRPIcon,
 } from "@igrp/igrp-framework-react-design-system";
 
@@ -19,17 +19,17 @@ function Empty({
 }) {
   return (
     <div className={cn(className)}>
-      <IGRPEmptyPrimitive>
-        <IGRPEmptyHeaderPrimitive>
-          <IGRPEmptyMediaPrimitive variant="icon">
+      <EmptyRoot>
+        <EmptyHeader>
+          <EmptyMedia variant="icon">
             <IGRPIcon iconName="Settings" />
-          </IGRPEmptyMediaPrimitive>
-          <IGRPEmptyTitlePrimitive>{title}</IGRPEmptyTitlePrimitive>
-          <IGRPEmptyDescriptionPrimitive>
+          </EmptyMedia>
+          <EmptyTitle>{title}</EmptyTitle>
+          <EmptyDescription>
             {description}
-          </IGRPEmptyDescriptionPrimitive>
-        </IGRPEmptyHeaderPrimitive>
-      </IGRPEmptyPrimitive>
+          </EmptyDescription>
+        </EmptyHeader>
+      </EmptyRoot>
     </div>
   );
 }

@@ -1,5 +1,4 @@
-'use client'
-
+'use client';
 /* THIS FILE WAS GENERATED AUTOMATICALLY BY iGRP STUDIO. */
 /* DO NOT MODIFY IT BECAUSE IT COULD BE REWRITTEN AT ANY TIME. */
 
@@ -8,10 +7,10 @@
 
 import { use, useState, useEffect, useRef } from 'react';
 import { cn, useIGRPMenuNavigation, useIGRPToast } from '@igrp/igrp-framework-react-design-system';
-import { IGRPFormHandle } from "@igrp/igrp-framework-react-design-system";
-import { z } from "zod"
-import { IGRPOptionsProps } from "@igrp/igrp-framework-react-design-system";
-import { AddChecklistItem } from '@/app/(myapp)/config/components/add-checklist-item'
+import { IGRPFormHandle } from '@igrp/igrp-framework-react-design-system';
+import { z } from 'zod';
+import { IGRPOptionsProps } from '@igrp/igrp-framework-react-design-system';
+import { AddChecklistItem } from '@/app/(myapp)/config/components/add-checklist-item';
 import {
   IGRPModalDialog,
   IGRPModalDialogContent,
@@ -27,13 +26,30 @@ import {
   IGRPInputHidden,
   IGRPModalDialogFooter,
   IGRPButton,
-  IGRPModalDialogClose
-} from "@igrp/igrp-framework-react-design-system";
+  IGRPModalDialogClose,
+} from '@igrp/igrp-framework-react-design-system';
 
-export default function Areamodal({ open, setOpen, isEditing, formData, onFormChange, onSave, onClose, options, allProcesses }: { open: boolean, setOpen: (prompt: boolean) => void, isEditing: boolean, formData: any, onFormChange: (data: any) => void, onSave: (data: any) => any, onClose: () => void, options: any, allProcesses: any }) {
-
-
-
+export default function Areamodal({
+  open,
+  setOpen,
+  isEditing,
+  formData,
+  onFormChange,
+  onSave,
+  onClose,
+  options,
+  allProcesses,
+}: {
+  open: boolean;
+  setOpen: (prompt: boolean) => void;
+  isEditing: boolean;
+  formData: any;
+  onFormChange: (data: any) => void;
+  onSave: (data: any) => any;
+  onClose: () => void;
+  options: any;
+  allProcesses: any;
+}) {
   z.config(z.locales.en());
 
   const form1 = z.object({
@@ -44,8 +60,8 @@ export default function Areamodal({ open, setOpen, isEditing, formData, onFormCh
     color: z.string().optional(),
     description: z.string().optional(),
     parentId: z.string().optional(),
-    processes: z.array(z.object()).optional()
-  })
+    processes: z.array(z.object()).optional(),
+  });
 
   type Form1ZodType = typeof form1;
 
@@ -57,32 +73,26 @@ export default function Areamodal({ open, setOpen, isEditing, formData, onFormCh
     color: `#3b82f6`,
     description: ``,
     parentId: ``,
-    processes: []
-  }
-
+    processes: [],
+  };
 
   const formform1Ref = useRef<IGRPFormHandle<Form1ZodType> | null>(null);
   const [form1Data, setForm1Data] = useState<any>(initForm1);
 
   const [editingArea, setEditingArea] = useState<void | undefined>(undefined);
 
-  const { igrpToast } = useIGRPToast()
+  const { igrpToast } = useIGRPToast();
 
   async function handleFormSubmit(data: z.infer<any>): Promise<void | undefined> {
-
     const formProcesses = (formData as { processes?: unknown[] })?.processes;
     const next = { ...data, processes: formProcesses };
 
-    onFormChange(next)
-    const response = onSave(next)
-    if (response)
-      onClose()
-
+    onFormChange(next);
+    const response = onSave(next);
+    if (response) onClose();
   }
 
   function handleAddItem(item: any): void {
-
-
     const data = formform1Ref.current?.getValues();
 
     const nextProcesses = [...(data?.processes || []), item];
@@ -90,21 +100,17 @@ export default function Areamodal({ open, setOpen, isEditing, formData, onFormCh
     setForm1Data(next);
     onFormChange(next);
 
-    formform1Ref.current?.setValue("processes", nextProcesses);
-
-
+    formform1Ref.current?.setValue('processes', nextProcesses);
   }
 
   function handleRemoveItem(item: any): void {
-
     const key = item?.key ?? item?.processKey;
     const nextProcesses = (form1Data.processes || []).filter(
-      (p: any) => (p?.key ?? p?.processKey) !== key
+      (p: any) => (p?.key ?? p?.processKey) !== key,
     );
     const next = { ...form1Data, processes: nextProcesses };
     setForm1Data(next);
     onFormChange(next);
-
   }
 
   const isUpdatingRef = useRef<boolean>(false);
@@ -117,8 +123,9 @@ export default function Areamodal({ open, setOpen, isEditing, formData, onFormCh
   }, [formData]);
 
   const title = isEditing ? 'Editar Área' : 'Adicionar Nova Área';
-  const modalDescription = isEditing ? 'Atualize os detalhes da área e as atribuições de processos' : 'Crie uma nova área ou sub-área no mapa de processos';
-
+  const modalDescription = isEditing
+    ? 'Atualize os detalhes da área e as atribuições de processos'
+    : 'Crie uma nova área ou sub-área no mapa de processos';
 
   useEffect(() => {
     let cleanup: (() => void) | undefined;
@@ -126,7 +133,7 @@ export default function Areamodal({ open, setOpen, isEditing, formData, onFormCh
 
     const trySubscribe = () => {
       const handle = formform1Ref.current;
-      if (handle && typeof (handle as any).watch === "function") {
+      if (handle && typeof (handle as any).watch === 'function') {
         const subscription = (handle as any).watch((value: any) => {
           if (isUpdatingRef.current) return;
 
@@ -135,10 +142,7 @@ export default function Areamodal({ open, setOpen, isEditing, formData, onFormCh
             const currentText = (value as any)?.applicationBaseText;
             if (currentValue && currentValue !== currentText) {
               isUpdatingRef.current = true;
-              formform1Ref.current?.setValue(
-                "applicationBaseText",
-                currentValue
-              );
+              formform1Ref.current?.setValue('applicationBaseText', currentValue);
               setTimeout(() => {
                 isUpdatingRef.current = false;
               }, 0);
@@ -148,7 +152,7 @@ export default function Areamodal({ open, setOpen, isEditing, formData, onFormCh
             const currentValue = (value as any)?.applicationBase;
             if (currentText && currentText !== currentValue) {
               isUpdatingRef.current = true;
-              formform1Ref.current?.setValue("applicationBase", currentText);
+              formform1Ref.current?.setValue('applicationBase', currentText);
               setTimeout(() => {
                 isUpdatingRef.current = false;
               }, 0);
@@ -157,7 +161,7 @@ export default function Areamodal({ open, setOpen, isEditing, formData, onFormCh
         });
 
         cleanup = () => {
-          if (subscription && typeof subscription.unsubscribe === "function") {
+          if (subscription && typeof subscription.unsubscribe === 'function') {
             subscription.unsubscribe();
           }
         };
@@ -174,51 +178,24 @@ export default function Areamodal({ open, setOpen, isEditing, formData, onFormCh
     };
   }, [options.applications]);
 
-
   const processesItems = (allProcesses || []).map((process: any) => ({
     ...process,
-    key: process.id
+    key: process.id,
   }));
 
   const itemsChecked = (formData.processes || []).map((process: any) => ({
     ...process,
-    key: process.releaseId ?? process.id
+    key: process.releaseId ?? process.id,
   }));
 
-
-
-
   return (
-    <div className={cn('component',)}    >
-      <IGRPModalDialog
-        onOpenChange={setOpen}
-        open={open}
-      >
-        <IGRPModalDialogContent
-          size={`lg`}
-          className={cn()}
+    <div className={cn('component')}>
+      <IGRPModalDialog onOpenChange={setOpen} open={open}>
+        <IGRPModalDialogContent size={`lg`}>
+          <IGRPModalDialogHeader>
+            <IGRPModalDialogTitle id={`modalDialogTitle1`}>{title}</IGRPModalDialogTitle>
 
-
-        >
-          <IGRPModalDialogHeader
-            className={cn('',)}
-
-
-          >
-            <IGRPModalDialogTitle
-              id={`modalDialogTitle1`}
-
-
-
-            >
-              {title}
-            </IGRPModalDialogTitle>
-            <IGRPModalDialogDescription
-              id={`modalDialogDescription1`}
-
-
-
-            >
+            <IGRPModalDialogDescription id={`modalDialogDescription1`}>
               {modalDescription}
             </IGRPModalDialogDescription>
           </IGRPModalDialogHeader>
@@ -226,130 +203,117 @@ export default function Areamodal({ open, setOpen, isEditing, formData, onFormCh
             schema={form1}
             validationMode={`onBlur`}
             formRef={formform1Ref}
-            className={cn('',)}
             onSubmit={handleFormSubmit}
             defaultValues={form1Data}
           >
             <>
-              {options?.applications.length > 0 && (<IGRPCombobox
-                id={`applicationBase`}
-                label={`Aplicação`}
-                variant={`single`}
-                placeholder={`Selecione uma opção...`}
-                required={true}
-                selectLabel={`Nenhuma opção encontrada`}
-                showSearch={true}
-                showIcon={false}
-                iconName={`CornerDownRight`}
-                className={cn()}
-                onChange={() => { }}
-                options={options?.applications || []}
-              >
-              </IGRPCombobox>)}
-              {options?.applications.length === 0 && (<IGRPInputText
-                id={`applicationBaseText`}
-                label={`Aplicação`}
-                showIcon={false}
-                required={true}
-                className={cn()}
-
-
-              >
-              </IGRPInputText>)}
+              {options?.applications.length > 0 && (
+                <IGRPCombobox
+                  id={`applicationBase`}
+                  label={`Aplicação`}
+                  variant={`single`}
+                  placeholder={`Selecione uma opção...`}
+                  required={true}
+                  selectLabel={`Nenhuma opção encontrada`}
+                  showSearch={true}
+                  showIcon={false}
+                  iconName={`CornerDownRight`}
+                  onChange={() => {}}
+                  options={options?.applications || []}
+                ></IGRPCombobox>
+              )}
+              {options?.applications.length === 0 && (
+                <IGRPInputText
+                  id={`applicationBaseText`}
+                  label={`Aplicação`}
+                  showIcon={false}
+                  required={true}
+                ></IGRPInputText>
+              )}
               <IGRPInputText
                 id={`name`}
                 label={`Nome`}
                 showIcon={false}
                 required={true}
                 placeholder={`ex.: Finanças e Contabilidade`}
-                className={cn()}
+              ></IGRPInputText>
 
-
-              >
-              </IGRPInputText>
-              <div className={cn('grid', 'lg:grid-cols-2 ', ' gap-4',)}    >
+              <div className={cn('grid', 'lg:grid-cols-2 ', ' gap-4')}>
                 <IGRPInputText
                   id={`code`}
                   label={`Código`}
                   showIcon={false}
                   required={true}
                   placeholder={`ex.: FIN & RH`}
-                  className={cn('', 'col-span-1',)}
+                  className={cn('col-span-1')}
+                ></IGRPInputText>
 
-
-                >
-                </IGRPInputText>
                 <IGRPInputColor
                   id={`color`}
                   label={`Cor`}
                   defaultValue={`#3b82f6`}
-                  showHexValue={true}
                   required={false}
-                  className={cn('col-span-1',)}
-
-
-                >
-                </IGRPInputColor></div>
+                  format={`hex`}
+                  defaultFormat={`hex`}
+                  showFormatValue={true}
+                  className={cn('col-span-1')}
+                ></IGRPInputColor>
+              </div>
               <IGRPTextarea
                 id={`description`}
                 label={`Descrição`}
                 rows={3}
                 required={false}
                 placeholder={`Breve descrição da área`}
-                className={cn()}
+              ></IGRPTextarea>
 
-
-              >
-              </IGRPTextarea>
               <IGRPSelect
                 id={`parentId`}
                 label={`Área Pai (Opcional)`}
                 placeholder={`Selecione uma opção...`}
-                className={cn()}
-
                 options={options?.areas || []}
-              >
-              </IGRPSelect>
+              ></IGRPSelect>
+
               <IGRPInputHidden
                 id={`processes`}
                 label={`processes`}
                 required={false}
-                className={cn()}
+              ></IGRPInputHidden>
 
-
-              >
-              </IGRPInputHidden>
-              <AddChecklistItem label={`Associar Processos`} availableItems={processesItems} items={itemsChecked} addItem={handleAddItem}
-                removeItem={handleRemoveItem} ></AddChecklistItem>
+              <AddChecklistItem
+                label={`Associar Processos`}
+                availableItems={processesItems}
+                items={itemsChecked}
+                addItem={handleAddItem}
+                removeItem={handleRemoveItem}
+              ></AddChecklistItem>
             </>
           </IGRPForm>
-          <IGRPModalDialogFooter
-            className={cn('', '',)}
-
-
-          >
-            <div className={cn('flex', 'flex-1', 'flex flex-row flex-nowrap items-center justify-end gap-2',)}    >
+          <IGRPModalDialogFooter className={cn()}>
+            <div
+              className={cn(
+                'flex',
+                'flex-1',
+                'flex flex-row flex-nowrap items-center justify-end gap-2',
+              )}
+            >
               <IGRPButton
                 id={`button1`}
                 variant={`default`}
                 size={`default`}
                 showIcon={false}
-                className={cn('',)}
                 onClick={() => formform1Ref.current?.submit()}
-
               >
                 Gravar
-              </IGRPButton></div>
+              </IGRPButton>
+            </div>
             <IGRPModalDialogClose
               id={`modalDialogClose1`}
-
-              className={cn()}
-              onClick={() => { }}
-
-            >
-            </IGRPModalDialogClose>
+              onClick={() => {}}
+            ></IGRPModalDialogClose>
           </IGRPModalDialogFooter>
         </IGRPModalDialogContent>
-      </IGRPModalDialog></div>
+      </IGRPModalDialog>
+    </div>
   );
 }

@@ -1,5 +1,5 @@
 import {
-  IGRPBadgePrimitive,
+  IGRPBadge,
   IGRPIcon,
 } from "@igrp/igrp-framework-react-design-system";
 
@@ -15,7 +15,7 @@ export function SelectedItems({
     <div className="flex flex-wrap gap-2">
       {itemsArray.length > 0 &&
         itemsArray.map((group) => (
-          <IGRPBadgePrimitive key={group} variant="secondary" className="gap-1">
+          <IGRPBadge key={group} variant="soft" className="gap-1">
             {group}
             <button
               onClick={() => removeItem(group)}
@@ -23,7 +23,7 @@ export function SelectedItems({
             >
               <IGRPIcon iconName="X" className="h-3 w-3" />
             </button>
-          </IGRPBadgePrimitive>
+          </IGRPBadge>
         ))}
       {itemsArray.length === 0 && (
         <p className="text-sm text-muted-foreground">

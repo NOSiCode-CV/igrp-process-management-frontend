@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { ExtendedArea } from "../../types";
 import {
   IGRPAlertDialog,
-  IGRPBadgePrimitive,
+  IGRPBadge,
   IGRPButton,
 } from "@igrp/igrp-framework-react-design-system";
 
@@ -34,9 +34,9 @@ export function AreaActions({
   return (
     <div className="flex items-center space-x-1">
       {processCount > 0 && (
-        <IGRPBadgePrimitive variant="secondary" className="text-xs">
+        <IGRPBadge variant="soft" className="text-xs">
           {processCount}
-        </IGRPBadgePrimitive>
+        </IGRPBadge>
       )}
       {isAreaOrSubarea && (
         <>
