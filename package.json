@@ -1,6 +1,6 @@
 {
   "name": "process-management-frontend",
-  "version": "0.0.1-alpha.5",
+  "version": "0.0.1-alpha.6",
   "displayName": "iGRP Process Management",
   "description": "Process Management Frontend for IGRP",
   "scripts": {

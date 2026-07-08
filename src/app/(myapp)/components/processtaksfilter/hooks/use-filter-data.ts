@@ -12,6 +12,10 @@ export function useFilterData(isProcess?: boolean) {
     dateTo: null,
     organic: "",
     user: "",
+    candidateGroups: "",
+    candidateUsers: "",
+    name: "",
+    priority: undefined,
     variables: [],
   };
   const [filters, setFilters] = useState<FilterState>(initialFilters);

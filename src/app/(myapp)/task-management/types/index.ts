@@ -3,6 +3,8 @@ import { Task, VariableParams } from "@igrp/platform-process-management-types";
 export interface TaskManagementFilters {
   processNumber?: string;
   processKey?: string;
+  /** First-class API filter (client 0.1.0-beta.19). Prefer this over processType. */
+  processReleaseKey?: string;
   user?: string;
   status?: string;
   dateFrom?: string;
@@ -12,6 +14,11 @@ export interface TaskManagementFilters {
   processType?: string;
   organic?: string;
   searchTerm?: string;
+  // Filters added in client 0.1.0-beta.19
+  candidateGroups?: string;
+  candidateUsers?: string;
+  name?: string;
+  priority?: number;
   variables?: VariableParams;
   page?: number;
   size?: number;

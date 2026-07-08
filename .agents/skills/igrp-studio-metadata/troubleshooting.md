@@ -66,7 +66,7 @@ Quick scan:
 ```bash
 python3 -c "
 import json
-with open('pedido.v1.json') as f: d=json.load(f)
+with open('intake.v1.json') as f: d=json.load(f)
 def walk(fs):
     for f in fs or []:
         if f.get('type')=='text': print('❌', f['name'])
@@ -75,7 +75,7 @@ for t in d.get('types',[]): walk(t.get('fields'))
 "
 ```
 
-Common offenders: free-text fields (`observacoes`, `nomeFarmacia`, `omc`, `recibo`), readonly utente snapshot fields (`numeroUtente`, `nomePaiUtente`, etc.), and `anexos[].url`.
+Common offenders: free-text fields (``notes`, `receiver`, `receipt`, `title`, other free-text strings`), readonly entity snapshot fields (`entityCode`, `parentName`, etc.)), and `anexos[].url`.
 - Check if API field types in `types[]` don't match what the hook returns.
 
 ### Type error in a file you didn't touch (e.g. `process/[...process]/page.ts`)
@@ -88,26 +88,26 @@ Pre-existing issue unrelated to your change. Mention but don't attempt to fix un
 
 ### Backend 400/500: request body keys don't match DTO / "field X is required"
 
-The form is submitting payload keys with suffix-renamed names (e.g. `montanteTransfFld`, `idUpsModalTa`) that don't exist on the backend DTO.
+The form is submitting payload keys with suffix-renamed names (e.g. `amountFld`, `categoryIdFld`, `targetIdFld`) that don't exist on the backend DTO.
 
 **Diagnosis**:
-1. Log the actual body sent: `body: '{"montanteTransfFld": 1234, "userPara": "5", ...}'` — if any key has a suffix like `Fld`, `Modal`, `Transf`, `Devol`, that's a renamed tag leaking through `...values`.
-2. Check the backend request type (e.g. `TransferirFundosRequest`) to see the REAL expected fields.
+1. Log the actual body sent: `body: '{"amountFld": 1234, "target": "5", ...}'` — if any key has a suffix like `Fld`, `Modal`, `Fltr`, `Btn`, that's a renamed tag leaking through `...values`.
+2. Check the backend request DTO to see the REAL expected fields.
 
 **Fix**: in the form's `handleFormSubmit`, construct the payload explicitly, re-keying the renamed tags to the API names:
 
 ```js
 // ❌ Before
-const payload = { ...values, de: 'UPS', para: 'ATENDEDOR' };
+const payload = { ...values, source: 'A', target: 'B' };
 
 // ✅ After
 const payload = {
-  idUps: selectidUpsModalTaValue ? Number(selectidUpsModalTaValue) : undefined,
-  userPara: values.userPara ? Number(values.userPara) : undefined,
-  montante: Number(values.montanteTransfFld),
-  obs: values.obsTransfFld,
-  de: 'UPS',
-  para: 'ATENDEDOR',
+  categoryId: selectCategoryFldValue ? Number(selectCategoryFldValue) : undefined,
+  targetUser: values.targetUser ? Number(values.targetUser) : undefined,
+  amount:     Number(values.amountFld),
+  notes:      values.notesFld,
+  source:     'A',
+  target:     'B',
 };
 ```
 
@@ -143,16 +143,16 @@ Apply to `dia`, `dataEnvio`, `dataInicio`, `dataFim`, any `@NotBlank` date range
 
 ### Backend `@NotBlank` filter rejects empty-filter initial list load
 
-The query DTO validates fields like `de`/`ate`/`utilizador` as `@NotBlank` but the initial page load has no filters applied.
+The query DTO validates fields like `from`/`to`/`user` as `@NotBlank` but the initial page load has no filters applied.
 
-**Wrong approach** (❌) — do NOT send sentinel values like `0`, `'_'`, `'1900-01-01'`. The backend will interpret them as real filter values (e.g. `idUps=0` → searches for UPS with id 0 → returns nothing).
+**Wrong approach** (❌) — do NOT send sentinel values like `0`, `'_'`, `'1900-01-01'`. The backend will interpret them as real filter values (e.g. `categoryId=0` → searches for the record with id 0 → returns nothing).
 
 **Correct approach** (✅) — always send `undefined` for unset filters:
 ```js
-de: toLocalDate(range?.from),                                  // undefined → omitted
-ate: toLocalDate(range?.to),                                   // undefined → omitted
-utilizador: (searchValue && searchValue.trim()) || undefined,
-idUps: selectidUpsFltValue ? Number(selectidUpsFltValue) : undefined,
+from:       toLocalDate(range?.from),                             // undefined → omitted
+to:         toLocalDate(range?.to),                               // undefined → omitted
+user:       (searchValue && searchValue.trim()) || undefined,
+categoryId: selectCategoryFldValue ? Number(selectCategoryFldValue) : undefined,
 ```
 
 `buildQueryParam` strips `undefined`/`null`/`""` so those fields don't appear on the query string at all.
@@ -229,19 +229,75 @@ useEffect(() => {
 
 Fix A is preferred (cheaper, idiomatic React). Fix B is the escape hatch when the upstream value really is a fresh object every render and you can't memoize at the source.
 
+### Custom component does not appear in the Studio list / renders as zebra — object-literal default in destructuring
+
+**Symptom:** a new custom component is registered in `igrp.config.ts`, has both `export function <Name>` and `export default <Name>` (correct pattern), but **doesn't appear in the Studio component list** and the JSON node renders as the **yellow zebra-tape placeholder** even after reopening the project and regenerating.
+
+**Root cause (confirmed against the real engine):** `parseComponents` in the nextjs-engine extracts components via **regex**, and drops the component when it can't extract props nor an interface (`if (props.length === 0 && !argumentsInterface) return;`). The destructuring regex is:
+
+```
+/^{\s*([^}]*)\s*}\s*:\s*([A-Z][a-zA-Z0-9_]*)/
+```
+
+`[^}]*` **does not traverse inner `}`**. A default with an object/array-of-objects literal inside the destructuring breaks the match:
+
+```ts
+// ❌ NOT registered — inner braces in the default break the regex
+export function MyComponent({
+  value = [],
+  optionsYesNo = [
+    { value: "Y", label: "Yes" },   // ← inner `}` → regex fails → 0 props → dropped
+    { value: "N", label: "No" },
+  ],
+}: MyComponentProps) { ... }
+```
+
+**Fix:** move the complex default to a module-level constant + fallback in the body. The destructuring stays free of inner braces and the parser extracts props + `argumentsInterface`:
+
+```ts
+// ✅ REGISTERS
+const DEFAULT_YES_NO: IGRPOptionsProps[] = [
+  { value: "Y", label: "Yes" },
+  { value: "N", label: "No" },
+];
+
+export function MyComponent({
+  value = [],
+  optionsYesNo,          // no default in destructuring
+}: MyComponentProps) {
+  const opts = optionsYesNo?.length ? optionsYesNo : DEFAULT_YES_NO;
+  ...
+}
+```
+
+**General rule:** in the destructuring of custom-component props, defaults may only be **primitives or `[]`** (`= []`, `= ""`, `= false`, `= 0`). Never `= { ... }` nor `= [{ ... }]`.
+
+**Quick diagnostic** (uses the real parser, no Studio needed):
+
+```bash
+node -e "
+const e = require('@igrp/igrp-studio-nextjs-engine');
+e.loadAppExports(process.argv[1]).then(c =>
+  console.log(c.components.map(x => x.name).sort().join('\n'))
+);
+" /path/to/project
+```
+
+If a component's function is exported but its name doesn't appear in the list, it was silently dropped — check for object-literal defaults first.
+
 ### Custom component renders as a yellow placeholder
 
-**Symptom**: the page mounts but where your custom component (e.g. `SearchFalecido`, `ProcessRectificationView`) should appear, you see a yellow striped/zebra div with the component name in red text inside it:
+**Symptom**: the page mounts but where your custom component (e.g. `SearchEntity`, `ProcessReviewView`) should appear, you see a yellow striped/zebra div with the component name in red text inside it:
 
 ```html
 <div className="bg-stripes-yellow ...">
-  <span className="text-red-500">SearchFalecido</span>
+  <span className="text-red-500">SearchEntity</span>
 </div>
 ```
 
-**Three possible root causes (check in order):**
+**Four possible root causes (check in order):**
 
-1. **`id` prefix mismatch** — the JSON node's `id` doesn't start with the lowercased `componentName`. `searchfalecido_main` ✅; `sru_main` or `falecido_main` ❌. The engine resolves the import path from the `id` prefix, not from `componentName`.
+1. **`id` prefix mismatch** — the JSON node's `id` doesn't start with the lowercased `componentName`. `searchentity_main` ✅; `sru_main` or `falecido_main` ❌. The engine resolves the import path from the `id` prefix, not from `componentName`.
 
 2. **Component not registered in `src/app/igrp.config.ts`** — even with the correct `id`, the engine refuses to import a path that's not whitelisted in the registry. Fix:
    ```ts
@@ -249,13 +305,21 @@ Fix A is preferred (cheaper, idiomatic React). Fix B is the escape hatch when th
    export default {
      components: [
        ...existing,
-       "components/search-falecido/search-falecido",   // ← ADD THIS
+       "components/search-entity/search-entity",   // ← ADD THIS
      ],
    }
    ```
    Path rules: relative to `src/app/(myapp)/`, kebab-case, no extension. After editing, rebuild.
 
-3. **`.tsx` file missing or misnamed** — the file at `src/app/(myapp)/components/<kebab>/<kebab>.tsx` doesn't exist, OR the exported function name doesn't match the PascalCase `componentName`. Named exports only (`export function SearchFalecido` — never `export default`).
+3. **`.tsx` file missing or misnamed** — the file at `src/app/(myapp)/components/<kebab>/<kebab>.tsx` doesn't exist, OR the exported function name doesn't match the PascalCase `componentName`. Named exports only (`export function SearchEntity` — never `export default`).
+
+4. **Component-detection scanner rejected the file** — added in `0.2.0-beta.21`. The engine now scans each `.tsx` under `(myapp)/components/` for top-level React components with a strict shape check. Rejections that surface as the yellow placeholder:
+   - **Not PascalCase** — `export function searchEntity(…)` or `export const searchEntity = (…)`. React convention: first letter uppercase. Rename → `SearchEntity`.
+   - **Bad props signature** — the scanner needs a destructured props object (`{ a, b }: SearchEntityProps`) or a single typed argument (`(props: SearchEntityProps)`). Positional args (`(a: string, b: number) => …`) are treated as helpers, not components. Fix: rewrap the signature.
+   - **Props-less component with bare `function X()`** — conservatively rejected. Fix: give it an empty destructure `function SearchEntity({}: {})` (or add a `_?: unknown` prop) so the scanner recognises the shape.
+   - **Not top-level** — the scanner ignores functions declared inside another function's body. Move the declaration to module scope.
+
+   Companion issue: **inner helpers no longer leak into the palette**. If you had an older beta emit a `updateRow` or `toggleImediato` custom-component tile that shouldn't be there, the `beta.21+` scanner filters them out — the Studio palette should show only the outer PascalCase component now.
 
 Quick scan to find every custom component referenced but not registered:
 ```bash
@@ -308,7 +372,7 @@ AND remove any `useRouter` import from onLoad imports (engine auto-imports it on
 
 ### SearchGeografia doesn't persist idGeografia (submit returns `0`)
 
-The default pattern in `imovelForm.json` uses `formform1Ref.current?.setValue(...)` to update hidden fields. This sometimes does NOT propagate to the Zod-backed form submission, resulting in a payload with `idGeografia: 0` (the schema's default).
+The default pattern in a form component (e.g. an entity form) uses `formform1Ref.current?.setValue(...)` to update hidden fields. This sometimes does NOT propagate to the Zod-backed form submission, resulting in a payload with `idGeografia: 0` (the schema's default).
 
 **Reliable fix** — use a dedicated state + merge in `handleSubmit`:
 
@@ -351,13 +415,13 @@ Common failures and fixes:
 
 | Failing value | Why | Fix |
 |---|---|---|
-| `pageName: "contribuintes-list"` | hyphen | `"contribuintesList"` |
+| `pageName: "entities-list"` | hyphen | `"entitiesList"` |
 | `pageName: "pagina1"` | digit | `"paginaUm"` or just `"pagina"` |
 | `pageName: "página"` | accent | `"pagina"` |
-| `description: "Página de contribuintes"` | accent on `á` | `"Pagina de contribuintes"` |
+| `description: "Página de clientes"` | accent on `á` | `"Pagina de clientes"` |
 | `description: "Users (admin)"` | parentheses | `"Users admin"` |
 | `description: "List - filtered"` | hyphen | `"List filtered"` |
-| `description: "Gestão, Utentes"` | comma + accent | `"Gestao Utentes"` |
+| `description: "Gestão, Entidades"` | comma + accent | `"Gestao Entidades"` |
 
 **Rule of thumb when the input is Portuguese:** transliterate to ASCII (`ã→a`, `ç→c`, `é→e`, …) and strip every non-alphanumeric character from `description`. For names, do the same and additionally remove digits, spaces and underscores.
 
@@ -372,6 +436,24 @@ Quick check:
 ```bash
 node -e "JSON.parse(require('fs').readFileSync('.igrpstudio/pages/xxx.json','utf8'))"
 ```
+
+### Studio "Save page" rejects with `The types attribute must be an array of valid type definition configuration`
+
+`types[].fields[]` schema is strict — accepts only `{ componentId, name, type, required, defaultValue, isList }` (+ `fields[]`/`label` for nested list fields). Common offenders rejected:
+
+- ❌ `isOptional: true` — not allowed here (it's valid in `args[]`/`arguments[]`, not in `types[].fields[]`)
+- ❌ `isNullable: true` — same
+- ❌ `isArray: true` — use `isList: true`
+
+**How to make a field optional / nullable**: use `required: false` in the schema + **coerce `null → ''` in the consumer** (e.g. in `onLoad.fnCode` before calling `setForm<X>Data(currentItem)`). The schema doesn't have a native nullable knob — the engine emits `z.string()` regardless of `required`, so the only safe path for nullable values is the consumer coercing them out.
+
+### Duplicate `const [select<tag>Value, …]` — combobox value state declared twice
+
+**Symptom:** generated `.tsx` has the same `const [selectFooValue, setSelectFooValue] = useState(...)` line **twice** → TS2451 "Cannot redeclare block-scoped variable" / build fails.
+
+**Cause:** a `combobox` node with `data.value.state.generate = true` (name `select{{id}}Value`) **already** makes the engine emit that `useState`. If you ALSO add a hand-written `states[]` entry with the same name (e.g. to be able to call `setSelectFooValue(...)` from `onLoad` fnCode), the engine emits it a second time.
+
+**Fix:** do NOT declare `select<tag>Value` in `states[]`. The combobox already generates both the state and its setter, and the setter IS callable from `onLoad` fnCode without any extra declaration. Only declare states in `states[]` for genuinely custom states (cardDetails items, current<Entity>, value-display states for search widgets, pdf url, etc.). If you must drive a combobox's value from code, just reference `setSelect<tag>Value` — it exists.
 
 ### Studio "Save page" rejects with `must have required property 'isNullable'` / `must NOT have additional properties` on `/functions/<n>/returnValue`
 
@@ -528,6 +610,43 @@ if(dupes.size) console.log("DUPLICATE tags:",[...dupes]);
 ```
 
 Run all five before considering a manifest done. Each takes < 2 seconds.
+
+---
+
+## CLI engine gotchas (`igrp gen`)
+
+The `igrp gen page` engine differs from older engine builds that may have generated parts of the repo. Regenerating an older page **surfaces latent incompatibilities** — they are real (any current-engine regen, CLI or Studio, hits them), so fix them forward in the **JSON**, then regenerate. Verify with `npx tsc --noEmit -p .` and loop until clean.
+
+The four known divergences and their JSON fixes:
+
+### 1. `defaultValue` is wrapped in a template literal
+
+The engine emits every state/field `defaultValue` as `` useState<string>(`<value>`) `` — the raw string goes **inside backticks**. Consequences:
+
+- `defaultValue: "''"` → renders the literal 2-char string `''` in the input. **Use `""`** (empty) + `isOptional: true`.
+- `defaultValue: "'Create X'"` (the old modal-title hack) → title shows `'Create X'` **with quotes**. **Use `"Create X"`** (no surrounding quotes).
+- A "today" date default → **use `"new Date()"`** on a `date`-typed field; the engine emits it as a raw expression for `date` fields.
+
+Normalize the whole tree (defaults live both in top-level `states[]` and inline in combobox `data.value.state.defaultValue`).
+
+### 2. Combobox auto-state uses the tag's ORIGINAL casing
+
+The engine generates `select<tag>Value` / `select<tag>Options` from the combobox `tag` **verbatim — no capitalization**. Tag `myCombo` → `selectmyComboValue` / `setSelectmyComboValue`. Hand-written `onLoad`/`functions[]` code that references the state (older engines capitalized: `selectMyCombo…`) must match the exact generated name. Replace any capitalized references (`SelectMyCombo…` → `SelectmyCombo…`) everywhere in the JSON (onLoad **and** functions).
+
+### 3. `initForm` is `z.infer<T>`, not `Partial<z.infer<T>>`
+
+Older engines wrapped the form-init object in `Partial<>`, so `undefined` defaults compiled. The current engine does not. Therefore **every `required` form field must have a type-valid default** in `types[].fields[]`, or you get `Type 'undefined' is not assignable to type 'number' | 'Date'`:
+
+- required `number` → `defaultValue: "0"`
+- required `date` → `defaultValue: "new Date()"`
+- required `string` → `""` is fine
+- `required: false` fields may stay empty (schema is `.optional()`, accepts `undefined`)
+
+Note the UX side effect: a required field now initialises to `0` / today instead of blank. If the page's `onLoad` already resets `form1Data` with explicit `?? ''` on `[currentItem]`, that override wins at runtime and there is no visible change; otherwise the default shows for new records.
+
+### 4. Numeric inputs emit a numeric `placeholder`
+
+For `inputNumber` (and `inputText` with `type: "number"`), the engine emits `placeholder={0}` (a number) even when the JSON `placeholder` is the string `"0"` → `Type 'number' is not assignable to type 'string'`. **Remove `placeholder` from numeric inputs.**
 
 ---
 
