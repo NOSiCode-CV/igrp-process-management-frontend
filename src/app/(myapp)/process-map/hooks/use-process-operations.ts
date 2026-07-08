@@ -54,6 +54,23 @@ export function useProcessOperations(
     },
   });
 
+  // Management dataset for "Gerir Área": associating processes to an area is an
+  // admin action that must see ALL processes, not just the current user's — so
+  // this query drops `filterByCurrentUser`. "Ver Mapa" keeps the filtered
+  // `data` above for its access-scoped tree.
+  const { data: manageData } = useQuery({
+    queryKey: ["all-processes-map-manage"],
+    queryFn: async () => {
+      const response = await getProcesses({});
+      const sortedContent = [...(response.content ?? [])].sort((a, b) =>
+        (a.name ?? "").localeCompare(b.name ?? "", undefined, {
+          sensitivity: "base",
+        }),
+      );
+      return { ...response, content: sortedContent };
+    },
+  });
+
   // Store process start parameters for later execution with priority
   const prepareProcessStart = useCallback(
     (
@@ -204,5 +221,6 @@ export function useProcessOperations(
     handleRemoveProcess,
     handleAssociateProcess,
     allProcesses: data,
+    allProcessesManage: manageData,
   };
 }

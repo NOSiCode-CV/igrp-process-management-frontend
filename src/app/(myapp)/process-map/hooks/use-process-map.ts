@@ -37,6 +37,7 @@ export function useProcessMap(
     handleRemoveProcess,
     handleAssociateProcess,
     allProcesses,
+    allProcessesManage,
   } = useProcessOperations(refreshData, router);
 
   const { igrpToast } = useIGRPToast();
@@ -147,6 +148,7 @@ export function useProcessMap(
 
   return {
     allProcesses,
+    allProcessesManage,
     // State
     areas,
     expandedNodes,

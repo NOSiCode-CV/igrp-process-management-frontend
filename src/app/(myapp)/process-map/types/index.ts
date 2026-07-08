@@ -57,6 +57,7 @@ export interface ProcessMapHookReturn
   clearSearch: () => void;
 
   allProcesses: any;
+  allProcessesManage: any;
 
   loadingPriorities: boolean;
   prioritiesOptions: IGRPOptionsProps[] | undefined;
