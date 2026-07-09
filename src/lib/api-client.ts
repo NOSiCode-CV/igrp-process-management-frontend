@@ -12,6 +12,20 @@ export async function getIGRPProcessClient(): Promise<ProcessManagementClient> {
   // surfaced via `token.error` rather than requiring a manual refresh call.
   const token = await auth.getAccessToken();
 
+  // --- DEBUG: is the token being obtained/sent? (mask the value) ---
+  const at = token?.accessToken;
+  console.log("[API Client][debug] token", {
+    baseUrl,
+    hasToken: !!token,
+    tokenError: token?.error ?? null,
+    hasAccessToken: !!at,
+    accessTokenPreview: at
+      ? `${at.slice(0, 12)}…${at.slice(-6)} (len ${at.length})`
+      : null,
+    expiresAt: token?.expiresAt ?? null,
+  });
+  // -----------------------------------------------------------------
+
   // Check if token is missing
   if (!token) {
     console.error("[API Client] No token available");
@@ -35,6 +49,14 @@ export async function getIGRPProcessClient(): Promise<ProcessManagementClient> {
     Accept: "application/json",
     Authorization: `Bearer ${token.accessToken}`,
   };
+
+  // --- DEBUG: confirm the Authorization header is attached to the client ---
+  console.log("[API Client][debug] headers", {
+    baseUrl,
+    hasAuthorization: !!headers.Authorization,
+    authorizationPreview: `Bearer ${token.accessToken.slice(0, 12)}…`,
+  });
+  // ------------------------------------------------------------------------
 
   // Build a fresh client per call. Never cache at module scope: in Next.js the
   // module is shared across all requests/users, so a cached client would leak
