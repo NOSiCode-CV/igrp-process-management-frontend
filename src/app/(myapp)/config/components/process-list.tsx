@@ -1,5 +1,6 @@
 import { IGRPIcon } from "@igrp/igrp-framework-react-design-system";
 import { ProcessItem } from "./process-item";
+import { Empty } from "../../components/empty";
 
 /**
  * Renders the selectable list of processes.
@@ -24,9 +25,19 @@ function ProcessList({
   if (loading && list.length === 0) {
     return (
       <div className="flex items-center justify-center gap-2 p-6 text-sm text-muted-foreground">
-        <IGRPIcon iconName="LoaderCircle" className="h-4 w-4 animate-spin" />
-        A carregar processos...
+        <IGRPIcon iconName="LoaderCircle" className="h-4 w-4 animate-spin" />A
+        carregar processos...
       </div>
+    );
+  }
+
+  if (!loading && list.length === 0) {
+    return (
+      <Empty
+        title="Sem processos"
+        description="Nenhum processo encontrado."
+        className="p-6"
+      />
     );
   }
 

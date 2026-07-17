@@ -1,7 +1,7 @@
 import {
-  IGRPBadgePrimitive,
+  IGRPBadge,
   IGRPButton,
-  IGRPCheckboxPrimitive,
+  IGRPCheckbox,
   IGRPIcon,
   IGRPInputText,
   IGRPLabel,
@@ -32,7 +32,7 @@ export default function CandidateGroups({
 
   return (
     <div className="grid gap-2">
-      <IGRPLabel>Grupos Candidatos</IGRPLabel>
+      <IGRPLabel label="Grupos Candidatos" />
       <p className="text-xs text-muted-foreground">
         Selecione os grupos que podem reclamar esta tarefa
       </p>
@@ -41,11 +41,7 @@ export default function CandidateGroups({
       {selectedCandidateGroupsState.length > 0 && (
         <div className="flex flex-wrap gap-1 p-2 border rounded-md bg-muted/30">
           {selectedCandidateGroupsState.map((group) => (
-            <IGRPBadgePrimitive
-              key={group}
-              variant="secondary"
-              className="gap-1 pr-1"
-            >
+            <IGRPBadge key={group} variant="soft" className="gap-1 pr-1">
               {group}
               <button
                 onClick={() => handleRemoveGroup(group)}
@@ -53,7 +49,7 @@ export default function CandidateGroups({
               >
                 <IGRPIcon iconName="X" />
               </button>
-            </IGRPBadgePrimitive>
+            </IGRPBadge>
           ))}
         </div>
       )}
@@ -66,7 +62,7 @@ export default function CandidateGroups({
             className="flex items-center gap-2 p-2 hover:bg-muted/50 cursor-pointer border-b last:border-b-0"
             onClick={() => handleToggleGroup(group)}
           >
-            <IGRPCheckboxPrimitive
+            <IGRPCheckbox
               checked={selectedCandidateGroupsState.includes(group)}
               onCheckedChange={() => handleToggleGroup(group)}
             />
@@ -90,6 +86,7 @@ export default function CandidateGroups({
           size="icon"
           onClick={handleAddCustomGroup}
           disabled={!newGroupInput.trim()}
+          aria-label="Adicionar grupo"
         >
           <IGRPIcon iconName="Plus" />
         </IGRPButton>

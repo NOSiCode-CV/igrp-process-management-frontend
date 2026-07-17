@@ -10,6 +10,7 @@ import {
 import { useProcessPriorities } from "../../hooks/use-process-priorities";
 import { format, formatDistanceToNow } from "date-fns";
 import { formatDuration } from "../../utils/shared";
+import { routeSearchTerm } from "../../utils/search-routing";
 
 export function useAvailableTasks() {
   const {
@@ -101,7 +102,8 @@ export function useAvailableTasks() {
   );
 
   const handleSearch = (searchTerm: string) => {
-    updateFilters({ processType: searchTerm });
+    // Route the free-text box to task name OR process number.
+    updateFilters(routeSearchTerm(searchTerm));
     applyFilters();
   };
 

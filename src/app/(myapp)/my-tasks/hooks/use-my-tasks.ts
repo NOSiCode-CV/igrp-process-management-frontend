@@ -9,6 +9,7 @@ import {
 import { useProcessPriorities } from "../../hooks/use-process-priorities";
 import { format } from "date-fns";
 import { formatDuration } from "../../utils/shared";
+import { routeSearchTerm } from "../../utils/search-routing";
 
 export function useMyTasks() {
   const {
@@ -65,7 +66,8 @@ export function useMyTasks() {
 
   // Handle search functionality
   const handleSearch = (searchTerm: string) => {
-    updateFilters({ processType: searchTerm });
+    // Route the free-text box to task name OR process number.
+    updateFilters(routeSearchTerm(searchTerm));
     applyFilters();
   };
 

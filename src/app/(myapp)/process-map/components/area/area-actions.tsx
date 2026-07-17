@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { ExtendedArea } from "../../types";
 import {
   IGRPAlertDialog,
-  IGRPBadgePrimitive,
+  IGRPBadge,
   IGRPButton,
 } from "@igrp/igrp-framework-react-design-system";
 
@@ -34,9 +34,9 @@ export function AreaActions({
   return (
     <div className="flex items-center space-x-1">
       {processCount > 0 && (
-        <IGRPBadgePrimitive variant="secondary" className="text-xs">
+        <IGRPBadge variant="soft" className="text-xs">
           {processCount}
-        </IGRPBadgePrimitive>
+        </IGRPBadge>
       )}
       {isAreaOrSubarea && (
         <>
@@ -46,6 +46,7 @@ export function AreaActions({
               onEdit(data as ExtendedArea, data?.areaId ?? undefined);
             }}
             title="Editar"
+            aria-label="Editar área"
             iconName={"Pencil"}
             size={"icon"}
             variant={"ghost"}
@@ -58,6 +59,7 @@ export function AreaActions({
           setIsOpen(true);
         }}
         title="Excluir"
+        aria-label="Eliminar área"
         iconName="Trash2"
         size={"icon"}
         variant={"ghost"}
@@ -70,6 +72,7 @@ export function AreaActions({
             onAddSubarea(node.id);
           }}
           title="Adicionar Subárea"
+          aria-label="Adicionar subárea"
           iconName={"Plus"}
           size={"icon"}
           variant={"ghost"}

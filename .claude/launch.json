@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "igrp-process-management-ui",
+      "runtimeExecutable": "/Users/carlosgraca/.nvm/versions/node/v24.15.0/bin/node",
+      "runtimeArgs": ["node_modules/next/dist/bin/next", "dev", "--turbopack"],
+      "port": 3000
+    }
+  ]
+}

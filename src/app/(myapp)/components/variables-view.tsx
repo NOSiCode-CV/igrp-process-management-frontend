@@ -7,7 +7,7 @@ import {
   IGRPDataTable,
   IGRPDataTableFacetedFilterFn,
   IGRPCopyTo,
-  IGRPBadgePrimitive,
+  IGRPBadge,
 } from "@igrp/igrp-framework-react-design-system";
 import { TaskVariables } from "@igrp/platform-process-management-types";
 import {
@@ -85,6 +85,7 @@ export function VariablesView({ variables }: VariablesViewProps) {
                       row.toggleExpanded();
                     }}
                     iconName={isExpanded ? "ChevronDown" : "ChevronRight"}
+                    aria-label={isExpanded ? "Recolher" : "Expandir"}
                   />
                 </div>
               );
@@ -101,13 +102,13 @@ export function VariablesView({ variables }: VariablesViewProps) {
               const TypeIcon = getTypeIcon(variable.value);
               return (
                 <div className="flex items-center gap-2">
-                  <IGRPBadgePrimitive
+                  <IGRPBadge
                     variant="outline"
                     className={`text-[10px] px-1.5 py-0 ${getTypeColor(variable.value)}`}
                   >
                     {TypeIcon}
                     {type}
-                  </IGRPBadgePrimitive>
+                  </IGRPBadge>
                 </div>
               );
             },
