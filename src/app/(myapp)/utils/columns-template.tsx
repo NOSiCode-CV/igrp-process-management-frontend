@@ -6,6 +6,7 @@ import {
   Progress,
   cn,
   type IGRPColorVariants,
+  type IGRPIconName,
 } from "@igrp/igrp-framework-react-design-system";
 import { format } from "date-fns";
 import {
@@ -107,7 +108,9 @@ export const getProcessInfo = (processName: string, processNumber: string) => {
   );
 };
 
-const processStatusColor = (status: ProcessInstanceStatus): IGRPColorVariants => {
+const processStatusColor = (
+  status: ProcessInstanceStatus,
+): IGRPColorVariants => {
   switch (status) {
     case "CREATED":
       return "info";
@@ -240,6 +243,29 @@ export const getTypeIcon = (value: unknown) => {
       return <IGRPIcon iconName="Braces" />;
     default:
       return <IGRPIcon iconName="Type" />;
+  }
+};
+
+/**
+ * Icon NAME (not JSX) for a value's type — for use with IGRPBadge's
+ * `showIcon`/`iconName` props so the badge renders the icon inline (a raw
+ * <IGRPIcon> child renders oversized/stacked because the badge's `[&>svg]`
+ * sizing only targets direct svg children).
+ */
+export const getTypeIconName = (value: unknown): IGRPIconName => {
+  const type = getTypeFromValue(value);
+  switch (type) {
+    case "integer":
+    case "double":
+      return "Hash";
+    case "boolean":
+      return "ToggleLeft";
+    case "json":
+    case "array":
+    case "object":
+      return "Braces";
+    default:
+      return "Type";
   }
 };
 
