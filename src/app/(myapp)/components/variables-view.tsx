@@ -103,8 +103,9 @@ export function VariablesView({ variables }: VariablesViewProps) {
               return (
                 <div className="flex items-center gap-2">
                   <IGRPBadge
-                    variant="outline"
-                    className={`text-[10px] px-1.5 py-0 ${getTypeColor(variable.value)}`}
+                    variant="soft"
+                    color={getTypeColor(variable.value)}
+                    className={`text-[10px] px-1.5 py-0`}
                   >
                     {TypeIcon}
                     {type}

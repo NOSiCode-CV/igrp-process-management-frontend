@@ -1,16 +1,20 @@
+import type { IGRPColorVariants } from "@igrp/igrp-framework-react-design-system";
 import {
   getTaskStatusLabel,
   getTaskStatusVariant,
   getProcessInstanceStatusLabel,
   getProcessInstanceStatusVariant,
   getPriorityLabel,
+  getPriorityVariant,
   TaskStatus,
   ProcessInstanceStatus,
-  mapPriorityToConfig,
-  priorityConfig,
 } from "./status-helpers";
 
-// Shared utility function to map badge variants to CSS classes
+// Shared utility function to map badge variants to CSS classes.
+// NOTE: retained ONLY for `getTaskStatusColor`, whose consumers are the
+// engine-generated available-tasks / task-management pages. Their tableBadgeCell
+// template hardcodes `badgeClassName={`${bgClass} ${textClass} ${className}`}`
+// and cannot bind a DS `color` (see report), so those pages still need bgClass.
 const getBgClass = (
   variant: string,
   useBlueForInfo: boolean = false,
@@ -36,11 +40,13 @@ const getBgClass = (
 export const getTaskStatusColor = (task: { status: string }) => {
   const status = task.status?.toUpperCase() as TaskStatus;
   const label = getTaskStatusLabel(status);
-  const variant = getTaskStatusVariant(status);
+  const color = getTaskStatusVariant(status);
 
   return {
     label,
-    bgClass: getBgClass(variant),
+    color,
+    // Legacy class fields kept for the engine-generated tableBadgeCell template.
+    bgClass: getBgClass(color),
     textClass: "",
     className: "",
     iconName: "",
@@ -49,37 +55,28 @@ export const getTaskStatusColor = (task: { status: string }) => {
 
 export const getProcessInstanceStatusColor = (processInstance: {
   status: string;
-}) => {
+}): { label: string; color: IGRPColorVariants; iconName: string } => {
   const status = processInstance.status?.toUpperCase() as ProcessInstanceStatus;
   const label = getProcessInstanceStatusLabel(status);
-  const variant = getProcessInstanceStatusVariant(status);
+  const color = getProcessInstanceStatusVariant(status);
 
   return {
     label,
-    bgClass: getBgClass(variant, true), // Use blue for info variant in process instances
-    textClass: "",
-    className: "",
+    color,
     iconName: "",
   };
 };
 
-export const getPriorityColor = (item: { priority: string | number }) => {
-  // Handle your priority system (1-5 scale)
+export const getPriorityColor = (item: {
+  priority: string | number;
+}): { label: string; color: IGRPColorVariants; iconName: string } => {
   const priority = item.priority;
-  const priorityNum =
-    typeof priority === "number"
-      ? priority
-      : parseInt(priority.toString(), 10) || 1;
-
   const label = getPriorityLabel(priority);
-  const configKey = mapPriorityToConfig(priorityNum);
-  const bgClass = priorityConfig[configKey]?.color || priorityConfig.low.color;
+  const color = getPriorityVariant(priority);
 
   return {
     label,
-    bgClass: bgClass,
-    textClass: "",
-    className: "",
+    color,
     iconName: "",
   };
 };
@@ -93,42 +90,36 @@ export interface ApiPriorityInfo {
 
 /**
  * Returns badge options for a task priority using API-defined priorities when available.
- * When apiPriority is provided with color, badgeStyle is set for custom hex; otherwise uses fallback bgClass.
+ * When apiPriority carries an explicit hex color, `badgeStyle` (inline hex) is returned;
+ * otherwise a DS `color` is returned so the badge stays theme-aware.
  */
 export function getPriorityBadgeFromApi(
   apiPriority: ApiPriorityInfo | undefined,
   fallback: { priority: string | number },
 ): {
   label: string;
-  bgClass: string;
+  color?: IGRPColorVariants;
   badgeStyle?: React.CSSProperties;
-  textClass: string;
-  className: string;
-  iconName: string;
 } {
   if (apiPriority) {
     const label = apiPriority.label || String(apiPriority.value);
-    const fallbackStyle = getPriorityColor(fallback);
     if (apiPriority.color) {
       return {
         label,
-        bgClass: "",
         badgeStyle: {
           backgroundColor: `${apiPriority.color}20`,
           color: apiPriority.color,
         },
-        textClass: "",
-        className: "",
-        iconName: "",
       };
     }
     return {
       label,
-      bgClass: fallbackStyle.bgClass,
-      textClass: "",
-      className: "",
-      iconName: "",
+      color: getPriorityColor(fallback).color,
     };
   }
-  return getPriorityColor(fallback);
+  const fallbackColor = getPriorityColor(fallback);
+  return {
+    label: fallbackColor.label,
+    color: fallbackColor.color,
+  };
 }
