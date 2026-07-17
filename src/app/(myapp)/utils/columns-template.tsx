@@ -5,35 +5,14 @@ import {
   IGRPDataTableCellBadge,
   Progress,
   cn,
+  type IGRPColorVariants,
+  type IGRPIconName,
 } from "@igrp/igrp-framework-react-design-system";
 import { format } from "date-fns";
 import {
   getProcessInstanceStatusLabel,
   ProcessInstanceStatus,
 } from "./status-helpers";
-
-const statusConfig = {
-  completed: {
-    label: "Completed",
-    dotColor: "bg-emerald-500",
-    textColor: "text-emerald-600 dark:text-emerald-400",
-  },
-  running: {
-    label: "Running",
-    dotColor: "bg-blue-500",
-    textColor: "text-blue-600 dark:text-blue-400",
-  },
-  suspended: {
-    label: "Suspended",
-    dotColor: "bg-amber-500",
-    textColor: "text-amber-600 dark:text-amber-400",
-  },
-  terminated: {
-    label: "Terminated",
-    dotColor: "bg-red-500",
-    textColor: "text-red-600 dark:text-red-400",
-  },
-};
 
 const progressColor = (status: string) => {
   if (status === "completed") return "bg-emerald-500";
@@ -45,9 +24,7 @@ const progressColor = (status: string) => {
 /** Options returned by getPriorityBadge / getPriorityBadgeFromApi for rendering the priority badge. */
 export interface PriorityBadgeOptions {
   label: string;
-  bgClass: string;
-  textClass: string;
-  className: string;
+  color?: IGRPColorVariants;
   badgeStyle?: React.CSSProperties;
 }
 
@@ -62,7 +39,11 @@ export const getPriorityTemplate = (
       </IGRPBadge>
     );
   }
-  return <></>;
+  return (
+    <IGRPBadge variant="soft" color={opts.color}>
+      {opts.label ?? priorityValue}
+    </IGRPBadge>
+  );
 };
 
 export const getDateTemplate = (date_: string | Date) => {
@@ -127,19 +108,31 @@ export const getProcessInfo = (processName: string, processNumber: string) => {
   );
 };
 
+const processStatusColor = (
+  status: ProcessInstanceStatus,
+): IGRPColorVariants => {
+  switch (status) {
+    case "CREATED":
+      return "info";
+    case "RUNNING":
+      return "warning";
+    case "SUSPENDED":
+      return "secondary";
+    case "COMPLETED":
+      return "success";
+    case "CANCELLED":
+    case "TERMINATED":
+      return "destructive";
+    default:
+      return "secondary";
+  }
+};
+
 export const getProcessStatusTemplate = (status: ProcessInstanceStatus) => {
-  const statusKey = status.toLowerCase() as keyof typeof statusConfig;
   return (
-    <div className="flex items-center gap-2">
-      <div
-        className={`h-2 w-2 rounded-full ${statusConfig[statusKey].dotColor}`}
-      />
-      <span
-        className={`text-xs font-medium ${statusConfig[statusKey].textColor}`}
-      >
-        {getProcessInstanceStatusLabel(status)}
-      </span>
-    </div>
+    <IGRPBadge dot variant="soft" color={processStatusColor(status)}>
+      {getProcessInstanceStatusLabel(status)}
+    </IGRPBadge>
   );
 };
 
@@ -212,25 +205,25 @@ export const getTypeFromValue = (value: unknown): string => {
   return typeof value;
 };
 
-export const getTypeColor = (value: unknown) => {
+export const getTypeColor = (value: unknown): IGRPColorVariants => {
   const type = getTypeFromValue(value);
   switch (type) {
     case "string":
-      return "bg-[oklch(0.7_0.15_200)] text-white";
+      return "info";
     case "integer":
     case "double":
-      return "bg-[oklch(0.6_0.18_280)] text-white";
+      return "indigo";
     case "boolean":
-      return "bg-[oklch(0.65_0.18_150)] text-white";
+      return "success";
     case "json":
     case "array":
     case "object":
-      return "bg-[oklch(0.65_0.18_50)] text-white";
+      return "warning";
     case "null":
     case "undefined":
-      return "bg-muted text-muted-foreground";
+      return "secondary";
     default:
-      return "bg-muted text-muted-foreground";
+      return "secondary";
   }
 };
 
@@ -250,6 +243,29 @@ export const getTypeIcon = (value: unknown) => {
       return <IGRPIcon iconName="Braces" />;
     default:
       return <IGRPIcon iconName="Type" />;
+  }
+};
+
+/**
+ * Icon NAME (not JSX) for a value's type — for use with IGRPBadge's
+ * `showIcon`/`iconName` props so the badge renders the icon inline (a raw
+ * <IGRPIcon> child renders oversized/stacked because the badge's `[&>svg]`
+ * sizing only targets direct svg children).
+ */
+export const getTypeIconName = (value: unknown): IGRPIconName => {
+  const type = getTypeFromValue(value);
+  switch (type) {
+    case "integer":
+    case "double":
+      return "Hash";
+    case "boolean":
+      return "ToggleLeft";
+    case "json":
+    case "array":
+    case "object":
+      return "Braces";
+    default:
+      return "Type";
   }
 };
 

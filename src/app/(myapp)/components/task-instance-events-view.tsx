@@ -11,6 +11,7 @@ import {
   Popover,
   PopoverTrigger,
   PopoverContent,
+  type IGRPIconName,
 } from "@igrp/igrp-framework-react-design-system";
 import { TaskInstanceEvent } from "@igrp/platform-process-management-types";
 import { format } from "date-fns";
@@ -94,9 +95,10 @@ export function TaskInstanceEventsView({
                 <div className="flex items-center gap-2">
                   <IGRPBadge
                     variant="outline"
-                    className={`text-[10px] px-1.5 py-0 flex items-center gap-1 ${getEventTypeColor(eventType)}`}
+                    showIcon
+                    iconName={iconName as IGRPIconName}
+                    className={`text-[10px] px-1.5 py-0 ${getEventTypeColor(eventType)}`}
                   >
-                    <IGRPIcon iconName={iconName} className="h-3 w-3" />
                     {getEventTypeLabel(eventType)}
                   </IGRPBadge>
                 </div>

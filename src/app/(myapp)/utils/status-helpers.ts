@@ -1,3 +1,5 @@
+import type { IGRPColorVariants } from "@igrp/igrp-framework-react-design-system";
+
 // Process Instance Status Types
 export type ProcessInstanceStatus =
   | "CREATED"
@@ -19,14 +21,8 @@ export type TaskStatus =
 // Priority Types - matching your priority modal values
 export type Priority = "1" | "2" | "3" | "4" | "5";
 
-// Badge Variant Types
-export type BadgeVariant =
-  | "info"
-  | "warning"
-  | "success"
-  | "destructive"
-  | "secondary"
-  | "default";
+// Badge Variant Types — aligned to the design-system color axis.
+export type BadgeVariant = IGRPColorVariants;
 
 /**
  * Get localized status label for process instances
@@ -135,7 +131,7 @@ export const getTaskStatusVariant = (status: TaskStatus): BadgeVariant => {
     case "DELETED":
       return "secondary";
     default:
-      return "default";
+      return "secondary";
   }
 };
 
@@ -161,35 +157,4 @@ export const getPriorityVariant = (
     default:
       return "secondary";
   }
-};
-
-export const priorityConfig = {
-  low: {
-    label: "Low",
-    color:
-      "bg-slate-500/15 text-slate-600 dark:text-slate-400 border-slate-500/20",
-  },
-  medium: {
-    label: "Medium",
-    color: "bg-blue-500/15 text-blue-600 dark:text-blue-400 border-blue-500/20",
-  },
-  high: {
-    label: "High",
-    color:
-      "bg-orange-500/15 text-orange-600 dark:text-orange-400 border-orange-500/20",
-  },
-  critical: {
-    label: "Critical",
-    color: "bg-red-500/15 text-red-600 dark:text-red-400 border-red-500/20",
-  },
-};
-
-// Map priority numbers (1-5) to config keys
-export const mapPriorityToConfig = (
-  num: number,
-): keyof typeof priorityConfig => {
-  if (num <= 2) return "low"; // 1-2: Muito Baixa, Baixa
-  if (num === 3) return "medium"; // 3: Média
-  if (num === 4) return "high"; // 4: Alta
-  return "critical"; // 5: Muito Alta
 };

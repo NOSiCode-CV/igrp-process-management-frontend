@@ -153,14 +153,16 @@ function TaskHistory({ tasks }: TaskHistoryProps) {
             cell: ({ row }) => {
               const task = row.original;
               return (
-                <div
-                  className={`flex items-center gap-1.5 ${getPriorityColor({ priority: task.priority || 0 }).bgClass.replace("bg-", "text-")}`}
+                <IGRPBadge
+                  variant="soft"
+                  color={
+                    getPriorityColor({ priority: task.priority || 0 }).color
+                  }
+                  showIcon
+                  iconName="Flag"
                 >
-                  <IGRPIcon iconName="Flag" className="h-3.5 w-3.5" />
-                  <span className="text-sm">
-                    {getPriorityLabel(task.priority || 0)}
-                  </span>
-                </div>
+                  {getPriorityLabel(task.priority || 0)}
+                </IGRPBadge>
               );
             },
             filterFn: IGRPDataTableFacetedFilterFn,
@@ -233,7 +235,9 @@ function TaskHistory({ tasks }: TaskHistoryProps) {
                     >
                       <div className="flex items-center gap-2 min-w-[180px]">
                         <IGRPBadge
-                          className={`text-[10px] px-1.5 py-0 flex items-center gap-1 ${getTypeColor(variable.value)}`}
+                          variant="soft"
+                          color={getTypeColor(variable.value)}
+                          className={`text-[10px] px-1.5 py-0 flex items-center gap-1`}
                         >
                           {getTypeIcon(variable.value)}
                           {getTypeFromValue(variable.value)}

@@ -22,9 +22,16 @@ COPY . .
 
 ARG NEXT_PUBLIC_BASE_PATH
 ARG NEXT_PUBLIC_ALLOWED_DOMAINS
+# Build-time only: `next build` prerenders /_not-found in production, and the
+# auth layer asserts NEXTAUTH_SECRET is set. This placeholder just satisfies
+# that build guard — the REAL secret is injected at runtime (runner stage /
+# deployment env) and is what NextAuth actually uses. Server-only, never
+# bundled into client output.
+ARG NEXTAUTH_SECRET="build-time-placeholder-not-used-at-runtime"
 
 ENV NEXT_PUBLIC_BASE_PATH=${NEXT_PUBLIC_BASE_PATH}
 ENV NEXT_PUBLIC_ALLOWED_DOMAINS=${NEXT_PUBLIC_ALLOWED_DOMAINS}
+ENV NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
 
 RUN pnpm build
 
