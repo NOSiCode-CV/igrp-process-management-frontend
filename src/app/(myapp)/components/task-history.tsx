@@ -155,13 +155,13 @@ function TaskHistory({ tasks }: TaskHistoryProps) {
               return (
                 <IGRPBadge
                   variant="soft"
-                  color={getPriorityColor({ priority: task.priority || 0 }).color}
-                  className="flex items-center gap-1.5"
+                  color={
+                    getPriorityColor({ priority: task.priority || 0 }).color
+                  }
+                  showIcon
+                  iconName="Flag"
                 >
-                  <IGRPIcon iconName="Flag" className="h-3.5 w-3.5" />
-                  <span className="text-sm">
-                    {getPriorityLabel(task.priority || 0)}
-                  </span>
+                  {getPriorityLabel(task.priority || 0)}
                 </IGRPBadge>
               );
             },
