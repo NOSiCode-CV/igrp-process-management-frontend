@@ -1,6 +1,6 @@
 # Project-specific conventions
 
-Concrete conventions and primitives that emerged in a production reference iGRP project. Treat them as **patterns to mirror**, not as fixed identities — names like `useMultipleComboBoxOptions`, `callApi`, `SearchGeografia` are illustrative of the **shape** of solutions a mature iGRP frontend converges on (centralized combobox loader, proxied API caller, search-with-dropdown component). Adapt freely to your project's domain.
+Concrete conventions and primitives that emerged in a production reference iGRP project. Treat them as **patterns to mirror**, not as fixed identities — names like `useMultipleComboBoxOptions`, `callApi`, `Search<Entity>` are illustrative of the **shape** of solutions a mature iGRP frontend converges on (centralized combobox loader, proxied API caller, search-with-dropdown component). Adapt freely to your project's domain.
 
 ---
 
@@ -8,7 +8,7 @@ Concrete conventions and primitives that emerged in a production reference iGRP 
 
 **Don't hardcode combobox options or leave them as empty `[]` arrays in process hooks.** This project has a centralised combobox loader that calls `/api/v1/combobox/<type>` endpoints and a typed enum of supported types in [`src/app/(myapp)/types/combobox.ts`](../../../src/app/(myapp)/types/combobox.ts).
 
-### Pattern (from `use-process-contribuinte-shared.ts` — canonical reference)
+### Pattern (from `use-process-<family>-shared.ts` — canonical reference)
 
 ```ts
 import { useMultipleComboBoxOptions } from "../hooks/use-combobox-options";
@@ -18,7 +18,7 @@ const { options, isLoading } = useMultipleComboBoxOptions(
   shouldLoadOptions
     ? [
         { type: "direitos" },
-        { type: "tipos-utente" },
+        { type: "entity-subtypes" },
         { type: "tipos-documento-inscricao" },
         { type: "tipos-contacto" },
         { type: "operadoras" },
@@ -29,7 +29,7 @@ const { options, isLoading } = useMultipleComboBoxOptions(
 
 return {
   optionsTipoSubsidioLuto: (options["direitos"] || []).filter(o => o.value === "SF" || o.value === "SUBL"),
-  optionsTipoUtente:        options["tipos-utente"] || [],
+  optionsEntitySubType:        options["entity-subtypes"] || [],
   optionsTipoContacto:      options["tipos-contacto"] || [],
   optionsOperadora:         options["operadoras"] || [],
   // ...
@@ -39,15 +39,17 @@ return {
 
 The step JSON's `onLoad.fnCode` then destructures `optionsXxx` from the hook and seeds combobox state via `setSelect<tag>Options(optionsXxx || [])` inside a `useEffect` keyed on `[isLoading]`.
 
-### Available `ComboBoxType` values (from `types/combobox.ts`)
+### Available `ComboBoxType` values
 
-`tipos-utente`, `tipos-representacao`, `tipos-relacao`, `tipos-estatuto-juridico`, `tipos-endereco`, `tipos-documento-inscricao`, `tipos-documento-inscricao-utente`, `tipos-documento-inscricao-contribuinte`, `tipos-documento-anexo`, `tipos-contacto`, `tipos-atividade`, `sexo`, `regimes`, `qualificacao`, `profissoes`, `operadoras`, `motivos`, `motivos-suspender-{contribuinte,beneficiario,agregado}`, `motivos-reativar-{...}`, `motivos-cessar-{...}`, `motivos-mudanca-emprego`, `geografia-regiao`, `geografia-pais`, `estados-utente`, `estados-contribuinte`, `estado-civil`, `escalao`, `categorias`, `tipos-documento-processo` (parametrized by `codigoProcesso`), `direitos`, `forma-pagamentos`, `tipos-utente-com-direito`.
+The typed enum in `src/app/(myapp)/types/combobox.ts` catalogues every combobox endpoint the project exposes (typical entries: entity-type enums, document-type enums, address-type enums, geographic-region lookups, status enums, currency/payment-form enums, motive/reason lookups, etc.). Add a new entry there when you need a new endpoint; the type gives IDE autocomplete on the `type` field of `useMultipleComboBoxOptions` / `useComboBoxOptions`.
 
 ### Two parametrized combobox types
 
+Some combobox endpoints take extra parameters — the enum entry declares this:
+
 ```ts
-{ type: "tipos-documento-processo", params: { codigoProcesso: "P3.2.7" } }
-{ type: "motivos",                  params: { agrupador: "..." } }
+{ type: "documents-for-process", params: { processCode: "<processKey>" } }
+{ type: "reasons",                params: { group: "<group>" } }
 ```
 
 ### `useComboBoxOptions` vs `useParametrizacaoOptions` — when each
@@ -129,80 +131,63 @@ Some combos may need data the API doesn't expose yet (e.g. `grauParentesco` for 
 
 Never hardcode option arrays inline (e.g. `[{ value: "MAIL", label: "Email" }, ...]`) — even for fixed enums like `tipoContacto`, use `useEnumOptions("TipoContacto")` or the `tipos-contacto` combobox type so changes propagate from one source.
 
-### `tipoUtenteId` — derive from `currentUtente.tiposUtente`, NOT global parametrização
+### Per-entity subset combobox — derive from the picked entity, NOT global parametrização
 
-When a process step has `SearchUtente` (or `SearchFalecido` for funeral-style flows) followed by a `tipoUtenteId` combobox, the options must come **exclusively** from the search result's `tiposUtente` array — never from `useParametrizacaoOptions("tipos-utente")` or `useMultipleComboBoxOptions([{type:"tipos-utente"}])` as fallback.
+When a process step has a search widget (`Search<Entity>`) followed by a combobox whose valid options depend on **the specific entity that was picked** (typical example: `<Entity>` has a nested array of related sub-types, and only that subset is valid for the current entity), the combobox options MUST come from the search result — never from the global parametrização endpoint as a fallback.
 
-**Why**: each utente has a specific subset of tipos that are valid for them (e.g. a Beneficiário may also be Reformado but not Pensionista). The global parametrização lists ALL tipos in the system, so using it as a combobox source lets the user select an invalid tipo for that utente, and the backend rejects on submit.
+**Why**: each entity has its own subset of valid sub-types (an entity may be classified as A + B but not C, while another is B + D). The global parametrização lists every possible sub-type in the system, so using it as the combobox source lets the user select something that's invalid for the current entity, and the backend rejects on submit.
 
-**Backend shape (search result)**:
-```ts
-type Utente = {
-  id: string; numero: string; nome: string;
-  tiposUtente: Array<{
-    id: number;
-    codigo: string;
-    descricao: string;
-    estado: string;
-    estadoDesc: string;
-  }>;
-  /* ... other fields */
-};
-```
-
-**Pattern in JSON `onLoad` fnCode** (canonical: `P3.2.4/pedido.v1.json`):
+**Pattern in JSON `onLoad` fnCode**:
 ```ts
 useEffect(() => {
-  const tipos = (currentUtente?.tiposUtente || []) as Array<{
-    id: number | string; codigo?: string; descricao?: string;
+  const subtypes = (currentEntity?.subTypes || []) as Array<{
+    id: number | string; code?: string; description?: string;
   }>;
-  const opts = tipos.map((t) => ({
-    value: String(t.id),
-    label: t.descricao ?? t.codigo ?? String(t.id),
+  const opts = subtypes.map((s) => ({
+    value: String(s.id),
+    label: s.description ?? s.code ?? String(s.id),
   }));
-  setSelecttipoUtenteIdOptions(opts);
-  // Reset selecionado quando utente muda
-  setSelecttipoUtenteIdValue('');
-  formform1Ref.current?.setValue('tipoUtenteId', 0);
-}, [currentUtente]);
+  setSelectsubTypeIdOptions(opts);
+  // Reset selection when the entity changes
+  setSelectsubTypeIdValue('');
+  formform1Ref.current?.setValue('subTypeId', 0);
+}, [currentEntity]);
 ```
 
-**Hook**: keep a `optionsTipoUtente` from `useParametrizacaoOptions("tipos-utente")` ONLY for label resolution in card-detail snapshots in later steps (Cálculo / Autorização) where `currentUtente` is no longer available — never as the combobox source. The labels match because both arrays describe the same domain entity (`T_TIPO_UTENTE`).
+**Hook**: keep a parallel global list from `useParametrizacaoOptions("<sub-type-enum>")` ONLY for **label resolution** in card-detail snapshots on downstream steps where `currentEntity` is no longer in memory — never as the combobox source. The labels match because both arrays describe the same domain enum.
 
-**Pre-pedido seed** (initial render before user does a search): set `setSelecttipoUtenteIdOptions([])` — combobox stays empty until a search result arrives. Empty + helpful placeholder is far better than a misleading global list.
-
-This rule applies to ANY process step where a `tipoUtenteId` (or analogous per-utente subset field, e.g. `direitoUtenteId`) is selected after a utente search.
+**Initial render** (before the user has searched): set the options to `[]`. The combobox stays empty with a helpful placeholder until a search result arrives. Empty + placeholder is far better than a misleading global list.
 
 ---
 
 ## Backend API calls — go through the Next.js proxy, not the gateway directly
 
 **`callApi` from the frontend never calls the backend gateway URL directly.** Always call a Next.js route handler under `src/app/api/...` that proxies to the gateway via `callGateway`. Two reasons:
-- The gateway URL is server-only env (`INSS_CORE_SERVICE_URL`); the browser shouldn't see it
+- The gateway URL is server-only env (`BACKEND_API_URL`); the browser shouldn't see it
 - Auth headers (access token) are injected server-side inside `callGateway`
 
 ### Frontend path = backend path **without `/v1/`**
 
-Backend exposes `/api/v1/<x>`. Frontend calls `/api/<x>`. The `/v1` prefix lives in `INSS_CORE_SERVICE_URL` (set on the server). The Next.js proxy forwards `${INSS_CORE_SERVICE_URL}${path}` — it doesn't strip or add anything.
+Backend exposes `/api/v1/<x>`. Frontend calls `/api/<x>`. The `/v1` prefix lives in `BACKEND_API_URL` (set on the server). The Next.js proxy forwards `${BACKEND_API_URL}${path}` — it doesn't strip or add anything.
 
 | Backend endpoint | Frontend `callApi(...)` | Next.js route file |
 |---|---|---|
-| `/api/v1/search/utente-falecido` | `/api/search/utente-falecido` | `src/app/api/search/[...source]/route.ts` (catch-all) |
-| `/api/v1/prestacoes/subsidios/luto/valor` | `/api/prestacoes/subsidios/luto/valor` | `src/app/api/prestacoes/subsidios/luto/valor/route.ts` |
-| `/api/v1/prestacoes/utentes/{id}/pagamentos` | `/api/prestacoes/utentes/{id}/pagamentos` | `src/app/api/prestacoes/utentes/[utenteId]/pagamentos/route.ts` |
+| `/api/v1/search/<entity>` | `/api/search/<entity>` | `src/app/api/search/[...source]/route.ts` (catch-all) |
+| `/api/v1/<module>/<resource>` | `/api/<module>/<resource>` | `src/app/api/<module>/<resource>/route.ts` |
+| `/api/v1/<module>/<parent>/{id}/<child>` | `/api/<module>/<parent>/{id}/<child>` | `src/app/api/<module>/<parent>/[id]/<child>/route.ts` |
 
 ### Two proxy patterns
 
-**Catch-all (preferred when many endpoints share the same prefix):** see `src/app/api/search/[...source]/route.ts` — forwards any `/api/search/<X>` to `${API_URL}/search/<X>`. New search endpoints work automatically without a new route file.
+**Catch-all (preferred when many endpoints share the same prefix):** e.g. `src/app/api/search/[...source]/route.ts` — forwards any `/api/search/<X>` to `${API_URL}/search/<X>`. New search endpoints work automatically without a new route file.
 
-**Specific route (preferred for typed handlers, validation, or POST bodies):** see `src/app/api/prestacoes/utentes/[utenteId]/pagamentos/route.ts`. Boilerplate:
+**Specific route (preferred for typed handlers, validation, or POST bodies):** e.g. `src/app/api/<module>/<parent>/[id]/<child>/route.ts`. Boilerplate:
 
 ```ts
 import { type NextRequest, NextResponse } from "next/server";
 import { handleApiError } from "@/lib/api-error-handler";
 import { callGateway } from "@/lib/api-gateway";
 
-const API_URL = process.env.INSS_CORE_SERVICE_URL || "";
+const API_URL = process.env.BACKEND_API_URL || "";
 const API_ENDPOINT = "/prestacoes/<your-path>";
 
 export async function GET(req: NextRequest) {
@@ -234,13 +219,13 @@ export async function GET(req: NextRequest) {
 - The function is reusable from multiple steps + tests + other hooks
 - Refactoring backend paths touches one file, not every caller
 
-✅ Canonical pattern (see `functions/prestacoes.ts`, `functions/contribuinte.ts`, `functions/utente.ts`, `functions/search.ts`):
+✅ Canonical pattern (one wrapper file per module under `functions/<module>.ts` — e.g. one per domain entity + one for cross-cutting search endpoints):
 
 ```ts
 // src/app/(myapp)/functions/prestacoes.ts
 export async function getValorSubsidioLuto(params: {
   idTipoDireito: number | string;
-  idTipoUtente: number | string;
+  entitySubTypeId: number | string;
 }): Promise<DetalhesCalculoSubsidioLutoDTO> {
   const query = buildQueryParam(params);
   return await callApi<DetalhesCalculoSubsidioLutoDTO>(
@@ -256,7 +241,7 @@ import { getValorSubsidioLuto } from "../functions/prestacoes";
 
 const detalhes = await getValorSubsidioLuto({
   idTipoDireito: pedido.tipoSubsidioId,
-  idTipoUtente: pedido.tipoUtenteId,
+  entitySubTypeId: form.entitySubTypeId,
 });
 ```
 
@@ -292,6 +277,47 @@ export const getAssetUrl = (fileId: string): string => {
 Swapping them causes 404 on cluster (basePath missing from `<iframe>`) or **double-basePath** (`/myapp/myapp/api/...`) on `<a href>`. Both are silent in dev (basePath is empty locally) and only break in deployed environments.
 
 Define the pair side-by-side in the same `functions/` file and name them with the `Link`/`Url` suffix — the convention makes the choice obvious at call sites.
+
+---
+
+## Idempotency — business POSTs inside `completeStep` MUST send `Idempotency-Key`
+
+The typical iGRP process-step runner performs a **two-phase submit**: first the domain POST (`completeStep()` handler), then the BPMN engine call (`completeTask()`). Without an idempotency key, a double click or a retry after a `completeTask` failure duplicates records on the backend side. If your backend implements the standard `Idempotency-Key` header contract (client-generated key, lock-first PENDING/COMPLETED, replay cached responses), the frontend MUST wire it on every write inside `completeStep`.
+
+**Deterministic key derivation, not stored.** Derive a UUID from `hash(userTaskInstanceId | intent | payload)` — no client-side storage involved. Properties this gives you:
+
+- Same task + same data (double click, retry after `completeTask` failure, page reload) → same key → backend dedupes.
+- User corrects the data and resubmits → payload changes → new key → re-executes. This matters: a strict backend IGNORES a different payload sent with a reused key and replays the original response, so a stable per-task key would silently drop corrections.
+- Legitimate task re-execution (retake cycle → new task instance) → new scope → new key. **Scope MUST be `userTaskInstanceId`**, never `processInstanceId`.
+
+Four frontend pieces to wire (follow this pattern on every NEW process step that persists data in `completeStep`):
+
+1. **Key helper** — `src/app/(myapp)/lib/idempotency.ts`:
+   ```ts
+   export function getIdempotencyKey(scope: string, intent: string, payload: unknown): string {
+     // deterministic UUID derived from scope|intent|hash(payload); no storage.
+   }
+   export function idempotencyHeaders(key?: string): Record<string, string> {
+     return key ? { "Idempotency-Key": key } : {};
+   }
+   ```
+2. **Transport** — the `callGateway` implementations (both server-side and app-side variants) forward the incoming `Idempotency-Key` header via `next/headers`. No per-proxy-route work needed once wired centrally.
+3. **Function wrapper** — every `functions/<modulo>.ts` write wrapper takes an optional trailing `idempotencyKey?: string` and passes `headers: idempotencyHeaders(idempotencyKey)` to `callApi`.
+4. **Hook call site** — inside `completeStep`, always pass the DTO as the payload:
+   ```ts
+   import { getIdempotencyKey } from "../lib/idempotency";
+
+   // userTaskInstanceId comes from the step's `process` prop (task-runner hooks)
+   // or from useIGRPProcessContext() (embedded step hooks — context exposes it).
+   const dto = buildDTO(payload);
+   await postDomain(dto, getIdempotencyKey(userTaskInstanceId, "domainIntent", dto));
+   ```
+
+**Rules learned wiring dozens of call sites:**
+
+- **One intent name per write call site.** Use distinct intents for mutually exclusive branches (`"pay-out"`, `"refund"`, `"grant"`) so cached responses never cross intents.
+- **Loops need one key per iteration.** If a shared hook iterates a collection and posts once per item, pass a `makeIdempotencyKey(payload)` factory to the callback and include the per-item id in the payload — otherwise every iteration hashes to the same key and only the first item's response is replayed.
+- **Never key on `processInstanceId`.** A retake cycle produces a new `userTaskInstanceId` but the same `processInstanceId`; keying on the latter blocks legitimate re-executions.
 
 ---
 
@@ -369,15 +395,15 @@ Backend typically lives in a sibling `<backend-service>/` repo — Spring Boot f
 
 ### Page paths
 
-- **Parametrization pages**: `(parametrizacao)/<slug>` — e.g. `motivos`, `regimes`, `ups`
-- **Module pages**: direct path — e.g. `caixa/dias`, `contribuintes`, `imoveis`
-- **Subpages**: include uuid param — `caixa/dias/[uuid]/atendedores`
+- **Parametrization pages**: `(parametrizacao)/<slug>` — e.g. `reasons`, `regimes`, `categories`
+- **Module pages**: direct path — e.g. `module/subresource`, `entities`, `resources`
+- **Subpages**: include uuid param — e.g. `resource/[uuid]/children`
 
 Route groups in parentheses don't appear in URLs but enable folder organization.
 
 ### API proxy paths
 
-Next API routes under `src/app/api/` proxy to `INSS_CORE_SERVICE_URL` backend. Important quirk:
+Next API routes under `src/app/api/` proxy to `BACKEND_API_URL` backend. Important quirk:
 - Backend endpoint: `/api/v1/parameterizacoes/*` (with typo — do not "fix")
 - Next proxy: `/api/parametrizacao/*` → backend `/parameterizacoes/*`
 - Backend endpoint: `/api/v1/caixa/*`
@@ -397,17 +423,27 @@ When asked to integrate a new endpoint `/api/v1/<area>/*`:
 
 The iGRP engine supports standard components AND project-custom ones referenced by `componentName`:
 
-### `SearchGeografia`
-Located: `src/app/(myapp)/components/search/search-geografia.tsx`
+### How the engine passes props to a custom component (JSON → TSX contract)
 
-Props: `labelInput`, `title`, `description`, `onClose`, `onItemSelected`, `geografiaId` (optional filter).
+A custom node receives props from three JSON locations, each with a different emission shape:
 
-Use for location picking. See `imovelForm.json` for reference. To also persist the ID (not just label), add an `inputHidden idGeografia` and in `onItemSelected` handler call `formform1Ref.current?.setValue('idGeografia', Number(geografia?.value))`.
+| JSON location | Emitted as | Use for |
+|---|---|---|
+| `properties.customProperties.<k>: "txt"` | `<k>={` `` `txt` `` `}` (wrapped in template literal) | **static** strings / booleans (label, placeholder, required, flags) |
+| `data.<prop>.value: { code: "expr", type: "string\|boolean\|any[]\|..." }` | `<prop>={ expr }` (raw expression) | **dynamic** values read from state/derived (value, options, disabled, formData) — always set `type` |
+| `interactions.<key>.function.fnName: "fn"` | `<key>={ fn }` | callbacks (`onItemSelected`, `onValueChange`, `onChange`, …) — arbitrary key names work, not just standard DOM events |
 
-### `LoadingPage`
-Located: `src/app/(myapp)/components/loading-page.tsx`
+The import path is resolved from the **registry** (`igrp.config.ts` `components: []`) by matching the exported symbol = `componentName`; the node `id` must be prefixed with the lowercased `componentName` (e.g. `mycomponent_dom` for `MyComponent`). Register the file or it renders as yellow zebra-tape.
 
-Used via `componentName: "LoadingPage"` with `data.isLoading.value.code: "isLoading"`. Renders a loading spinner bound to a hook's isLoading flag.
+Custom form fields do **not** auto-bind to the `IGRPForm` schema — write the value into the form via the auto-created `formform1Ref.current?.setValue('<tag>', value)` inside the callback handler. Keep the field in `types[]` (componentId → the custom node id) so the Zod field exists.
+
+### Example — search widget with ID persistence
+
+A common project-custom shape is a search dialog (`Search<Entity>`) that returns a picked record from a modal. Typical props: `labelInput`, `title`, `description`, `onClose`, `onItemSelected` (plus optional filter args). To persist the ID (not just the label) into the form, pair the widget with an `inputHidden <entityId>` and in `onItemSelected` call `formform1Ref.current?.setValue('<entityId>', Number(item?.value))`.
+
+### Example — loading-state widget
+
+A `Loading` / `LoadingPage` custom wrapper is another common shape: `data.isLoading.value.code: "isLoading"` binds to a hook's `isLoading` flag; the component renders a spinner while the hook resolves.
 
 ---
 
@@ -434,7 +470,7 @@ Fetches enum values by name from the backend. Returns `{ options: IGRPOptionsPro
 Common enums: `"Status"`, other domain enums (check backend).
 
 ### `useMultipleComboBoxOptions(configs)`
-Load multiple combobox options in one call. Used in contribuintes, imoveis. Pass an array of `{ type: "enum-name" }` configs.
+Load multiple combobox options in one call. Used across many list/CRUD pages. Pass an array of `{ type: "enum-name" }` configs.
 
 ### `useParametrizacaoOptions(routeName, options)`
 From `@/app/(myapp)/hooks/use-parametrizacao-options`
@@ -456,31 +492,22 @@ From `@/app/(myapp)/hooks/use-caixa`:
 
 ## Status/badge color functions
 
-Located under `src/app/(myapp)/functions/`:
+Located under `src/app/(myapp)/functions/` — see `patterns.md` §9 for the canonical dual-output shape (raw Tailwind for table badges + design-system variant token for banners) and the single-source `STATUS` map.
 
-- `global.ts`:
-  - `getStatusColor(contribuinte)` — contribuinte estados (ATIVO/SUSPENSO/BAIXA)
-  - `getStatusBadge(item)` — generic A/I estado
-  - `getStatusColorUtente(utente)` — utente estados
-  - `getStatusColorImovel(imovel)`, `getStatusColorFracao`, `getStatusColorManifestacao`
-  - `getStatusContribuinteBanner`, `getStatusUtenteBanner` — banner variant strings
-- `caixa-utils.ts`:
-  - `getCaixaEstadoColor(rowData)` — dias ABERTO/FECHADO
-  - `getCaixaMovimentoEstadoColor(rowData)` — movimentos POR_CONFIRMAR/CONFIRMADO (reads `rowData.estado`; falls back to legacy `rowData.estadoMovimento`)
-  - `getCaixaAtendedorEstadoColor(rowData)` — atendedor ABERTA/FECHADA
-  - `getTipoTransferenciaColor(rowData)` — tipo ENVIO (blue) / DEVOLUCAO (orange)
-  - `getPontoTransferenciaColor(rowData, field)` — `UPS` (indigo) / `FINANCEIRO` (purple) / `ATENDEDOR` (teal). Convenience variants: `getPontoDeColor`, `getPontoParaColor`.
-  - `getCaixaEstadoBanner(rowData)` — banner variant
-  - Enum label maps (for reuse outside badge context): `ESTADO_MOVIMENTO_LABEL`, `ESTADO_CAIXA_LABEL`, `PONTO_TRANSFERENCIA_LABEL`, `TIPO_TRANSFERENCIA_LABEL`
+Typical distribution across files:
 
-All color functions return `{ bgClass, textClass, iconName, label, className }`.
+- **`global.ts`** — status functions for the main domain entities (one `getStatusBadge<Entity>` + one `getStatus<Entity>Banner` per entity).
+- **`<module>-utils.ts`** — module-specific status functions when a module has its own enum (e.g. transaction state, workflow state) that doesn't fit into the global entity flavours.
+- **Enum label maps** for reuse outside the badge context: `ESTADO_<X>_LABEL`, etc. — resolves an enum code to a human label without loading the whole badge shape.
+
+All colour functions return the same shape: `{ bgClass, textClass, iconName, label, className }` for badges, and `IGRPStatusBannerVariant` for banners.
 
 Badge customize in `tableBadgeCell.interactions.customize.function`:
 ```json
 {
   "type":"function",
-  "fnCustomCode":{"imports":[{"namespace":"import {getCaixaEstadoColor} from '@/app/(myapp)/functions/caixa-utils'","id":"<10char>"}]},
-  "fnName":"getCaixaEstadoColor"
+  "fnCustomCode":{"imports":[{"namespace":"import {getStatusBadge<Entity>} from '@/app/(myapp)/functions/<module>-utils'","id":"<10char>"}]},
+  "fnName":"getStatusBadge<Entity>"
 }
 ```
 
@@ -490,10 +517,10 @@ Badge customize in `tableBadgeCell.interactions.customize.function`:
 
 Located under `src/app/(myapp)/lib/`:
 
-- `caixaValidators.ts`: `validateAbrirDia`, `validateAbrirCaixaAtendedor`, `validateTransferirFundos`
-- `imoveisValidators.ts`, other entity validators
+- One `<module>Validators.ts` file per module (e.g. `<entity>Validators.ts`) exporting one validator function per form action.
+- Each validator has the same signature (see below), so a single call site pattern in `handleFormSubmit` works everywhere.
 
-Signature: `(values: Partial<Request>) => { isValid: boolean, error?: { title, description } }`.
+Signature: `(values: Partial<Request>) => { isValid: boolean, error?: { title, description } }` — same shape as the `ValidationResult` for `validateStep<X>` in `process-steps.md` §11.7.
 
 Use in `handleFormSubmit`:
 ```js
@@ -509,10 +536,9 @@ if (!validation.isValid) {
 ## Types
 
 Located under `src/app/(myapp)/types/`:
-- `caixa.ts` — CaixaDia, CaixaAtendedor, TransferirFundosRequest, etc.
-- `share-types.ts` — PaginatedResponse<T>
-- `parametrizacao.ts` — ParametrizacaoItem generic
-- Domain-specific: contribuinte.ts, imovel.ts, utente.ts, etc.
+- One file per module (`<module>.ts`) exporting the DTOs / request/response shapes for that module.
+- `share-types.ts` — cross-cutting utility types: `PaginatedResponse<T>`, `UploadingState`, etc.
+- `parametrizacao.ts` — the generic `ParametrizacaoItem` used across every parametrization endpoint.
 
 Import as needed in state/type definitions.
 
@@ -542,14 +568,9 @@ Import as needed in state/type definitions.
 
 ## Menu conventions (`src/temp/menus/menus.ts`)
 
-Groups by top-level area:
-- `CADASTRO` (apps CADASTRO) — root cadastro features
-- `CONTRIBUICOES` (apps CORE) — contributions, declarações, entregas
-- `IMOBILIARIA_GROUP` — imóveis
-- `PARAMETRIZACAO` — parametrization entities (folders for Utentes, Contribuintes, Documentos, Atividade Económica, Outros, Direitos, Saúde, Caixa)
-- `GESTAO_CAIXA` — Caixa module (folders for GAF, Movimentos, Operações)
+Group by top-level area — one root code per module (e.g. `<MODULE>_GROUP`), plus a shared `PARAMETRIZACAO` group for lookup/parametrization tables organised into sub-folders by category (`PARAMETRIZACAO_<CATEGORY>`).
 
-When adding a new parametrization, place under the appropriate `PARAMETRIZACAO_*` folder. If no folder fits, either use `PARAMETRIZACAO_OUTROS` or create a new folder.
+When adding a new parametrization page, place it under the matching `PARAMETRIZACAO_<CATEGORY>` folder. If no folder fits, either use `PARAMETRIZACAO_OTHERS` or create a new category folder.
 
 Menu slugs must match page URL paths (excluding route groups).
 
@@ -571,14 +592,14 @@ This is the go-to pattern for any new simple CRUD entity.
 
 ## Project-specific engine quirks (learned the hard way)
 
-1. **The typo `parameterizacoes` is intentional** — don't "fix" the backend path.
-2. **Path for parametrizations uses route group** `(parametrizacao)/` — other pages use direct paths.
+1. **Beware of "typos" in backend paths that are intentional** — some backends have historical misspellings that would break clients if "corrected". When in doubt, verify with the backend team before altering a proxied path.
+2. **Route-group paths vs direct paths** — parametrization pages typically use a `(parametrizacao)/` route group; module pages use direct paths. Mirror the nearest existing page of the same category.
 3. **`useIGRPToast` is always auto-imported and instantiated** — never import it yourself.
 4. **`useRouter` is only auto-emitted when a `type:"navigate"` button exists** — import manually otherwise.
-5. **Named functions in `functions[]` collide with destructured hook vars** — rename on one side if `useXxxHook()` returns something with same name (e.g. `refreshList`).
+5. **Named functions in `functions[]` collide with destructured hook vars** — rename on one side if `useXxxHook()` returns something with the same name (e.g. `refreshList`).
 6. **Form without `dataType` → runtime `'_def' in undefined` error**.
 7. **`tableAlertDropdownItem` is valid but `tableAlertAction` is preferred** for simple row-level confirmations (fewer clicks, simpler UX).
-8. **`SearchGeografia` doesn't capture the ID by default** — wire the hidden `idGeografia` input manually in the `onItemSelected` handler.
+8. **A custom search widget doesn't capture the selected ID by default** — pair it with an `inputHidden <entityId>` and wire the value into the form via `formform1Ref.current?.setValue('<entityId>', Number(item?.value))` inside the widget's `onItemSelected` callback.
 9. **Combobox for ID selection must bind both `value.state` and `options.state`** — a common mistake is to skip `options.state`, leading to empty options.
 10. **Body-level state setters cause infinite re-renders** — always wrap in `useEffect`.
 11. **Lucide icon names follow the `Verb-Noun` → `Noun-Verb` rename** — the icons the design system ships are lucide-react. Common correct names: `CircleCheck` (not `CheckCircle`), `CircleX` (not `XCircle`), `CircleAlert` (not `AlertCircle`), `CircleCheckBig` (distinct icon). If you see a `?` placeholder in the UI, the icon name is wrong — check [lucide.dev/icons](https://lucide.dev/icons).
@@ -586,54 +607,46 @@ This is the go-to pattern for any new simple CRUD entity.
 
 ---
 
-## Cross-step labels — id/code → descrição
+## Cross-step labels — id/code → human description
 
-Combobox/parametrização values are stored as **id** (number) or **code** (string) — never as the descrição. To show the human label in cardDetails of a downstream step (Cálculo, Autorização, …):
+Combobox/parametrização values are stored as **id** (number) or **code** (string) — never as the human label. To show the label in the card-details / summary of a downstream step:
 
-**Use `mapPedidoDataWithLabels` from [use-process-1.1-shared.ts](../../src/app/(myapp)/process/use-process-1.1-shared.ts)** — never hand-roll lookups:
+**Centralize the mapping.** Write one shared helper (typically inside a `use-process-<family>-shared.ts`) that consumes the raw form data + the available options maps + a per-family `single`/`docsKey` mapping (field name → options-key), and returns the labelled record. Never hand-roll lookups at each step.
 
 ```ts
-import { mapPedidoDataWithLabels } from "./use-process-1.1-shared";
-
-const dadosDoPedido = useMemo(() => {
-  const allOptions = { ...options, ...parametrizacaoOptions };
-  return mapPedidoDataWithLabels(previousTaskData, allOptions, {
-    single: {
-      tipoSubsidioId: "direitos",
-      tipoDocumentoRequerente: "tipos-documento-inscricao-utente",
-      grauParentesco: "tipos-relacao",
-      // field → optionsKey
-    },
-    docsKey: "tipos-documento-processo",
-  });
-}, [previousTaskData, options, parametrizacaoOptions]);
+// signature — put the implementation in a shared hook
+mapFormDataWithLabels(
+  previousTaskData: unknown,
+  allOptions: Record<string, IGRPOptionsProps[]>,
+  spec: { single: Record<string, string>; docsKey?: string }
+): { <labelled fields> };
 ```
 
-The helper internally:
-1. **Prefers `<field>_desc` if persisted** (Convenção `_desc`, ver abaixo)
-2. Senão faz `getLabelFromOptions(options[optKey], base[field])`
-3. Trata `actividadesEconomicas`, `enderecos`, `contactos`, `dadosBancarios`, `pagamentos` automaticamente
-4. Para anexos, resolve `desc` via `tipos-documento-processo`
+The helper's resolution order for each field:
 
-### Convenção `_desc` — quando o lookup global falha
+1. **Prefer `<field>_desc` if persisted** on the source record (the `_desc` convention, below).
+2. Otherwise `getLabelFromOptions(options[optKey], base[field])`.
+3. For repeatable groups (`addresses`, `contacts`, `payments`, etc.), map each item recursively.
+4. For attachments, resolve `desc` via the document-type options-key declared in `docsKey`.
 
-Para campos cujas opções **não vêm da parametrização global** mas sim da entidade pesquisada (ex: `tipoUtenteId` em P3.2.7/P3.2.3 vem de `currentFalecido.tiposUtente` / `currentUtente.tiposUtente`):
+### The `_desc` convention — when the global lookup can't answer
 
-- No `completeStep<Step>`: além do `<field>` no `forms[]`, gravar também `<field>_desc` com o label correspondente.
-  ```ts
-  const tipoUtenteIdDesc = (utente?.tiposUtente || []).find(
-    (t) => String(t.id) === String(formData.tipoUtenteId),
-  )?.descricao ?? "";
+For fields whose valid options come from the **picked entity** (not global parametrização — see "Per-entity subset combobox" above), the global options map won't have the right label. In those cases, persist a sibling `<field>_desc` alongside the id at the point the entity is still in memory:
 
-  const form = [
-    ...Object.entries(formattedFormData).map(([k, v]) => ({ name: k, value: String(v) })),
-    ...(tipoUtenteIdDesc ? [{ name: "tipoUtenteId_desc", value: tipoUtenteIdDesc }] : []),
-  ];
-  ```
-- O `mapPedidoDataWithLabels` lê `_desc` automaticamente — basta o `single` map listar o campo.
-- Helpers manuais devem fazer `p.<field>_desc ?? lookup ?? raw`.
+```ts
+const subTypeDesc = (entity?.subTypes || []).find(
+  (t) => String(t.id) === String(formData.subTypeId),
+)?.description ?? "";
 
-**Regra**: `_desc` é exceção, **não default**. Aplica-se apenas quando as opções não estão num `ComboBoxType` global ou parametrização. Para tudo o resto, deixa o `mapPedidoDataWithLabels` resolver via options.
+const form = [
+  ...Object.entries(formattedFormData).map(([k, v]) => ({ name: k, value: String(v) })),
+  ...(subTypeDesc ? [{ name: "subTypeId_desc", value: subTypeDesc }] : []),
+];
+```
+
+The shared label mapper reads `_desc` automatically — just list the field in the `single` spec. Manual helpers should do `p.<field>_desc ?? lookup ?? raw`.
+
+**Rule**: `_desc` is the **exception**, not the default. Apply it only when the options aren't in a global `ComboBoxType` or parametrização. For everything else, let the shared mapper resolve via options.
 
 ---
 
@@ -641,7 +654,7 @@ Para campos cujas opções **não vêm da parametrização global** mas sim da e
 
 When asked to create or modify a page:
 
-1. Identify the closest existing file that matches the pattern (use `.igrpstudio/pages/` examples).
+1. Identify the closest existing file that matches the pattern (mirror an existing `.igrpstudio/pages/<file>.json` of the same category).
 2. Copy that file's structure.
 3. Update: pageName, path, id, tags, types, states, functions, onLoad.
 4. Register the page in `src/temp/menus/menus.ts` with `pageSlug` matching the URL path.

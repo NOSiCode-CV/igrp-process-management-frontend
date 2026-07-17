@@ -7,7 +7,7 @@ import {
   IGRPDataTableFacetedFilterFn,
   IGRPCopyTo,
   cn,
-  IGRPBadgePrimitive,
+  IGRPBadge,
 } from "@igrp/igrp-framework-react-design-system";
 import {
   formatDuration,
@@ -100,6 +100,7 @@ function TaskHistory({ tasks }: TaskHistoryProps) {
                       row.toggleExpanded();
                     }}
                     iconName={isExpanded ? "ChevronDown" : "ChevronRight"}
+                    aria-label={isExpanded ? "Recolher" : "Expandir"}
                   />
                 </div>
               );
@@ -185,7 +186,7 @@ function TaskHistory({ tasks }: TaskHistoryProps) {
               return (
                 <div>
                   {task.status && (
-                    <IGRPBadgePrimitive
+                    <IGRPBadge
                       variant="outline"
                       className={cn(
                         "flex flex-row items-center gap-1",
@@ -198,7 +199,7 @@ function TaskHistory({ tasks }: TaskHistoryProps) {
                       <span className="text-sm">
                         {getStatusLabel(task.status)}
                       </span>
-                    </IGRPBadgePrimitive>
+                    </IGRPBadge>
                   )}
                 </div>
               );
@@ -231,12 +232,12 @@ function TaskHistory({ tasks }: TaskHistoryProps) {
                       className="flex items-center gap-3 p-2 rounded-md bg-background border border-border"
                     >
                       <div className="flex items-center gap-2 min-w-[180px]">
-                        <IGRPBadgePrimitive
+                        <IGRPBadge
                           className={`text-[10px] px-1.5 py-0 flex items-center gap-1 ${getTypeColor(variable.value)}`}
                         >
                           {getTypeIcon(variable.value)}
                           {getTypeFromValue(variable.value)}
-                        </IGRPBadgePrimitive>
+                        </IGRPBadge>
                         <span className="text-sm font-medium text-foreground font-mono">
                           {variable.name}
                         </span>

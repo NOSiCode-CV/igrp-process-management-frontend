@@ -8,6 +8,7 @@ import {
 } from "../../utils/columns-template";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useProcessPriorities } from "../../hooks/use-process-priorities";
+import { routeSearchTerm } from "../../utils/search-routing";
 import {
   AssignTaskModalState,
   TaskManagementFilters,
@@ -109,7 +110,8 @@ export function useTaskManagement() {
   // Handle search functionality
   const handleSearch = useCallback(
     (searchTerm: string) => {
-      const newFilters = { ...filters, searchTerm };
+      // Route the free-text box to task name OR process number.
+      const newFilters = { ...filters, ...routeSearchTerm(searchTerm) };
       setFilters(newFilters);
     },
     [filters],

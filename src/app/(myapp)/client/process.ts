@@ -1,6 +1,7 @@
 "use server";
 import { DEFAULT_PAGE_SIZE } from "@/app/(myapp)/utils/shared";
 import { getIGRPProcessClient } from "@/lib/api-client";
+import { isCurrentUserSuperAdmin } from "@/lib/igrp-claims";
 import {
   CreateProcessArtifactRequest,
   CreateProcessInstanceRequest,
@@ -27,8 +28,12 @@ export const getProcesses = async (
   filter?: ProcessFilter,
 ): Promise<PaginatedResponse<Process>> => {
   const processManagementClient = await getIGRPProcessClient();
+  // Super admins bypass access-scoped filtering and see every process — force
+  // `filterByCurrentUser: false` regardless of what the caller requested.
+  const superAdmin = await isCurrentUserSuperAdmin();
   const response = await processManagementClient.processes.getProcesses({
     ...filter,
+    filterByCurrentUser: superAdmin ? false : filter?.filterByCurrentUser,
     page: 0,
     size: DEFAULT_PAGE_SIZE,
   });

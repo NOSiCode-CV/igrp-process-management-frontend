@@ -15,6 +15,7 @@ import {
   getProgressTemplate,
 } from "../../utils/columns-template";
 import { useProcessPriorities } from "../../hooks/use-process-priorities";
+import { routeSearchTerm } from "../../utils/search-routing";
 import { format, formatDistanceToNow } from "date-fns";
 
 export function useProcessInstances() {
@@ -81,8 +82,10 @@ export function useProcessInstances() {
   }, [processInstancesState.processInstances, getPriorityBadge]);
 
   const handleSearch = (searchTerm: string) => {
-    // Update filters - query will automatically refetch when filters change
-    updateFilters({ processType: searchTerm });
+    // Route the free-text box to instance name OR process number.
+    // (previously wrote into `processType` → procReleaseKey, which broke the
+    // search and corrupted the "Tipo Processo" combo.)
+    updateFilters(routeSearchTerm(searchTerm));
   };
 
   return {

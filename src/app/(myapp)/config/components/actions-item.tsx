@@ -4,12 +4,12 @@ import {
   useIGRPToast,
 } from "@igrp/igrp-framework-react-design-system";
 import {
-  IGRPDropdownMenuPrimitive,
-  IGRPDropdownMenuContentPrimitive,
-  IGRPDropdownMenuGroupPrimitive,
-  IGRPDropdownMenuItemPrimitive,
-  IGRPDropdownMenuSeparatorPrimitive,
-  IGRPDropdownMenuTriggerPrimitive,
+  IGRPDropdownMenu,
+  IGRPDropdownMenuContent,
+  IGRPDropdownMenuGroup,
+  IGRPDropdownMenuItem,
+  IGRPDropdownMenuSeparator,
+  IGRPDropdownMenuTrigger,
   IGRPIcon,
 } from "@igrp/igrp-framework-react-design-system";
 import { useRef, useState } from "react";
@@ -122,41 +122,41 @@ export function ActionsItem({
         onChange={handleFileChange}
         aria-hidden
       />
-      <IGRPDropdownMenuPrimitive>
-        <IGRPDropdownMenuTriggerPrimitive asChild>
-          <IGRPButton variant="outline">
+      <IGRPDropdownMenu>
+        <IGRPDropdownMenuTrigger asChild>
+          <IGRPButton variant="outline" aria-label="Abrir menu">
             <IGRPIcon iconName="EllipsisVertical" />
           </IGRPButton>
-        </IGRPDropdownMenuTriggerPrimitive>
-        <IGRPDropdownMenuContentPrimitive>
-          <IGRPDropdownMenuGroupPrimitive>
+        </IGRPDropdownMenuTrigger>
+        <IGRPDropdownMenuContent>
+          <IGRPDropdownMenuGroup>
             {processDefinitionId && (
-              <IGRPDropdownMenuItemPrimitive onClick={handleExport}>
+              <IGRPDropdownMenuItem onClick={handleExport}>
                 <IGRPIcon iconName="Download" />
                 Export
-              </IGRPDropdownMenuItemPrimitive>
+              </IGRPDropdownMenuItem>
             )}
-            <IGRPDropdownMenuItemPrimitive onClick={handleImportClick}>
+            <IGRPDropdownMenuItem onClick={handleImportClick}>
               <IGRPIcon iconName="Upload" />
               Import new
-            </IGRPDropdownMenuItemPrimitive>
-          </IGRPDropdownMenuGroupPrimitive>
+            </IGRPDropdownMenuItem>
+          </IGRPDropdownMenuGroup>
           {processDefinitionId && (
             <>
-              <IGRPDropdownMenuSeparatorPrimitive />
-              <IGRPDropdownMenuGroupPrimitive>
-                <IGRPDropdownMenuItemPrimitive
+              <IGRPDropdownMenuSeparator />
+              <IGRPDropdownMenuGroup>
+                <IGRPDropdownMenuItem
                   variant="destructive"
                   onClick={() => setIsOpen(!isOpen)}
                 >
                   <IGRPIcon iconName="Archive" />
                   Archive
-                </IGRPDropdownMenuItemPrimitive>
-              </IGRPDropdownMenuGroupPrimitive>
+                </IGRPDropdownMenuItem>
+              </IGRPDropdownMenuGroup>
             </>
           )}
-        </IGRPDropdownMenuContentPrimitive>
-      </IGRPDropdownMenuPrimitive>
+        </IGRPDropdownMenuContent>
+      </IGRPDropdownMenu>
 
       <IGRPAlertDialog
         title="Arquivar"

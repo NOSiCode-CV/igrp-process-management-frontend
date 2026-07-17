@@ -1,5 +1,5 @@
 import {
-  IGRPBadgePrimitive,
+  IGRPBadge,
   IGRPButton,
   IGRPIcon,
   IGRPLabel,
@@ -59,12 +59,12 @@ function AreaDetails({
                       <span className="text-sm flex-1">
                         {process?.name || processKey}
                       </span>
-                      <IGRPBadgePrimitive
+                      <IGRPBadge
                         variant="outline"
                         className="text-xs font-mono"
                       >
                         {processKey}
-                      </IGRPBadgePrimitive>
+                      </IGRPBadge>
                     </div>
                   );
                 })}

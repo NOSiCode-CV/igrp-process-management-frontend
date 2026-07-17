@@ -37,7 +37,7 @@ Note `formform1Ref` — the engine names form refs as `form<formTag>Ref`.
 
 ---
 
-## 4. Filter pattern for list pages (contribuintes-style)
+## 4. Filter pattern for list pages
 
 Embed this block inside `section.children` between pageHeader and table:
 
@@ -202,35 +202,35 @@ The shared `buildQueryParam` utility filters out `null`/`undefined`/`""` automat
 
 ### Mapping renamed form tags back to API field names in `handleFormSubmit`
 
-When a form lives in a page that also has a table showing the same domain entity (e.g. a `montante` column in the table AND a `montante` input in the modal form), the duplicate-tag rule forces one side to be renamed — usually the form input gets a `Fld` or modal-scoped suffix (`montanteTransfFld`, `idUpsModalTa`, `paraFld`). But the backend DTO still expects the clean names.
+When a form lives in a page that also has a table showing the same domain entity (e.g. an `amount` column in the table AND an `amount` input in the modal form), the duplicate-tag rule forces one side to be renamed — usually the form input gets a `Fld` or modal-scoped suffix (`amountFld`, `categoryIdFld`, `targetIdFld`). But the backend DTO still expects the clean names.
 
 **The trap**: a `...values` spread leaks the renamed keys into the request body:
 
 ```js
-// ❌ BROKEN — backend receives {"montanteTransfFld": 1234, "obsTransfFld": "...", ...}
-const payload = { ...values, de: 'UPS', para: 'ATENDEDOR' };
-await submitMovimentoCaixa('transferir-fundos', payload);
+// ❌ BROKEN — backend receives {"amountFld": 1234, "notesFld": "...", ...}
+const payload = { ...values, source: 'A', target: 'B' };
+await submitAction('transfer', payload);
 ```
 
 **The fix**: build the payload explicitly, re-keying to the API shape:
 
 ```js
-// ✅ CORRECT — payload matches backend TransferirFundosRequest
+// ✅ CORRECT — payload matches the backend request DTO
 const payload = {
-  idUps: selectidUpsModalTaValue ? Number(selectidUpsModalTaValue) : undefined,
-  userPara: values.userPara ? Number(values.userPara) : undefined,
-  montante: Number(values.montanteTransfFld),   // re-key Fld → API
-  obs: values.obsTransfFld,                      // re-key Fld → API
-  de: 'UPS',
-  para: 'ATENDEDOR',
+  categoryId: selectCategoryFldValue ? Number(selectCategoryFldValue) : undefined,
+  targetUser: values.targetUser ? Number(values.targetUser) : undefined,
+  amount:     Number(values.amountFld),   // re-key Fld → API
+  notes:      values.notesFld,             // re-key Fld → API
+  source:     'A',
+  target:     'B',
 };
-await submitMovimentoCaixa('transferir-fundos', payload);
+await submitAction('transfer', payload);
 ```
 
 **Discipline**:
-1. After writing or modifying a form handler, list the backend DTO fields (e.g. `TransferirFundosRequest`) and verify every key in the outgoing payload matches.
+1. After writing or modifying a form handler, list the backend DTO fields and verify every key in the outgoing payload matches.
 2. Never trust `...values` when the form has ANY renamed tag — always re-key explicitly.
-3. For every renamed tag, leave a comment `// API: montante` so future readers see the mapping intent.
+3. For every renamed tag, leave a comment `// API: amount` so future readers see the mapping intent.
 
 ### Write endpoints returning `{ success: true }` JSON (not plain text)
 
@@ -254,20 +254,24 @@ return await callApi<SuccessResponse>(`/api/caixa/dia`, {
 
 When coordinating with backend, prefer all write endpoints to return a small JSON envelope (`{ success: true }` or the created entity) rather than plain strings — keeps the error handler uniform.
 
-### Dependent combobox (atendedor depending on UPS)
+### Dependent combobox (child options driven by parent value)
 ```js
-const { data: ups } = useCaixaComboboxUps();
+// Parent combobox — loads once
+const { data: parents } = useParentOptions();
 useEffect(() => {
-  if (!ups) return;
-  setSelectidUpsOptions(ups.map((u: any) => ({ value: String(u.value), label: u.label })));
-}, [ups]);
+  if (!parents) return;
+  setSelectparentOptions(parents.map((p: any) => ({ value: String(p.value), label: p.label })));
+}, [parents]);
 
-const { data: atd } = useCaixaComboboxAtendedor(selectidUpsValue || undefined);
+// Child combobox — re-fetches whenever parent's selected value changes
+const { data: children } = useChildOptions(selectparentValue || undefined);
 useEffect(() => {
-  if (!atd) return;
-  setSelectatendedorOptions(atd.map((a: any) => ({ value: String(a.value), label: a.label })));
-}, [atd]);
+  if (!children) return;
+  setSelectchildOptions(children.map((c: any) => ({ value: String(c.value), label: c.label })));
+}, [children]);
 ```
+
+The child hook takes the parent's `selectparentValue` as an argument so it re-runs on every parent change; passing `undefined` when the parent is empty prevents the child endpoint firing before there's a valid parent to filter by.
 
 ### Filling a table from paginated API
 ```js
@@ -331,3 +335,76 @@ Rules:
 - The `STATUS` map is the **single source of truth** for label/colour/icon — never hardcode at the call site.
 - **Default to a "safe" status** (typically the most restrictive: inactive/error) when the entity is missing or the key is unknown — fail visibly, not invisibly.
 - Status keys mirror the backend's enum **exactly**; if the backend changes its enum, this is the one file to update.
+
+---
+
+## 10. Async action button — loading state (submit / delete / process / send)
+
+> **ASK FIRST.** Before authoring a button that triggers a slow/long-running endpoint (submit, process batch, cascading delete, send-for-approval), ask the dev: *"Do you want a loading state (spinner + button blocked during the await) on this button?"* Default to yes for endpoints the dev flags as slow. The pattern below is the canonical answer.
+
+`IGRPButton` has `loading?: boolean` + `loadingText?: string`. Bind `loading` to a boolean state that the handler toggles around the `await`. This blocks double-submits and gives feedback while a slow API runs.
+
+**State** (one per slow action):
+```json
+{ "id": "state_sending", "name": "sending", "type": "boolean", "defaultValue": "false", "imports": [], "isArray": false, "isOptional": false }
+```
+
+**Handler** — set true before, reset in `finally` (so it clears on error too):
+```js
+setSending(true);
+try {
+  await performSlowAction(id, args);
+  igrpToast({ type: 'success', title: 'Done', description: 'Action completed.' });
+  setOpenModal(false);
+  refetch();
+} catch (e) {
+  igrpToast({ type: 'error', title: 'Error', description: e?.message ?? 'Failed.' });
+} finally {
+  setSending(false);
+}
+```
+
+(For handlers that have validation early-returns *before* the `try`, put `setSending(true)` as the first line **inside** `try` so early returns don't leave it stuck on.)
+
+**Button bindings** — Confirm gets `loading` + `disabled`; the paired Cancel gets `disabled` (so it can't close mid-await):
+```jsonc
+// Confirm button
+"data": {
+  "loading":  { "value": { "id": "", "code": "sending", "type": "boolean" } },
+  "disabled": { "value": { "id": "", "code": "sending", "type": "boolean" } }
+}
+// Cancel button
+"data": { "disabled": { "value": { "id": "", "code": "sending", "type": "boolean" } } }
+```
+
+**The `await` runs on the modal's Confirm, not on the header opener.** A header button like "Send for Approval" usually only does `setOpenSend(true)` (opens the confirm modal) — put the `loading` binding on the modal's **Confirm** button, where the `await` actually runs. The header button keeps only its real gate (e.g. `disabled = !data || data.length === 0`).
+
+### Row action that needs loading → convert alert to link + shared modal
+
+`tableAlertAction` (`IGRPDataTableButtonAlert`) has **no** `loading`/`disabled` props and auto-closes on confirm, so a slow row action can't show a spinner. Convert it to a `tableLinkAction` that opens a shared confirm `modalDialog`, then apply the pattern above:
+
+```jsonc
+// row action: link instead of alert
+{
+  "componentName": "tableLinkAction",
+  "tag": "tableLinkActionProcess",
+  "interactions": {
+    "action": {
+      "type": "function",
+      "function": {
+        "fnCustomSet": "()=>{setCurrentItem(rowData); setOpenProcess(true)}",
+        "type": "function"
+      }
+    }
+  },
+  "properties": {
+    "labelTrigger": "Process",
+    "iconProperties": { "iconName": "Play" },
+    "variant": "ghost",
+    "href": ""
+  },
+  "rules": [{ "type": "visibility", "condition": "!rowData.processed" }]
+}
+```
+
+The handler then reads `currentItem` instead of the row arg: `await processItem(currentItem?.id)`, and closes with `setOpenProcess(false); setCurrentItem(undefined)`. The modal's Confirm carries the `loading`/`disabled` bindings; Cancel carries `disabled`.

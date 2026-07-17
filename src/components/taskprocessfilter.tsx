@@ -1,5 +1,4 @@
 "use client";
-
 /* THIS FILE WAS GENERATED AUTOMATICALLY BY iGRP STUDIO. */
 /* DO NOT MODIFY IT BECAUSE IT COULD BE REWRITTEN AT ANY TIME. */
 
@@ -24,6 +23,7 @@ import {
   IGRPInputText,
 } from "@igrp/igrp-framework-react-design-system";
 import { useProcessTasksFilter } from "@/app/(myapp)/components/processtaksfilter/hooks/use-process-tasks-filter";
+import { PRIORITY_OPTIONS } from "@/app/(myapp)/config/constants";
 
 export default function Taskprocessfilter({
   onSearch,
@@ -31,12 +31,16 @@ export default function Taskprocessfilter({
   onResetFilters,
   onFiltersChange,
   isProcess,
+  showTaskFilters,
+  hideCandidateUsers,
 }: {
   onSearch: (searchTerm: string) => void;
   onApplyFilters: (filters: any) => void;
   onResetFilters: () => void;
   onFiltersChange: (filters: any) => void;
   isProcess?: boolean;
+  showTaskFilters?: boolean;
+  hideCandidateUsers?: boolean;
 }) {
   const [selectStatusOptions, setSelectStatusOptions] = useState<
     IGRPOptionsProps[]
@@ -50,6 +54,12 @@ export default function Taskprocessfilter({
   const [selectProcesstypeOptions, setSelectProcesstypeOptions] = useState<
     IGRPOptionsProps[]
   >([]);
+  const [selectPriorityOptions, setSelectPriorityOptions] =
+    useState<IGRPOptionsProps[]>(PRIORITY_OPTIONS);
+  const [selectCandidateGroupsOptions, setSelectCandidateGroupsOptions] =
+    useState<IGRPOptionsProps[]>([]);
+  const [selectCandidateUsersOptions, setSelectCandidateUsersOptions] =
+    useState<IGRPOptionsProps[]>([]);
 
   const { igrpToast } = useIGRPToast();
 
@@ -85,6 +95,9 @@ export default function Taskprocessfilter({
     handleProcessNumberChange,
     handleDateChange,
     handleFiltersChange,
+    handleCandidateGroupsChange,
+    handleCandidateUsersChange,
+    handlePriorityChange,
     resetFilters,
   } = useProcessTasksFilter(
     setSelectAreaOptions,
@@ -97,6 +110,8 @@ export default function Taskprocessfilter({
     () => {},
     onFiltersChange,
     isProcess,
+    setSelectCandidateGroupsOptions,
+    setSelectCandidateUsersOptions,
   );
 
   // Handle search
@@ -128,12 +143,13 @@ export default function Taskprocessfilter({
           submitIcon={`ArrowRight`}
           required={false}
           submitButtonLabel={`Pesquisar`}
-          placeholder={`Pesquise por...`}
+          placeholder={`Pesquisar por nome ou nº processo`}
           className={cn("py-1 flex-1 max-w-sm")}
           setValueChange={(value) => setSearchTerm(value)}
           onSearch={handleSearchSubmit}
           value={searchTerm}
         ></IGRPInputSearch>
+
         <div className={cn("grid", "grid-cols-3 ", " gap-4")}>
           <IGRPCombobox
             id={`Status`}
@@ -153,13 +169,13 @@ export default function Taskprocessfilter({
             options={selectStatusOptions}
             value={filters.status}
           ></IGRPCombobox>
+
           <IGRPDatePickerRange
             placeholder={`Selecione uma data`}
             id={`datePickerRange1`}
             dateFormat={`dd/MM/yyyy`}
             onDateChange={(date) => handleDateChange(date ?? null)}
             date={getDateRange()}
-            className={cn("col-span-1")}
           />
           <FilterData
             onChange={(filters) => handleFiltersChange(filters)}
@@ -206,6 +222,7 @@ export default function Taskprocessfilter({
             onChange={(e) => handleProcessNumberChange(e.target.value)}
             value={filters.processNumber}
           ></IGRPInputText>
+
           <IGRPCombobox
             id={`Area`}
             label={`Área`}
@@ -222,6 +239,7 @@ export default function Taskprocessfilter({
             options={selectAreaOptions}
             value={filters.areaId}
           ></IGRPCombobox>
+
           <IGRPCombobox
             id={`Subarea`}
             label={`Sub-área`}
@@ -241,6 +259,7 @@ export default function Taskprocessfilter({
             value={filters.subareaId}
             disabled={!filters.areaId}
           ></IGRPCombobox>
+
           <IGRPCombobox
             id={`Processtype`}
             label={`Tipo Processo`}
@@ -260,6 +279,76 @@ export default function Taskprocessfilter({
             value={filters.processType}
             disabled={!filters.areaId && !filters.subareaId}
           ></IGRPCombobox>
+        </div>
+      )}
+      {showFilter && showTaskFilters && (
+        <div
+          className={cn(
+            "grid",
+            "grid-cols-2 ",
+            "md:grid-cols-2 ",
+            "lg:grid-cols-4 ",
+            " gap-4 px-3 mt-4",
+          )}
+        >
+          <IGRPCombobox
+            id={`Priority`}
+            label={`Prioridade`}
+            variant={`single`}
+            placeholder={`Selecione uma prioridade...`}
+            selectLabel={`No option found`}
+            showSearch={true}
+            showIcon={false}
+            iconName={`CornerDownRight`}
+            className={cn("col-span-1")}
+            onChange={(selected) =>
+              handlePriorityChange(
+                Array.isArray(selected) ? selected[0] : selected,
+              )
+            }
+            options={selectPriorityOptions}
+            value={filters.priority != null ? String(filters.priority) : ""}
+          ></IGRPCombobox>
+
+          <IGRPCombobox
+            id={`CandidateGroups`}
+            label={`Grupo Candidato`}
+            variant={`single`}
+            placeholder={`Selecione um grupo...`}
+            selectLabel={`No option found`}
+            showSearch={true}
+            showIcon={false}
+            iconName={`CornerDownRight`}
+            className={cn("col-span-1")}
+            onChange={(selected) =>
+              handleCandidateGroupsChange(
+                Array.isArray(selected) ? selected[0] : selected,
+              )
+            }
+            options={selectCandidateGroupsOptions}
+            value={filters.candidateGroups}
+          ></IGRPCombobox>
+
+          {!hideCandidateUsers && (
+            <IGRPCombobox
+              id={`CandidateUsers`}
+              label={`Utilizador Candidato`}
+              variant={`single`}
+              placeholder={`Selecione um utilizador...`}
+              selectLabel={`No option found`}
+              showSearch={true}
+              showIcon={false}
+              iconName={`CornerDownRight`}
+              className={cn("col-span-1")}
+              onChange={(selected) =>
+                handleCandidateUsersChange(
+                  Array.isArray(selected) ? selected[0] : selected,
+                )
+              }
+              options={selectCandidateUsersOptions}
+              value={filters.candidateUsers}
+            ></IGRPCombobox>
+          )}
         </div>
       )}
       {showFilter && (
@@ -283,7 +372,6 @@ export default function Taskprocessfilter({
             size={`default`}
             showIcon={true}
             iconName={`Eraser`}
-            className={cn("")}
             onClick={handleResetFilters}
           >
             Limpar Filtros

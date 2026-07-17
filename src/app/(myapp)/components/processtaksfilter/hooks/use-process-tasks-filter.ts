@@ -6,6 +6,8 @@ import {
 } from "@igrp/igrp-framework-react-design-system";
 import { VariableFilter } from "../../filter-data";
 import { format } from "date-fns";
+import { useBusinessGroups } from "../../../access-management/use-business-groups";
+import { useBusinessUsers } from "../../../access-management/use-business-users";
 
 export function useProcessTasksFilter(
   setSelectAreaOptions: (options: IGRPOptionsProps[]) => void,
@@ -16,6 +18,10 @@ export function useProcessTasksFilter(
   setSelectUserOptions: (options: IGRPOptionsProps[]) => void,
   onFiltersChange?: (filters: any) => void,
   isProcess?: boolean,
+  // Options for the beta.19 task filters (candidate groups / users). Optional:
+  // pages that don't surface these filters simply omit the setters.
+  setSelectCandidateGroupsOptions?: (options: IGRPOptionsProps[]) => void,
+  setSelectCandidateUsersOptions?: (options: IGRPOptionsProps[]) => void,
 ) {
   const { filters, dropdownOptions, updateFilters, resetFilters } =
     useFilterData(isProcess);
@@ -65,6 +71,24 @@ export function useProcessTasksFilter(
     }));
   }, [dropdownOptions.users]);
 
+  // Candidate groups / users come from access-management (beta.19 filters).
+  const { groupOptions } = useBusinessGroups();
+  const { userOptions } = useBusinessUsers();
+
+  const transformedCandidateGroupOptions = useMemo((): IGRPOptionsProps[] => {
+    return groupOptions.map((option) => ({
+      label: option.name,
+      value: option.value,
+    }));
+  }, [groupOptions]);
+
+  const transformedCandidateUserOptions = useMemo((): IGRPOptionsProps[] => {
+    return userOptions.map((option) => ({
+      label: option.label,
+      value: option.value,
+    }));
+  }, [userOptions]);
+
   // Update the IGRPStudio generated state variables when dropdown options change
   useEffect(() => {
     setSelectAreaOptions(transformedAreaOptions);
@@ -90,6 +114,14 @@ export function useProcessTasksFilter(
     setSelectUserOptions(transformedUserOptions);
   }, [transformedUserOptions, setSelectUserOptions]);
 
+  useEffect(() => {
+    setSelectCandidateGroupsOptions?.(transformedCandidateGroupOptions);
+  }, [transformedCandidateGroupOptions, setSelectCandidateGroupsOptions]);
+
+  useEffect(() => {
+    setSelectCandidateUsersOptions?.(transformedCandidateUserOptions);
+  }, [transformedCandidateUserOptions, setSelectCandidateUsersOptions]);
+
   // Notify parent component when filters change (except on initial mount and area/subarea changes)
   useEffect(() => {
     if (isInitialMount.current) {
@@ -107,6 +139,10 @@ export function useProcessTasksFilter(
       prevFiltersRef.current.processNumber !== filters.processNumber ||
       prevFiltersRef.current.dateFrom !== filters.dateFrom ||
       prevFiltersRef.current.dateTo !== filters.dateTo ||
+      prevFiltersRef.current.candidateGroups !== filters.candidateGroups ||
+      prevFiltersRef.current.candidateUsers !== filters.candidateUsers ||
+      prevFiltersRef.current.name !== filters.name ||
+      prevFiltersRef.current.priority !== filters.priority ||
       JSON.stringify(prevFiltersRef.current.variables) !==
         JSON.stringify(filters.variables);
 
@@ -123,6 +159,10 @@ export function useProcessTasksFilter(
     filters.processNumber,
     filters.dateFrom,
     filters.dateTo,
+    filters.candidateGroups,
+    filters.candidateUsers,
+    filters.name,
+    filters.priority,
     filters.variables,
     onFiltersChange,
   ]);
@@ -181,6 +221,26 @@ export function useProcessTasksFilter(
     updateFilters({ variables });
   };
 
+  const handleCandidateGroupsChange = (selected: string | string[]) => {
+    const value = Array.isArray(selected) ? selected[0] : selected;
+    updateFilters({ candidateGroups: value });
+  };
+
+  const handleCandidateUsersChange = (selected: string | string[]) => {
+    const value = Array.isArray(selected) ? selected[0] : selected;
+    updateFilters({ candidateUsers: value });
+  };
+
+  const handleNameChange = (value: string) => {
+    updateFilters({ name: value });
+  };
+
+  const handlePriorityChange = (value: string | number) => {
+    const num =
+      typeof value === "number" ? value : value === "" ? NaN : Number(value);
+    updateFilters({ priority: Number.isNaN(num) ? undefined : num });
+  };
+
   return {
     // Filter values
     filters,
@@ -195,5 +255,9 @@ export function useProcessTasksFilter(
     handleProcessNumberChange,
     handleDateChange,
     handleFiltersChange,
+    handleCandidateGroupsChange,
+    handleCandidateUsersChange,
+    handleNameChange,
+    handlePriorityChange,
   };
 }

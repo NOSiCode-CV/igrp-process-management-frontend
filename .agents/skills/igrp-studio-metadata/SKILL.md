@@ -92,7 +92,7 @@ import { Button } from '@radix-ui/react-button';         // bare Radix — no st
 **Two opposite failure modes to avoid:**
 
 - ❌ **Inventing engine primitives.** Names like `tableActionView`, `cellAmount`, `userProfileCard` that aren't in `component-reference.md` produce a yellow zebra-tape `<span>Unsupported Component</span>` placeholder which crashes the data-table.
-- ❌ **Refusing to create real custom components.** The codebase IS full of legitimate ones (`SearchFalecido`, `AgregadoItem`, `ProcessRectificationView`) referenced by `componentName` from JSON, with a `.tsx` file under `(myapp)/components/` and a registry entry in `igrp.config.ts`. These are not "invented" — they're handcrafted React, all composed from the design system. The Studio convention for registering them is already established (see "Custom components — when and how").
+- ❌ **Refusing to create real custom components.** The codebase IS full of legitimate ones (`SearchEntity`, `EntityGroupItem`, `ProcessReviewView`) referenced by `componentName` from JSON, with a `.tsx` file under `(myapp)/components/` and a registry entry in `igrp.config.ts`. These are not "invented" — they're handcrafted React, all composed from the design system. The Studio convention for registering them is already established (see "Custom components — when and how").
 
 Never the middle ground: inventing a primitive name without writing the `.tsx`. The placeholder is fatal in row contexts.
 
@@ -176,19 +176,19 @@ If you write a stale name (`UserCircle`, `XCircle`, etc.), you'll get a TS compi
 For `type: "component"`:
 - `scope`: one of three values — `"page"`, `"app"`, or `"global"`
   - **`"page"`** — the component is consumed by one specific page (modals, page-local helpers, list-page detail dialogs). Requires `pagePath` + `pageName` so Studio's "Pages" tree shows it nested under its owner.
-  - **`"app"`** — the component is reused across many pages or process steps inside the same app (e.g. `SearchFalecido`, `AgregadoItem`). Omit `pagePath`/`pageName`. Studio lists it under the app's shared components tray.
+  - **`"app"`** — the component is reused across many pages or process steps inside the same app (e.g. `SearchEntity`, `EntityGroupItem`). Omit `pagePath`/`pageName`. Studio lists it under the app's shared components tray.
   - **`"global"`** — semantically equivalent to `"app"` (both mean "not tied to a specific page"). Some older manifests use `"global"`; newer ones prefer `"app"`. Either works.
 - `pagePath`: path of the consuming page (when `scope: "page"`)
 - `pageName`: name of the consuming page (when `scope: "page"`)
 
 ```json
-// Page-scoped: a modal used only on the utentes page
-{ "type": "component", "scope": "page", "pagePath": "utentes", "pageName": "utentes",
-  "name": "VistoriaList", "fileName": "vistoriaList", ... }
+// Page-scoped: a modal used only on the entities page
+{ "type": "component", "scope": "page", "pagePath": "entities", "pageName": "entities",
+  "name": "EntityDetailModal", "fileName": "entityDetailModal", ... }
 
-// App-scoped: a search dialog reused everywhere a falecido is picked
+// App-scoped: a search dialog reused everywhere an entity is picked
 { "type": "component", "scope": "app",
-  "name": "SearchFalecido", "fileName": "searchFalecido", ... }
+  "name": "SearchEntity", "fileName": "searchEntity", ... }
 ```
 
 **Rule of thumb:** if the component is only ever rendered from one page or process step, use `scope: "page"`. Anything reused twice or more → `scope: "app"`.
@@ -241,23 +241,23 @@ Types define the shape of table rows and form values. Every `<table>` and `<form
 
 **Hidden fields are NEVER `required` at the schema or JSX level — even when they're conceptually mandatory.**
 
-If a hidden field is required by business rules (e.g. `idUtenteFalecido` must be set after `SearchFalecido`), enforce it inside `validateStepPedido`/`validateStep<Step>` in the hook, NOT via:
+If a hidden field is required by business rules (e.g. `entityId` must be set after `SearchEntity`), enforce it inside `validateStep<Step>` in the hook, NOT via:
 - ❌ `types[].fields[].required: true` — Zod adds `.nonempty()` and the form blocks submit with "field is required" alert pointing to a hidden field the user can't see → confusing UX
 - ❌ `properties.required: true` on the `inputHidden` JSON node — emits the red asterisk `<label>field *</label>` rendering markup the user shouldn't see anyway
 
 ✅ Correct pattern:
 ```ts
 // types[].fields[]:
-{ componentId: "inputhidden_idfalec", name: "idUtenteFalecido", type: "string", required: false, ... }
+{ componentId: "inputhidden_entityid", name: "entityId", type: "string", required: false, ... }
 ```
 ```json
 // inputHidden node:
-"properties": { "label": "idUtenteFalecido", "required": false, ... }
+"properties": { "label": "entityId", "required": false, ... }
 ```
 ```ts
-// In validateStepPedido (hook):
-if (!formData?.idUtenteFalecido) {
-  return { success: false, error: "É necessário identificar o falecido. Pesquise por nome ou número." };
+// In validateStep<Step> (hook):
+if (!formData?.entityId) {
+  return { success: false, error: "Identify the subject entity first (use the search widget)." };
 }
 ```
 
@@ -445,16 +445,16 @@ The `components` root is a single node. Each node has this shape:
 
 **🔑 `id` naming convention (CRITICAL — engine resolves component imports from `id` prefix):**
 
-`id` MUST start with `<componentName-in-lowercase>` followed by `_<suffix>`. For custom React components (anything outside the built-in component reference, e.g. `SearchUtente`, `SearchFalecido`, `AgregadoItem`, `ProcessRectificationView`), the engine **resolves the import path by reading the `id` prefix** — not the `componentName` directly. Mismatched ids cause:
-1. Custom components render as a yellow zebra-tape placeholder (`<span className="text-red-500">SearchFalecido</span>` inside a striped div) — engine couldn't resolve the import.
+`id` MUST start with `<componentName-in-lowercase>` followed by `_<suffix>`. For custom React components (anything outside the built-in component reference, e.g. `SearchEntity`, `SearchEntity`, `EntityGroupItem`, `ProcessReviewView`), the engine **resolves the import path by reading the `id` prefix** — not the `componentName` directly. Mismatched ids cause:
+1. Custom components render as a yellow zebra-tape placeholder (`<span className="text-red-500">SearchEntity</span>` inside a striped div) — engine couldn't resolve the import.
 2. Stray `;` after every JSX element in the generated TSX — engine falls into a broken code path.
 
 | ✅ Correct | ❌ Broken |
 |---|---|
 | `"id":"combobox_p017b2"` for `componentName: "combobox"` | `"id":"cbx_tpsub"` |
-| `"id":"searchfalecido_falec327"` for `componentName: "SearchFalecido"` | `"id":"src_falec327"` |
+| `"id":"searchentity_falec327"` for `componentName: "SearchEntity"` | `"id":"src_falec327"` |
 | `"id":"inputdatepickersingle_dtnasc"` for `componentName: "inputDatePickerSingle"` | `"id":"dtp_dtnasc"` |
-| `"id":"processrectificationview_xlaq92"` | `"id":"prv_p327"` |
+| `"id":"processreviewview_xlaq92"` | `"id":"prv_p327"` |
 
 The same applies to `componentId` references inside `types[].fields[]` — they MUST mirror the renamed component `id`.
 
@@ -573,7 +573,7 @@ Common code-expression types:
 | Numeric (e.g. `index`) | `"number"` |
 | List/array data passed to a child component | `"any[]"` or specific item type |
 
-Verified pattern: 8 readonly `inputText` fields in `P3.2.7/pedido.v1.json` (display of `currentFalecido` data) needed `type` added to both `value.value` and `disabled.value` bindings before the interface generated cleanly.
+Verified pattern: a set of readonly `inputText` fields displaying data from a `current<Entity>` state needed `type` added to both `value.value` and `disabled.value` bindings before the interface generated cleanly.
 
 ### `data` binds state / values (older intro)
 ```json
@@ -644,7 +644,71 @@ Emitted as `{ showFilter && (<Component ... />) }`.
 | `inputDatePicker` | **Standard date picker — use this** |
 | `inputDatePickerSingle` | Another valid option for single date |
 
-**DEPRECATED — do NOT use:** `input`, `datePicker`
+**DEPRECATED — do NOT use:** `input`, `datePicker`, `slider` (removed from the engine in `0.2.0-beta.17`)
+
+### New in `0.2.0-beta.17`+ — feedback / overlay / primitive components
+
+The engine now exposes these thin wrappers over the design-system primitives:
+
+- **Feedback**: `notification`, `banner`, `progress`, `skeleton`, `spinner`, `empty`, `toaster`, `loadingSpinner`, `fieldDescription`
+- **Overlays**: `tooltip`, `hoverCard`, `popover`, `sheet`, `drawer`, `command`
+- **Navigation**: `breadcrumb`, `pagination`, `navigationMenu`, `menubar` (+ 15 child components under `menubar/children/`)
+- **Forms**: `toggle`, `inputOTP`, `inputGroup`
+- **Layout / typography**: `aspectRatio`, `scrollArea`, `kbd`, `pageHeaderBackButton`, `stepperUI`
+- **Media**: `imageCropper`
+- **Data display**: `statsCardMini`, `statsCardTopBorderColored`, `userAvatar`, `dateTimeInput`
+
+Each maps 1:1 to the equivalent design-system export (`IGRPNotification`, `Tooltip`, `Sheet`, `Popover`, `IGRPBanner`, etc.). Use them the same way as any other engine primitive — set `componentName`, populate `properties`. Consult **`component-reference.md`** for the prop list of each.
+
+**`stepperUI` vs the existing `process` / `processStep`.**
+- `stepperUI` (new) → shadcn `<Stepper>` primitive. Low-level linear stepper for multi-step form wizards.
+- `process` / `processStep` (existing, unchanged) → BPMN-style workflow steps under `.igrpstudio/process/*.json`. These wire `IGRPStepperProcess` from the design-system.
+- Don't mix them. Use `stepperUI` only inside pages that need a UI-only step tracker; use `processStep` for actual workflow authoring.
+
+### Notable prop additions on existing components (`0.2.0-beta.18`)
+
+| Component | New props | Notes |
+|---|---|---|
+| `button` | `loading`, `loadingText`, `asChild`, `type` (`"button"`/`"submit"`/`"reset"`), `iconClassName`, `ariaLabel` | `loading` disables the button and swaps content for `loadingText`; new sizes: `"xs"`, `"icon-xs"`, `"icon-sm"`, `"icon-lg"` |
+| `alert` | `alignment` | `"start"` \| `"center"` \| `"end"` |
+| `alertDialog` | `showIcon`, `iconName`, `iconPlacement` | Optional header icon |
+| `avatar` | `fallbackIcon`, `hasFallbackIcon`, `badgeShowIcon`, `badgeIconName`, `iconColor`, `iconClassName` | Icon-based fallback + status badge with icon |
+| `badge` | `asChild` | shadcn primitive alignment |
+| `cardDetails` | `description`, `contentClassName` | |
+| `combobox` | `defaultValue` | |
+| `dropdown` | `asChild`, `align` (`"start"`/`"center"`/`"end"`), `sideOffset` | |
+| `imageCropper` | `cropShape` (`"rect"`/`"round"`), `aspect` | |
+| `infoCard` | `titleClassName`, `contentClassName`, `variantSection`, `colorSection`, `orientation` | |
+| `inputColor` | `format` / `defaultFormat` (`"hex"`/`"rgb"`/`"hsl"`) — **replaces** `showHexValue`; also new: `showFormatValue`, `formatOptions` | Multi-format color; migrate away from `showHexValue` |
+| `inputFile` | `variant` (`"default"`/`"dropzone"`), `maxSize`, `maxFiles`, `acceptTypes`, `dropzoneLabel`, `dropzoneHint`, `removeLabel`, `removeAllLabel`, `dragActiveLabel`, `dragRejectLabel`, `maxSizeLabel`, `maxFilesLabel`, `rejectedAlertTitle`, `helperText`, `error`, `onFilesChange` | Dropzone mode |
+| `inputNumber` | `description`, `defaultValue`, `min`, `max`, `step`, `errorMessage`, `error` | |
+| `inputPassword` | `showPasswordToggle`, `defaultValue`, `error`, `helperText` | |
+| `inputPhone` | `international` | |
+| `inputSearch` | `helperText`, `error` | |
+| `inputText` | `type` (`"text"`/`"email"`/`"tel"`/`"search"`/`"url"`), `helperText`, `iconSize`, `iconClassName`, `error`, `labelClassName`, `inputClassName` | |
+| `inputTextarea` | `helperText`, `error`, `rows` | |
+| `checkbox`, `switch` | `helperText`, `labelClassName`, `error`, `required` | |
+| `radio` (`RadioGroup`) | `showIcon`, `iconName` | |
+| `select` | `defaultValue`, `iconName` | |
+| `loadingSpinner` | `parentClassName` | |
+| `modalDialogContent` | `contentClassName`, `showCloseButton`, `showCloseButtonClassName` | `showCloseButton` defaults to `true` (was implicit before) |
+| `notification` | `showIcon`, `iconName`, `content`, `showClose`, `showLink`, `lableLink`, `actionLink`, `border` | `lableLink` (yes, sic — matches DS prop name) |
+| `pageHeader` | `iconBackButton`, `backButtonAriaLabel`, `backButtonShowText`, `backButtonText`, `backButtonClassName`, `backButtonUseBrowserBack`, `headlineContentClassName`, `pageHeaderContentClassName` | Back-button subprops now first-class |
+| `pageHeaderBackButton` | `iconName`, `variant`, `size`, `ariaLabel`, `showText`, `text`, `url`, `useBrowserBack` | Standalone back-button |
+| `pdfViewer` | `documents`, `defaultDocument` | Documents array with `id`/`url`/`name` |
+| `separator` | `decorative` | |
+| `statsCardMini` | `titleSize`, `titleClassName`, `valueSize`, `valueClassName`, `iconName`, `iconClassName`, `image`, `imageAlt`, `variant` | |
+| `statsCardTopBorderColored` | `cardVariant`, `iconName`, `iconClassName` | |
+| `statusBanner` | `text`, `badgeVariant`, `badgeColor`, `badgeText` | |
+| `table` | `rowCount` | For server-side pagination |
+| `tableExpanderCell` | `field` is **now optional** (was required); new `label` prop | |
+| `tabs` | `showScrollIndicators`, `scrollButtonClassName` | Horizontal scroll UX |
+| `userAvatar` | `image`, `alt`, `fallbackContent`, `fallbackClass` | |
+| `videoEmbed` | `title`, `allowFeatures`, `width`, `height` | |
+
+### `repetitiveList` — dropped and re-added
+
+`repetitiveList` was **removed** in `0.2.0-beta.17` when the design-system dropped `IGRPRepetitiveComponent`, then **restored** in `0.2.0-beta.19` after DS re-introduced it. Any workspace JSON authored between those two versions that referenced `repetitiveList` broke silently; those manifests work again from `beta.19` forward with the same shape as before (`items` string ref, `variable` for loop var, `dataKey` for key path).
 
 ### Selection
 - `combobox` — searchable select (use for API-loaded options and ID selection)
@@ -732,7 +796,7 @@ Emitted as `{ showFilter && (<Component ... />) }`.
 
 ### Pattern 1: List page with filters + stats + table + modal
 
-Reference implementation: `.igrpstudio/pages/contribuintes.json`, `.igrpstudio/pages/motivos.json`
+A typical list-with-filters page follows this shape — mirror an existing page in your `.igrpstudio/pages/` that matches the same category (list-with-filters vs parametrization vs form).
 
 Structure:
 ```
@@ -758,7 +822,7 @@ Must-have functions: `clearFilters()`, `refreshList()`.
 
 ### Pattern 2: Form page or form component
 
-Reference: `.igrpstudio/components/imovelForm.json`
+Reference: mirror an existing form component under `.igrpstudio/components/` in your project.
 
 Form rules:
 - `<form>` node needs `dataType: "FormXxx"` AND a matching type in `types[]` with all field mappings
@@ -844,7 +908,7 @@ For multi-select: `variant: "multiple"`, type `string[]`, setter receives `as st
     "labelTrigger": "Visualizar",
     "iconProperties": { "iconName": "Eye" },
     "variant": "ghost",
-    "href": "contribuintes/[uuid]",
+    "href": "entities/[uuid]",
     "segments": [{ "name": "[uuid]", "tag": "contribuinteId", "context": "column" }],
     "params": []
   },
@@ -1019,15 +1083,15 @@ Sometimes the engine catalog doesn't carry the right primitive for what the spec
 
 ```json
 {
-  "id": "searchutente_main",
-  "componentName": "SearchUtente",
-  "tag": "searchUtente1",
-  "label": "Search Utente",
+  "id": "searchentity_main",
+  "componentName": "SearchEntity",
+  "tag": "searchEntity1",
+  "label": "Search Entity",
   "children": [],
   "interactions": {},
   "data": {},
   "properties": {
-    "title": "Find utente",
+    "title": "Find entity",
     "onItemSelected": "()=>{setCurrentItem(rowData)}",
     "commonProperties": { "generateReference": false }
   },
@@ -1035,14 +1099,14 @@ Sometimes the engine catalog doesn't carry the right primitive for what the spec
 }
 ```
 
-🔑 **`id` MUST start with the lowercased component name** — the engine resolves the import path from the `id` prefix, NOT from `componentName`. `searchutente_main` ✅ — `searchutente` (no suffix) ✅ — `sru_main` or `search_main` ❌ (engine won't find the file). The same applies to `componentId` references inside `types[].fields[]` if the component is form-input-like.
+🔑 **`id` MUST start with the lowercased component name** — the engine resolves the import path from the `id` prefix, NOT from `componentName`. `searchentity_main` ✅ — `searchentity` (no suffix) ✅ — `sru_main` or `search_main` ❌ (engine won't find the file). The same applies to `componentId` references inside `types[].fields[]` if the component is form-input-like.
 
 ### B. A real `.tsx` file under `src/app/(myapp)/components/<kebab-name>/<kebab-name>.tsx`
 
 The path on disk is **kebab-case** even though the `componentName` is **PascalCase** — that's the convention the engine's import resolver expects:
 
 ```tsx
-// src/app/(myapp)/components/search-utente/search-utente.tsx
+// src/app/(myapp)/components/search-entity/search-entity.tsx
 'use client';
 
 import { useState } from 'react';
@@ -1062,16 +1126,16 @@ import {
   PopoverTrigger,
 } from '@igrp/igrp-framework-react-design-system';
 
-import { useSearchUtente } from '@/app/(myapp)/hooks/use-search-utente';
+import { useSearchEntity } from '@/app/(myapp)/hooks/use-search-entity';
 
-export interface SearchUtenteProps {
+export interface SearchEntityProps {
   title?: string;
-  onItemSelected?: (utente: Utente) => void;
+  onItemSelected?: (entity: Entity) => void;
 }
 
-export function SearchUtente({ title, onItemSelected }: SearchUtenteProps) {
+export function SearchEntity({ title, onItemSelected }: SearchEntityProps) {
   const [query, setQuery] = useState('');
-  const { results } = useSearchUtente(query);
+  const { results } = useSearchEntity(query);
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -1088,8 +1152,12 @@ export function SearchUtente({ title, onItemSelected }: SearchUtenteProps) {
 
 Component file rules:
 - **`'use client'` directive** if it uses state or browser APIs.
-- **Named export** matching the `componentName` exactly (`export function SearchUtente`, not `export default`).
-- **Props interface** exported (`SearchUtenteProps`) so other consumers can type-check.
+- **Named export** matching the `componentName` exactly (`export function SearchEntity`, not `export default`).
+- **Component name MUST be PascalCase** — starts with an uppercase ASCII letter. The engine's component-detection scanner (`parseComponents`) rejects any function that starts lowercase — that includes `useSearchEntity` (hook — treated as such), `searchEntity` (typo), `updateRow` (helper), `handleClick` (event handler). Rename to `SearchEntity` and re-export.
+- **Props signature MUST be a destructured object** (`{ prop1, prop2 }: SearchEntityProps`) OR a single typed argument (`(props: SearchEntityProps)`). Positional args (`(a: string, b: number) => …`) are treated as helpers and skipped — that's what keeps event handlers like `(idx: number, patch: Partial<X>) => …` from polluting the Studio palette. If your component takes no props, still declare `{}: {}` so it's picked up.
+- **Props interface** exported (`SearchEntityProps`) so other consumers can type-check.
+- **Only top-level declarations count.** Nested arrow functions and named functions inside the component body (`const updateRow = …`, `function Inner() { … }`) are NOT detected as separate components — even if PascalCase. This is intentional (fixed in `0.2.0-beta.21`). Keep helpers inside the component body freely.
+- **Multiple components per file are fine** — declare each as a top-level `export function Xxx` / `export const Xxx = (…) => …` and each will be detected independently. Just don't nest.
 - **One import source for primitives:** `@igrp/igrp-framework-react-design-system` carries IGRP components AND the full shadcn set (Button, Input, Card, Dialog, Sheet, Popover, Tabs, Tooltip, Toast, …). Do NOT import from `@/components/ui/*`, `shadcn/ui`, or raw Radix — those bypass IGRP theming and the build will mismatch.
 - **Domain hooks** live in `src/app/(myapp)/hooks/use-<name>.ts` and are also registered (see C).
 
@@ -1097,10 +1165,10 @@ Component file rules:
 
 ```ts
 export default {
-  types: [...existing, "types/utente"],
-  hooks: [...existing, "hooks/use-search-utente"],
+  types: [...existing, "types/entity"],
+  hooks: [...existing, "hooks/use-search-entity"],
   functions: [...existing],
-  components: [...existing, "components/search-utente/search-utente"],
+  components: [...existing, "components/search-entity/search-entity"],
 };
 ```
 
@@ -1113,16 +1181,16 @@ Path rules in the registry:
 
 ### D. The `iconProperties` / per-prop conventions
 
-If your custom component takes user-facing props that the JSON manifest will populate (icon names, labels, variant), declare them on the `properties` object verbatim. The engine passes them through as JSX props — so `properties.title: "Find utente"` becomes `<SearchUtente title="Find utente" />`. Any prop NOT in the engine's standard set (`commonProperties`, `iconProperties`, `dataProperties`, etc.) is forwarded raw.
+If your custom component takes user-facing props that the JSON manifest will populate (icon names, labels, variant), declare them on the `properties` object verbatim. The engine passes them through as JSX props — so `properties.title: "Find entity"` becomes `<SearchEntity title="Find entity" />`. Any prop NOT in the engine's standard set (`commonProperties`, `iconProperties`, `dataProperties`, etc.) is forwarded raw.
 
 ### E. Prototype-context caveat
 
 When you're building a **prototype** (the page lives under `prototype/src/app/(igrp)/(generated)/`), creating a brand-new custom component is heavier than the prototype goal warrants. Prefer primitive composition for the first iteration. Only escalate to a real custom component when:
 - The same UI block recurs across ≥3 places in the prototype, OR
-- The user explicitly asks for a named component ("create a `SearchUtente` widget…"), OR
+- The user explicitly asks for a named component ("create a `SearchEntity` widget…"), OR
 - The behavior genuinely can't be expressed with `combobox` / `inputText` + `interactions`.
 
-If you can't decide, ship the primitive composition AND mention in the chat reply (before the JSON fence) that a `SearchUtente` custom component could be extracted later if needed.
+If you can't decide, ship the primitive composition AND mention in the chat reply (before the JSON fence) that a `SearchEntity` custom component could be extracted later if needed.
 
 ---
 
@@ -1227,7 +1295,7 @@ Row-level actions (the last column of a list with "View / Edit / Delete" buttons
 
 ### Row-action navigation — use Next.js slug segments, NOT query strings
 
-When the row action navigates to a detail page (`/invoices/42`, `/utentes/abc-123/pagamentos`), build the URL through `href` + `segments`, NOT through a string interpolation in `href` itself. The engine's `resolve-segment-path` walks each entry in `segments[]` and replaces `[name]` placeholders in the href with `${row.original.<tag>}`.
+When the row action navigates to a detail page (`/invoices/42`, `/entities/abc-123/children`), build the URL through `href` + `segments`, NOT through a string interpolation in `href` itself. The engine's `resolve-segment-path` walks each entry in `segments[]` and replaces `[name]` placeholders in the href with `${row.original.<tag>}`.
 
 ✅ **Correct shape — navigate to `/invoices/[id]` using the row's `id`:**
 
@@ -1527,15 +1595,15 @@ The engine validates `applicationName`, `pageName`, `name`, `componentName`, `pa
 **Transliteration rule for Portuguese input.** When the user request is in Portuguese (or any language with accents/punctuation), normalize before emitting:
 
 - `ã ç é í ó ú á ê â ô` → `a c e i o u a e a o` (drop diacritics).
-- For `pageName` / `name` / `componentName`: also strip digits, spaces, hyphens, underscores. Use camelCase: `"Página de contribuintes"` → `"paginaContribuintes"`, `"gestão-utentes"` → `"gestaoUtentes"`.
-- For `description`: strip every punctuation char (`, . : ; ( ) [ ] / \ - _ " '`). Keep digits and spaces. `"Página de contribuintes (gestão)"` → `"Pagina de contribuintes gestao"`, `"List - filtered v2"` → `"List filtered v2"`.
+- For `pageName` / `name` / `componentName`: also strip digits, spaces, hyphens, underscores. Use camelCase: `"Página de clientes"` → `"paginaClientes"`, `"gestão-users"` → `"gestaoUsers"`.
+- For `description`: strip every punctuation char (`, . : ; ( ) [ ] / \ - _ " '`). Keep digits and spaces. `"Página de clientes (gestão)"` → `"Pagina de clientes gestao"`, `"List - filtered v2"` → `"List filtered v2"`.
 
 **Quick examples:**
 
 | User wants | ❌ Reject | ✅ Emit |
 |---|---|---|
 | Invoice list page | `pageName: "invoice-list"`, `description: "List of invoices"` | `pageName: "invoiceList"`, `description: "List of invoices"` |
-| Contribuintes page | `pageName: "contribuintes1"`, `description: "Página de contribuintes"` | `pageName: "contribuintes"`, `description: "Pagina de contribuintes"` |
+| Página de clientes | `pageName: "clientes1"`, `description: "Página de clientes"` | `pageName: "clientes"`, `description: "Pagina de clientes"` |
 | Users admin | `description: "Users (admin)"` | `description: "Users admin"` |
 
 ---
@@ -1581,6 +1649,10 @@ Before declaring a JSON complete, verify:
 | `Identifier 'router' has already been declared` | `const router = useRouter()` in onLoad AND page has `type:navigate` button | Remove from onLoad fnCode — engine auto-declares |
 | `Identifier 'useIGRPToast' has already been declared` | `useIGRPToast` imported in function imports | Remove — always auto-imported |
 | `Identifier 'refreshList' has already been declared` | Function name in `functions[]` collides with destructured hook result | Rename one (e.g. destructure as `doRefetch`) |
+| Input shows the literal text `''` / modal title shows `'Create X'` with quotes | State/field `defaultValue` is `"''"` or `"'Create X'"` — the CLI engine wraps `defaultValue` in a template literal, so the quotes become literal | Use `""` for empty (+ `isOptional: true`) and `"Create X"` (no surrounding quotes) for literals. See troubleshooting.md → "CLI engine gotchas" |
+| `Cannot find name 'setSelectMyComboValue'. Did you mean 'setSelectmyComboValue'?` | Hand-written onLoad/function references a combobox state with capitalized casing; the engine emits `select<tag>Value` using the tag's **original** casing | Match the exact generated name (no capitalization after `select`) — e.g. tag `myCombo` → `setSelectmyComboValue` |
+| `Type 'undefined' is not assignable to type 'number' \| 'Date'` in `initForm…` | Engine emits `initForm: z.infer<T>` (not `Partial<>`); a **required** number/date field with an empty `defaultValue` becomes `undefined` | Give the required field a valid default in `types[].fields[]`: `number → "0"`, `date → "new Date()"` (optional fields may stay empty) |
+| `Type 'number' is not assignable to type 'string'` on a `placeholder` | `inputNumber` / `inputText[type=number]` — engine emits the `placeholder` as a number literal | Remove `placeholder` from numeric inputs |
 | `X is not defined` at runtime (e.g. router, a hook) | Missing import in onLoad imports OR hook not invoked in onLoad | Add the import + invoke the hook in onLoad fnCode |
 | Combobox empty, no options | `setSelectXOptions` called at body level (infinite re-render); OR options hook not wired in onLoad | Wrap in useEffect; ensure hook is called and state setter runs after load |
 | Component value binding shows up but TypeScript can't infer the prop type | `data.<prop>.value.code` set without `type` field | Add `"type": "string" \| "boolean" \| "number" \| ...` next to `code` (see SKILL.md "value bindings") |
@@ -1647,10 +1719,10 @@ export default {
 
 | ✅ Correct | ❌ Wrong |
 |---|---|
-| `"hooks/use-utente"` | `"./hooks/use-utente.ts"` |
-| `"components/search/search-falecido"` | `"src/app/(myapp)/components/search/search-falecido"` |
+| `"hooks/use-entity"` | `"./hooks/use-entity.ts"` |
+| `"components/search/search-entity"` | `"src/app/(myapp)/components/search/search-entity"` |
 | `"process/use-process-3.2.7"` | `"process/use-process-3.2.7.tsx"` |
-| `"types/utente"` | `"@/types/utente"` |
+| `"types/entity"` | `"@/types/entity"` |
 
 ### When to register
 
@@ -1672,6 +1744,36 @@ diff <(find src/app/\(myapp\) -name "*.ts" -o -name "*.tsx" | grep -v ".test." |
 ```
 
 (or just open `igrp.config.ts` and visually scan)
+
+## Engine registry lifecycle (Studio integration only)
+
+These notes are relevant only if you're wiring the engine into a host tool (e.g. iGRP Studio itself). If you're authoring JSON manifests, skip this section.
+
+The engine keeps a **process-global component registry** that accumulates every `registerComponents(config)` call — including custom components registered from opened projects. Without an explicit reset, the palette leaks components across project switches.
+
+**API added in `0.2.0-beta.20`:**
+
+```ts
+import * as engine from '@igrp/igrp-studio-nextjs-engine';
+
+// once at startup
+await engine.initComponents();
+engine.registerComponents(projectAConfig);
+
+// on project switch — fast: only drops non-built-ins
+engine.resetComponents();
+engine.registerComponents(projectBConfig);
+
+// nuke-all escape hatch (rare) — requires initComponents() before rendering
+engine.clearComponents();
+```
+
+- `resetComponents()` drops custom / app-registered entries only. Built-ins stay, and no expensive re-registration runs.
+- `clearComponents()` drops everything (built-ins + custom); must be followed by `initComponents()` before generating anything.
+- Both mutate the internal `registry` object in place — the exported `registry` reference stays valid across calls.
+- If `initComponents()` never ran, `resetComponents()` is a no-op (no baseline to preserve). Always init first.
+
+**JSON authoring is unaffected** — the manifests you write don't call these APIs; only the host tool does.
 
 ## File layout reference
 
@@ -1698,11 +1800,34 @@ src/temp/menus/menus.ts       # menu registration
 ## Working rhythm for tasks
 
 1. **Understand the target**: is it a list page, form page, modal, processStep, or simple component?
-2. **Pick the closest reference**: contribuintes.json (list with filters), motivos.json (parametrization list+modal), imovelForm.json (form component with SearchGeografia).
+2. **Pick the closest reference** in `.igrpstudio/pages/`: a list-with-filters page, a parametrization list+modal page, a form component that uses a search widget — whatever most resembles the target.
 3. **Copy its skeleton** and adapt: rename ids/tags, update `types[]`, update states, adapt onLoad fnCode.
 4. **Wire data sources**: create/reuse hooks in `src/app/(myapp)/hooks/` if needed; add Next API routes in `src/app/api/` if proxying a new backend endpoint.
 5. **Run the validation checklist** above.
-6. **Build** (`npx next build`) to catch type-check errors. Webpack "Compiled successfully" means the engine generated valid TSX for your JSON.
+6. **Generate + verify via the CLI loop** — see "Generating the page — CLI + verify loop" below. Author JSON → `igrp gen page` → `npx tsc --noEmit` → if the generated TSX has errors, fix the **JSON** and regenerate. Do NOT depend on the user opening the Studio one page at a time.
 7. **Register in the menu** (`src/temp/menus/menus.ts`) if it's a user-facing page.
 
-**Never edit generated TSX under `src/app/(igrp)/(generated)/` as a first move.** Fix the JSON and let the user regenerate through iGRP Studio. Only patch TSX directly as a temporary workaround if the user confirms they can't regenerate immediately and understands it'll be overwritten.
+**Never edit generated TSX under `src/app/(igrp)/(generated)/` as a first move.** Fix the JSON and regenerate via the CLI (below). Only patch TSX directly as a temporary workaround if the user confirms they can't regenerate immediately and understands it'll be overwritten.
+
+---
+
+## Generating the page — CLI + verify loop (REQUIRED)
+
+After authoring or editing any `.igrpstudio/**` JSON, generate the TSX with the **iGRP CLI** (`igrp generate`, alias `igrp gen`) — it invokes the *same* `@igrp/igrp-studio-nextjs-engine` pipeline the Studio runs on "Page Builder save". This is the standard rhythm: **generate JSON → generate page (CLI) → verify TSX → if errors, fix JSON and regenerate.** Do NOT hand-write TSX and do NOT make the user regenerate page-by-page in the Studio.
+
+The loop for every JSON you touch:
+
+1. **Author/edit the JSON** (`.igrpstudio/pages/<pageName>.json`, `components/<name>.json`, or `process/<step>.json`).
+2. **Generate via CLI** — writes TSX into `src/app/(igrp)/(generated)/…` and re-persists the manifest (`--project .` auto-detects the `.igrpstudio/` marker):
+   ```bash
+   igrp gen page         --manifest .igrpstudio/pages/<pageName>.json --project . --quiet
+   igrp gen component    --manifest .igrpstudio/components/<name>.json --project . --quiet
+   igrp gen process-step --manifest .igrpstudio/process/<step>.json    --project . --quiet
+   ```
+   (The `--dry-run` summary line prints a misleading `app/pages/...` path — ignore it; the real write lands in `src/app/(igrp)/(generated)/…`.)
+3. **Verify the generated TSX**: `npx tsc --noEmit -p .` and grep the output for the page's `(generated)/` path.
+4. **If the generated TSX has errors → fix the JSON (never the .tsx) and go back to step 2.** Loop until tsc is clean for that page. The `.tsx` is overwritten on every gen, so hand-edits are always lost.
+
+**Batching many pages (zsh):** zsh does NOT word-split an unquoted `$VAR` — use `while IFS= read -r f; do igrp gen page --manifest "$f" --project . --quiet; done < list.txt`, never `for f in $FILES`.
+
+**Engine parity:** `igrp --version` ships a specific engine build. The repo can contain older pages generated by a previous engine; regenerating them **surfaces latent incompatibilities** that any current-engine regen (CLI or Studio) would hit — fix them forward, don't revert. See `troubleshooting.md` → "CLI engine gotchas (`igrp gen`)" for the concrete divergences (state-default wrapping, combobox casing, non-`Partial` initForm, numeric placeholders) and their JSON fixes.

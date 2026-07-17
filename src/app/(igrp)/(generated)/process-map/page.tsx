@@ -210,7 +210,7 @@ export default function PageProcessmapComponent() {
                   open={pm.manageAreas.areaForm.modalState.isOpen}
                   isEditing={!!pm.manageAreas.areaForm.modalState.editingArea}
                   formData={pm.manageAreas.areaForm.formData}
-                  allProcesses={pm.allProcesses?.content}
+                  allProcesses={pm.allProcessesManage?.content}
                   setOpen={(open) =>
                     !pm.manageAreas.areaForm.modalState.isOpen
                       ? pm.manageAreas.areaForm.openModal()

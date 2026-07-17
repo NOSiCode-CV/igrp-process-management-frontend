@@ -2,8 +2,8 @@
 
 import { cookies } from "next/headers";
 
-import { getAccessToken } from "@/lib/auth-helpers";
-import { isPreviewMode } from "@/lib/utils";
+import { PREVIEW_SESSION_STUB, serverSession } from "@/lib/auth";
+import { isAuthBypass } from "@/lib/utilities";
 
 export async function getTheme() {
   const cookieStore = await cookies();
@@ -14,17 +14,20 @@ export async function getTheme() {
 }
 
 export async function configLayout() {
-  // Check preview mode
-
-  // In preview mode, provide a mock session object to prevent client-side redirects
-  // The framework might check for session existence rather than just previewMode
-  const session = isPreviewMode()
-    ? ({
-        user: { name: "Preview User", email: "preview@example.com" },
-        accessToken: "preview-token",
-        expires: "9999-12-31T23:59:59.999Z",
-      } as any)
-    : await getAccessToken();
+  // NOTE: This function is called from both the root layout (app/layout.tsx) and the
+  // protected IGRP layout (app/(igrp)/layout.tsx). Auth enforcement is handled by
+  // verifySession() in dal.ts, which is called only from the protected layout.
+  // Do NOT add verifySession() here — it would redirect unauthenticated users on
+  // the root layout, breaking the login page.
+  //
+  // When auth is bypassed (preview mode OR AUTH_PROVIDER=none), provide a mock
+  // session so the layout doesn't kick the user to /login. The framework reads
+  // session existence rather than the preview flag when deciding redirects.
+  // Use the sanitized NextAuth Session — NOT auth.getAccessToken(), which
+  // returns the full JWT (including the refresh token) and would leak it into
+  // the client SessionProvider. serverSession() is redirect-free, so it stays
+  // safe to call from the root layout (auth enforcement lives in verifySession()).
+  const session = isAuthBypass() ? PREVIEW_SESSION_STUB : await serverSession();
 
   const { activeThemeValue, isScaled } = await getTheme();
 

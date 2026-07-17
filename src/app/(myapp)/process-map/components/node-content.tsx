@@ -2,7 +2,7 @@ import React from "react";
 import { ExtendedArea } from "../types";
 import { NodeActions } from "./node-actions";
 import { Area, Process } from "@igrp/platform-process-management-types";
-import { IGRPBadgePrimitive } from "@igrp/igrp-framework-react-design-system";
+import { IGRPBadge } from "@igrp/igrp-framework-react-design-system";
 
 interface NodeContentProps {
   node: ExtendedArea;
@@ -47,12 +47,12 @@ export function NodeContent({ node, onStartProcess }: NodeContentProps) {
             <div className="text-xs text-gray-500 truncate">
               {(node.data as Process).description}
             </div>
-            <IGRPBadgePrimitive
+            <IGRPBadge
               variant="outline"
               className="text-xs font-mono opacity-0 group-hover/process:opacity-100"
             >
               {(node.data as Process).processKey}
-            </IGRPBadgePrimitive>
+            </IGRPBadge>
           </>
         )}
       </div>

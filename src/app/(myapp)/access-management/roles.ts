@@ -27,14 +27,18 @@ function isAccessManagementEnabled(): boolean {
 
 /**
  * Access-management client configured for the machine-to-machine endpoints
- * (`/api/m2m/**`). Uses the M2M service id + token (legacy static-token path).
+ * (`/api/m2m/**`). Authenticates via OAuth2 `client_credentials` — the client
+ * fetches/caches a bearer token from `{baseUrl}/oauth2/token` using the M2M
+ * client id + secret (access-management-client 0.2). `serviceId` is sent as
+ * the `X-Machine-Service-ID` header.
  */
 function getM2MClient(): AccessManagementClient {
   return AccessManagementClient.create(
     { baseUrl: process.env.IGRP_ACCESS_MANAGEMENT_API || "" },
     {
-      serviceId: process.env.IGRP_M2M_SERVICE_ID || "",
-      token: process.env.IGRP_M2M_TOKEN || "",
+      clientId: process.env.IGRP_M2M_CLIENT_ID || "",
+      clientSecret: process.env.IGRP_M2M_CLIENT_SECRET || "",
+      serviceId: process.env.IGRP_SERVICE_ID || "",
     },
   );
 }

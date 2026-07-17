@@ -1,10 +1,9 @@
 import {
   IGRPBadge,
-  IGRPBadgePrimitive,
   IGRPColorVariants,
   IGRPCopyTo,
   IGRPIcon,
-  IGRPLabelPrimitive,
+  IGRPLabel,
   IGRPLink,
   IGRPSeparator,
 } from "@igrp/igrp-framework-react-design-system";
@@ -38,9 +37,10 @@ export function TaskInformation({
           {task.description && (
             <>
               <div>
-                <IGRPLabelPrimitive className="text-muted-foreground">
-                  Descrição
-                </IGRPLabelPrimitive>
+                <IGRPLabel
+                  label="Descrição"
+                  className="text-muted-foreground"
+                />
                 <p className="text-sm mt-1">{task.description}</p>
               </div>
               <IGRPSeparator />
@@ -51,7 +51,9 @@ export function TaskInformation({
             {/* Left column */}
             <div className="space-y-3">
               <div className="flex justify-between">
-                <span className="text-sm text-muted-foreground">Responsável</span>
+                <span className="text-sm text-muted-foreground">
+                  Responsável
+                </span>
                 <span className="text-sm font-medium">
                   {assignedBy || "Não atribuído"}
                 </span>
@@ -78,13 +80,13 @@ export function TaskInformation({
                   </span>
                   <div className="flex flex-wrap gap-1 justify-end">
                     {candidateGroups.map((group) => (
-                      <IGRPBadgePrimitive
+                      <IGRPBadge
                         key={group}
                         variant="outline"
                         className="text-xs"
                       >
                         {group}
-                      </IGRPBadgePrimitive>
+                      </IGRPBadge>
                     ))}
                   </div>
                 </div>
@@ -92,7 +94,9 @@ export function TaskInformation({
 
               {task.formKey && (
                 <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">Formulário</span>
+                  <span className="text-sm text-muted-foreground">
+                    Formulário
+                  </span>
                   <span className="text-sm font-mono">{task.formKey}</span>
                 </div>
               )}
@@ -139,9 +143,7 @@ export function TaskInformation({
                     className="h-4 w-4 text-muted-foreground"
                   />
                   <div className="flex-1 flex justify-between">
-                    <span className="text-sm text-muted-foreground">
-                      Prazo
-                    </span>
+                    <span className="text-sm text-muted-foreground">Prazo</span>
                     <span className="text-sm flex items-center gap-2">
                       {format(task.dueDate, "MMM d, yyyy HH:mm")}
                       {new Date() > new Date(task.dueDate) && (
@@ -175,9 +177,10 @@ export function TaskInformation({
           </div>
           <IGRPSeparator />
           <div>
-            <IGRPLabelPrimitive className="text-muted-foreground">
-              Instância do Processo
-            </IGRPLabelPrimitive>
+            <IGRPLabel
+              label="Instância do Processo"
+              className="text-muted-foreground"
+            />
             <div className="mt-2 flex items-center justify-between">
               <div>
                 <div className="text-sm font-medium">{task.processName}</div>

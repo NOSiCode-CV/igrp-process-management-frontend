@@ -142,6 +142,7 @@ export default function MyTasksFilter({
         {/* Process Date */}
         <div>
           <IGRPDatePicker
+            mode="single"
             id="processDate"
             name="processDate"
             label="Data do Processo"

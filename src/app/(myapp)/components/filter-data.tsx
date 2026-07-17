@@ -1,13 +1,13 @@
 import {
-  IGRPBadgePrimitive,
-  IGRPButtonPrimitive,
+  IGRPBadge,
+  IGRPButton,
   IGRPCombobox,
   IGRPIcon,
-  IGRPInputPrimitive,
-  IGRPLabelPrimitive,
-  IGRPPopoverContentPrimitive,
-  IGRPPopoverPrimitive,
-  IGRPPopoverTriggerPrimitive,
+  Input,
+  IGRPLabel,
+  PopoverContent,
+  Popover,
+  PopoverTrigger,
 } from "@igrp/igrp-framework-react-design-system";
 import { useState } from "react";
 import { OperatorOptions } from "./types";
@@ -64,9 +64,9 @@ function FilterData({
   };
 
   return (
-    <IGRPPopoverPrimitive open={isFilterOpen} onOpenChange={setIsFilterOpen}>
-      <IGRPPopoverTriggerPrimitive asChild>
-        <IGRPButtonPrimitive
+    <Popover open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+      <PopoverTrigger asChild>
+        <IGRPButton
           variant="outline"
           size="default"
           className={`bg-secondary border-border gap-2 ${variableFilters && variableFilters.length > 0 ? "border-primary" : ""}`}
@@ -74,30 +74,30 @@ function FilterData({
           <IGRPIcon iconName="Funnel" />
           <span>Filtrar por Dados</span>
           {variableFilters.length > 0 && (
-            <IGRPBadgePrimitive
-              variant="secondary"
+            <IGRPBadge
+              variant="soft"
               className="ml-1 h-5 w-5 p-0 flex items-center justify-center text-xs"
             >
               {variableFilters.length}
-            </IGRPBadgePrimitive>
+            </IGRPBadge>
           )}
-        </IGRPButtonPrimitive>
-      </IGRPPopoverTriggerPrimitive>
-      <IGRPPopoverContentPrimitive className="w-[480px] p-4" align="start">
+        </IGRPButton>
+      </PopoverTrigger>
+      <PopoverContent className="w-[480px] p-4" align="start">
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h4 className="font-medium text-sm">
               Filtrar por Variáveis do Processo
             </h4>
             {variableFilters.length > 0 && (
-              <IGRPButtonPrimitive
+              <IGRPButton
                 variant="ghost"
                 size="sm"
                 onClick={clearAllFilters}
                 className="h-7 text-xs"
               >
                 Limpar tudo
-              </IGRPButtonPrimitive>
+              </IGRPButton>
             )}
           </div>
 
@@ -114,9 +114,10 @@ function FilterData({
                   className="flex items-end gap-2 p-3 rounded-lg border border-border bg-secondary/50"
                 >
                   <div className="flex-1 space-y-1.5">
-                    <IGRPLabelPrimitive className="text-xs text-muted-foreground">
-                      Variável
-                    </IGRPLabelPrimitive>
+                    <IGRPLabel
+                      label="Variável"
+                      className="text-xs text-muted-foreground"
+                    />
                     {availableVariableNames &&
                     availableVariableNames.length > 0 ? (
                       <IGRPCombobox
@@ -132,7 +133,7 @@ function FilterData({
                         }))}
                       />
                     ) : (
-                      <IGRPInputPrimitive
+                      <Input
                         className="h-8 text-sm"
                         placeholder="Digite o nome da variável..."
                         value={filter.name}
@@ -146,9 +147,10 @@ function FilterData({
                   </div>
 
                   <div className="w-[120px] space-y-1.5">
-                    <IGRPLabelPrimitive className="text-xs text-muted-foreground">
-                      Operador
-                    </IGRPLabelPrimitive>
+                    <IGRPLabel
+                      label="Operador"
+                      className="text-xs text-muted-foreground"
+                    />
                     <IGRPCombobox
                       value={filter.operator}
                       onChange={(v) =>
@@ -161,10 +163,11 @@ function FilterData({
                   </div>
 
                   <div className="flex-1 space-y-1.5">
-                    <IGRPLabelPrimitive className="text-xs text-muted-foreground">
-                      Valor
-                    </IGRPLabelPrimitive>
-                    <IGRPInputPrimitive
+                    <IGRPLabel
+                      label="Valor"
+                      className="text-xs text-muted-foreground"
+                    />
+                    <Input
                       className="h-8 text-sm"
                       placeholder="Digite o valor..."
                       value={filter.value}
@@ -177,20 +180,21 @@ function FilterData({
                     />
                   </div>
 
-                  <IGRPButtonPrimitive
+                  <IGRPButton
                     variant="ghost"
                     size="icon"
                     className="h-8 w-8 text-muted-foreground hover:text-destructive"
                     onClick={() => removeVariableFilter(filter.id)}
+                    aria-label="Remover filtro"
                   >
                     <IGRPIcon iconName="X" />
-                  </IGRPButtonPrimitive>
+                  </IGRPButton>
                 </div>
               ))}
             </div>
           )}
 
-          <IGRPButtonPrimitive
+          <IGRPButton
             variant="outline"
             size="sm"
             onClick={addVariableFilter}
@@ -198,10 +202,10 @@ function FilterData({
           >
             <IGRPIcon iconName="Plus" />
             Adicionar Filtro
-          </IGRPButtonPrimitive>
+          </IGRPButton>
         </div>
-      </IGRPPopoverContentPrimitive>
-    </IGRPPopoverPrimitive>
+      </PopoverContent>
+    </Popover>
   );
 }
 
