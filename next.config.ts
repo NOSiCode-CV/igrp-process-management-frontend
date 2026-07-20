@@ -4,11 +4,11 @@ import { fileURLToPath } from "node:url";
 import type { NextConfig } from "next";
 import type { RemotePattern } from "next/dist/shared/lib/image-config";
 
+/** This app's own directory. */
+const appDir = path.dirname(fileURLToPath(import.meta.url));
+
 /** Monorepo root — stops Turbopack from traversing to D:\ while keeping the pnpm .pnpm store in scope for symlink resolution. */
-const turbopackRoot = path.resolve(
-  path.dirname(fileURLToPath(import.meta.url)),
-  "../..",
-);
+const turbopackRoot = path.resolve(appDir, "../..");
 
 // const turbopackRoot = path.dirname(fileURLToPath(import.meta.url));
 
@@ -40,6 +40,11 @@ const getRemotePatterns = () => {
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  // Pin the standalone tracing root to THIS app. Without it, Next infers a
+  // monorepo root above the app (multiple lockfiles up the tree) and nests the
+  // build — server.js lands in `.next/standalone/app/server.js` instead of the
+  // root, so the Docker image's `node server.js` @ /app crashes (MODULE_NOT_FOUND).
+  outputFileTracingRoot: appDir,
   basePath: basePath,
   images: {
     remotePatterns: getRemotePatterns(),
