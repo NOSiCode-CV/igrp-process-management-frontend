@@ -3,6 +3,7 @@
  */
 
 import { getApplication } from "../access-management/applications";
+import { getProcessExecutionBaseUrl } from "./runtime-config";
 
 export function formatSlug(slug: string): string {
   let baseUrl = "";
@@ -42,17 +43,14 @@ export const urlConfig = {
     applicationBase: string,
     processKey: string,
   ): Promise<string> => {
-    if (process.env.NEXT_PUBLIC_APP_BASE_RUNTIME_URL) {
-      return `${process.env.NEXT_PUBLIC_APP_BASE_RUNTIME_URL}/process/view/${processKey}/${processInstanceId}`;
+    const runtimeBaseUrl = await getProcessExecutionBaseUrl();
+    if (runtimeBaseUrl) {
+      return `${runtimeBaseUrl}/process/view/${processKey}/${processInstanceId}`;
     }
     const application = await getApplication(applicationBase);
     const { slug, url } = application;
 
-    const href = process.env.NEXT_PUBLIC_APP_BASE_RUNTIME_URL
-      ? process.env.NEXT_PUBLIC_APP_BASE_RUNTIME_URL
-      : slug
-        ? formatSlug(slug)
-        : (url ?? "");
+    const href = slug ? formatSlug(slug) : (url ?? "");
 
     return `${href}/process/view/${processKey}/${processInstanceId}`;
   },
@@ -72,17 +70,14 @@ export const urlConfig = {
     taskId: string,
     applicationBase: string,
   ): Promise<string> => {
-    if (process.env.NEXT_PUBLIC_APP_BASE_RUNTIME_URL) {
-      return `${process.env.NEXT_PUBLIC_APP_BASE_RUNTIME_URL}/process/${procReleaseKey}/${processInstanceId}/${taskKey}/${taskId}`;
+    const runtimeBaseUrl = await getProcessExecutionBaseUrl();
+    if (runtimeBaseUrl) {
+      return `${runtimeBaseUrl}/process/${procReleaseKey}/${processInstanceId}/${taskKey}/${taskId}`;
     }
     const application = await getApplication(applicationBase);
     const { slug, url } = application;
 
-    const href = process.env.NEXT_PUBLIC_APP_BASE_RUNTIME_URL
-      ? process.env.NEXT_PUBLIC_APP_BASE_RUNTIME_URL
-      : slug
-        ? formatSlug(slug)
-        : (url ?? "");
+    const href = slug ? formatSlug(slug) : (url ?? "");
 
     return `${href}/process/${procReleaseKey}/${processInstanceId}/${taskKey}/${taskId}`;
   },
@@ -92,10 +87,10 @@ export const urlConfig = {
    * @param segments - Array of URL segments
    * @returns Complete URL with provided segments
    */
-  buildProcessUrl: (...segments: string[]): string => {
-    const BASE_RUNTIME_URL = process.env.NEXT_PUBLIC_APP_BASE_RUNTIME_URL ?? "";
+  buildProcessUrl: async (...segments: string[]): Promise<string> => {
+    const runtimeBaseUrl = await getProcessExecutionBaseUrl();
 
-    return `${BASE_RUNTIME_URL}/process/${segments.join("/")}`;
+    return `${runtimeBaseUrl}/process/${segments.join("/")}`;
   },
 } as const;
 
