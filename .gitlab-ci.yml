@@ -22,6 +22,7 @@ stages:
 
 .build-template:
   only:
+    - main
     - develop
   before_script:
     - apk add --no-cache curl bash
@@ -38,6 +39,7 @@ build-arm64:
   tags:
     - arm64
   only:
+    - main
     - develop
    
 build-amd64:
@@ -51,6 +53,7 @@ build-amd64:
   tags:
     - nosi-runner
   only:
+    - main
     - develop
 
 create-manifest:
