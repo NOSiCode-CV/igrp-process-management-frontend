@@ -7,7 +7,7 @@ export async function getApplications(): Promise<ApplicationDTO[]> {
   const client = await getClientAccess();
 
   try {
-    const result = await client.applications.getApplications();
+    const result = await client.users.getCurrentUserApplications();
     return result.data as ApplicationDTO[];
   } catch (error) {
     console.error("[apps] Não foi possível obter os dados:", error);

@@ -19,6 +19,13 @@ import {
 } from "@igrp/platform-process-management-types";
 
 /**
+ * Verbose server-side logging for this client layer. Toggle WITHOUT touching
+ * code by setting `IGRP_DEBUG_CLIENT=true` in the environment (.env.local for
+ * local dev, or the deployment env). Logs print to the Next server terminal.
+ */
+const DEBUG = process.env.IGRP_DEBUG_CLIENT === "true";
+
+/**
  * Fetches a paginated list of processes.
  * @param page The page number to fetch.
  * @param size The number of items per page.
@@ -31,12 +38,33 @@ export const getProcesses = async (
   // Super admins bypass access-scoped filtering and see every process — force
   // `filterByCurrentUser: false` regardless of what the caller requested.
   const superAdmin = await isCurrentUserSuperAdmin();
-  const response = await processManagementClient.processes.getProcesses({
+  const params = {
     ...filter,
-    filterByCurrentUser: superAdmin ? false : filter?.filterByCurrentUser,
+    filterByCurrentUser:false,// superAdmin ? false : filter?.filterByCurrentUser,
     page: 0,
     size: DEFAULT_PAGE_SIZE,
-  });
+  };
+  if (DEBUG) {
+    console.log("[client/process][getProcesses] → request", {
+      superAdmin,
+      params,
+    });
+  }
+  const response = await processManagementClient.processes.getProcesses(params);
+  if (DEBUG) {
+    console.log("[client/process][getProcesses] ← response", {
+      totalElements: response.data?.totalElements,
+      count: response.data?.content?.length,
+      sample: response.data?.content?.slice(0, 3).map((p) => ({
+        id: p.id,
+        processKey: p.processKey,
+        name: p.name,
+        releaseId: p.releaseId,
+        status: p.status,
+        applicationBase: p.applicationBase,
+      })),
+    });
+  }
   return response.data;
 };
 

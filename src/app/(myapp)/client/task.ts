@@ -51,7 +51,6 @@ export const getTasks = async (
     priority: priority ?? undefined,
     page: 0,
     size: DEFAULT_PAGE_SIZE,
-    filterByCurrentUser: true,
   };
   const response = await processManagementClient.tasks.getTasks(params, {
     variables,
@@ -136,8 +135,7 @@ export const getAvailableTasks = async (
     priority: priority ?? undefined,
     status: "CREATED",
     page: 0,
-    size: DEFAULT_PAGE_SIZE,
-    filterByCurrentUser: true,
+    size: DEFAULT_PAGE_SIZE
   };
   const response =
     await processManagementClient.tasks.getAvailableTasks(searchParams);
