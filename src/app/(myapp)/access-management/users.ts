@@ -6,9 +6,17 @@ import {
 } from "@igrp/platform-access-management-client-ts";
 
 export interface BusinessUserOption {
-  value: string; // user email (the identifier used by the assign API)
-  label: string; // `${name} (${email})`
+  value: string; // user id (assignee identity used by the API)
+  label: string; // `${name} (${email})` — email is display-only
 }
+
+type BusinessUser = IGRPUserDTO & { externalId?: string };
+
+/**
+ * Verbose server-side logging. Toggle with `IGRP_DEBUG_CLIENT=true`
+ * (.env.local). Logs print to the Next server terminal.
+ */
+const DEBUG = process.env.IGRP_DEBUG_CLIENT === "true";
 
 function isAccessManagementEnabled(): boolean {
   return !!process.env.IGRP_ACCESS_MANAGEMENT_API;
@@ -37,21 +45,48 @@ export async function getBusinessUsers(): Promise<BusinessUserOption[]> {
   // The users endpoint requires at least one filter (applicationCode,
   // departmentCode, roleCode or permissionName). Scope to this application's
   // users via applicationCode (always available from env).
-  const result = await client.m2m.getUsersForBusiness([], {
+  const query = {
     activeOnly: true,
     applicationCode: process.env.IGRP_APP_CODE || "",
-  });
-  const users = (result.data as IGRPUserDTO[]) ?? [];
+  };
+  if (DEBUG) {
+    console.log("[access-management/users][getBusinessUsers] → request", query);
+  }
+  const result = await client.m2m.getUsersForBusiness([], query);
+  const users = (result.data as BusinessUser[]) ?? [];
+  if (DEBUG) {
+    console.log("[access-management/users][getBusinessUsers] ← response", {
+      status: result.status,
+      count: users.length,
+      users: users.map((u) => ({
+        id: u.id,
+        name: u.name,
+        username: u.username,
+        email: u.email,
+        externalId: u.externalId,
+        status: u.status,
+      })),
+    });
+  }
 
-  return users.map<BusinessUserOption>((user) => {
-    // `name` can be null; fall back to username, then email, to avoid "null (…)".
-    const displayName = user.name || user.username || user.email;
-    return {
-      value: user.email,
-      label:
-        displayName === user.email
-          ? user.email
-          : `${displayName} (${user.email})`,
-    };
-  });
+  const options = users
+    .filter((user) => user.id != null)
+    .map<BusinessUserOption>((user) => {
+      // `name` can be null; fall back to username, then email, to avoid "null (…)".
+      const displayName = user.name || user.username || user.email;
+      return {
+        value: String(user.id),
+        label:
+          displayName === user.email
+            ? user.email
+            : `${displayName} (${user.email})`,
+      };
+    });
+  if (DEBUG) {
+    console.log("[access-management/users][getBusinessUsers] ← options", {
+      count: options.length,
+      options,
+    });
+  }
+  return options;
 }

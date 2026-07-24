@@ -64,7 +64,7 @@ export default function PageTaskmanagementComponent() {
       row.taskId,
       row.applicationBase,
     );
-    router.push(taskUrl as any);
+    window.location.assign(taskUrl as any);
   }
 
   //-------------------reserved area start----------------------------

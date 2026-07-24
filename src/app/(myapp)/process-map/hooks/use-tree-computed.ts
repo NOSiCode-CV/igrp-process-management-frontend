@@ -8,9 +8,12 @@ export function useTreeComputed(
   expandedNodes: Set<string>,
   allProcesses: Process[],
 ) {
+  // NOTE: `allProcesses` MUST be in the deps — the access filter reads it. It
+  // loads from a separate query (usually after `areas`), so omitting it left
+  // the tree built against an empty process set → "Ver Mapa" pruned everything.
   const treeNodes = useMemo(() => {
     return buildProcessTree(areas, allProcesses);
-  }, [areas]);
+  }, [areas, allProcesses]);
 
   // Management view: every area must show (no pruning, no access filter).
   const manageNodes = useMemo(() => {
@@ -18,7 +21,7 @@ export function useTreeComputed(
       pruneEmpty: false,
       filterByAccess: false,
     });
-  }, [areas]);
+  }, [areas, allProcesses]);
 
   const flatNodes = useMemo(() => {
     return flattenTreeNodes(treeNodes, expandedNodes);

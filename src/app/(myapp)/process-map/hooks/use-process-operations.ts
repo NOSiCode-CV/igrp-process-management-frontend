@@ -145,7 +145,10 @@ export function useProcessOperations(
                 firstTask.id,
                 firstTask.applicationBase ?? "",
               );
-              router.push(taskUrl);
+              // Jump to the (separate) process-execution app — hard navigation,
+              // not router.push, which is for in-app routes and would apply this
+              // app's basePath to a foreign URL.
+              window.location.assign(taskUrl);
             }
           } catch (taskError) {
             console.warn(

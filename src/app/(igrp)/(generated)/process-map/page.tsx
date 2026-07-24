@@ -74,7 +74,6 @@ export default function PageProcessmapComponent() {
                   title={`Mapa de Processo`}
                   description={`Navegue pelos processos organizados por áreas.`}
                   variant={`h6`}
-                  roleColor={`solid`}
                   color={`primary`}
                   showIcon={true}
                   iconName={`Map`}
@@ -139,7 +138,6 @@ export default function PageProcessmapComponent() {
                             title={` Estrutura do Mapa de Processos`}
                             description={`Hierarquia de áreas e subáreas`}
                             variant={`h6`}
-                            roleColor={`solid`}
                             color={`primary`}
                             showIcon={false}
                           ></IGRPHeadline>
@@ -187,7 +185,6 @@ export default function PageProcessmapComponent() {
                           title={`Detalhes da área`}
                           description={`Visualizar processos e configurações atribuídos`}
                           variant={`h6`}
-                          roleColor={`solid`}
                           color={`primary`}
                           showIcon={false}
                         ></IGRPHeadline>
