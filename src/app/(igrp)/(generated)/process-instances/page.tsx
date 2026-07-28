@@ -64,11 +64,9 @@ export default function PageProcessinstancesComponent() {
   }
 
   async function consultarProcess(row: any): Promise<void> {
-    // Navigate to task execution page using centralized URL config
     const taskUrl = await urlConfig.buildProcessInstanceUrl(
       row.processInstanceId,
       row.applicationBase,
-      row.procReleaseKey,
     );
     window.location.assign(taskUrl as any);
   }

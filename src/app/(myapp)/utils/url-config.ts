@@ -5,6 +5,19 @@
 import { getApplication } from "../access-management/applications";
 import { getProcessExecutionBaseUrl } from "./runtime-config";
 
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function assertProcessInstanceUuid(value: string): string {
+  const trimmed = value.trim();
+  if (!UUID_RE.test(trimmed)) {
+    throw new Error(
+      `Invalid processInstanceId for consultation route: "${value}". Expected UUID.`,
+    );
+  }
+  return trimmed;
+}
+
 export function formatSlug(slug: string): string {
   let baseUrl = "";
   if (slug.startsWith("/apps")) {
@@ -33,26 +46,25 @@ export function formatSlug(slug: string): string {
  */
 export const urlConfig = {
   /**
-   * Build URL for process instance execution
-   * @param procReleaseKey - Process release key
-   * @param processInstanceId - Process instance ID
-   * @returns Complete URL for process instance
+   * Build URL for process instance consultation (read-only).
+   * Route: /process/view/{processInstanceId}
+   * Requires process instance UUID.
    */
   buildProcessInstanceUrl: async (
     processInstanceId: string,
     applicationBase: string,
-    processKey: string,
   ): Promise<string> => {
+    const safeProcessInstanceId = assertProcessInstanceUuid(processInstanceId);
     const runtimeBaseUrl = await getProcessExecutionBaseUrl();
     if (runtimeBaseUrl) {
-      return `${runtimeBaseUrl}/process/view/${processKey}/${processInstanceId}`;
+      return `${runtimeBaseUrl}/process/view/${safeProcessInstanceId}`;
     }
     const application = await getApplication(applicationBase);
     const { slug, url } = application;
 
     const href = slug ? formatSlug(slug) : (url ?? "");
 
-    return `${href}/process/view/${processKey}/${processInstanceId}`;
+    return `${href}/process/view/${safeProcessInstanceId}`;
   },
 
   /**
@@ -98,6 +110,7 @@ export const urlConfig = {
  * URL patterns for reference
  */
 export const urlPatterns = {
+  PROCESS_CONSULTATION: "/process/view/{processInstanceId}",
   PROCESS_INSTANCE: "/process/{procReleaseKey}/{processInstanceId}",
   TASK_EXECUTION:
     "/process/{procReleaseKey}/{processInstanceId}/{taskKey}/{taskId}",
