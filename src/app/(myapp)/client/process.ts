@@ -5,6 +5,7 @@ import { isCurrentUserSuperAdmin } from "@/lib/igrp-claims";
 import {
   CreateProcessArtifactRequest,
   CreateProcessInstanceRequest,
+  CreateAndStartProcessRequest,
   CreateProcessSequenceRequest,
   StartProcessInstanceRequest,
   PaginatedResponse,
@@ -59,13 +60,13 @@ export const getProcesses = async (
         id: p.id,
         processKey: p.processKey,
         name: p.name,
-        releaseId: p.releaseId,
-        status: p.status,
+        deploymentId: p.deploymentId,
         applicationBase: p.applicationBase,
       })),
     });
   }
-  return response.data;
+  // OpenAPI returns ProcessDeploymentListDTO; UI still models list rows as Process.
+  return response.data as unknown as PaginatedResponse<Process>;
 };
 
 /**
@@ -173,14 +174,13 @@ export const createProcessInstance = async (
   applicationBase: string,
   priority: number,
   businessKey?: string,
-  variables?: Array<{ name: string; value: string }>,
+  _variables?: Array<{ name: string; value: string }>,
 ): Promise<ProcessInstance> => {
   const body: CreateProcessInstanceRequest = {
     processDefinitionId,
     processKey,
     applicationBase: applicationBase,
     businessKey,
-    variables,
     priority: priority,
   };
 
@@ -232,7 +232,7 @@ export const createAndStartProcess = async (
   businessKey?: string,
   variables?: Array<{ name: string; value: string }>,
 ): Promise<ProcessInstance> => {
-  const body: CreateProcessInstanceRequest = {
+  const body: CreateAndStartProcessRequest = {
     processDefinitionId,
     processKey,
     applicationBase: applicationBase,
