@@ -20,13 +20,7 @@ export const getProcessInstances = async (filters?: {
   processType?: string;
   processNumber?: string;
   name?: string;
-  status?:
-    | "CREATED"
-    | "RUNNING"
-    | "SUSPENDED"
-    | "CANCELED"
-    | "COMPLETED"
-    | "TERMINATED";
+  status?: "CREATED" | "RUNNING" | "SUSPENDED" | "CANCELED" | "COMPLETED";
   businessKey?: string;
   dateFrom?: string | null;
   dateTo?: string | null;

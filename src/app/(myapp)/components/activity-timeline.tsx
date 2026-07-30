@@ -60,12 +60,15 @@ export function ActivityTimeline({
     <div className="space-y-6">
       {activities.length > 0 ? (
         activities.map((activity, index) => {
-          const Icon = activityIcons[activity.type] || (
+          const activityType = activity.type ?? "OTHER";
+          const Icon = activityIcons[activityType] || (
             <IGRPIcon iconName="Cog" />
           );
-          const color = activityColors[activity.type] || "bg-muted";
+          const color = activityColors[activityType] || "bg-muted";
 
           const status = activity.status ? activity.status.toLowerCase() : "";
+          const durationMs =
+            activity.durationMillis ?? activity.duration ?? undefined;
 
           return (
             <div key={index} className="relative flex gap-4">
@@ -91,10 +94,10 @@ export function ActivityTimeline({
                     {activity.startTime ? (
                       <>
                         <div className="text-sm text-foreground">
-                          {format(activity.startTime, "HH:mm:ss")}
+                          {format(new Date(activity.startTime), "HH:mm:ss")}
                         </div>
                         <div className="text-xs text-muted-foreground">
-                          {format(activity.startTime, "MMM d, yyyy")}
+                          {format(new Date(activity.startTime), "MMM d, yyyy")}
                         </div>
                       </>
                     ) : (
@@ -113,9 +116,9 @@ export function ActivityTimeline({
                       {activity.assignee}
                     </div>
                   )}
-                  {activity.duration !== undefined && (
+                  {durationMs !== undefined && (
                     <div className="text-muted-foreground">
-                      Duração: {formatDuration(activity.duration)}
+                      Duração: {formatDuration(durationMs)}
                     </div>
                   )}
                   <div

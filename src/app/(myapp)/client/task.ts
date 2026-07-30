@@ -135,7 +135,7 @@ export const getAvailableTasks = async (
     priority: priority ?? undefined,
     status: "CREATED",
     page: 0,
-    size: DEFAULT_PAGE_SIZE
+    size: DEFAULT_PAGE_SIZE,
   };
   const response =
     await processManagementClient.tasks.getAvailableTasks(searchParams);
@@ -232,7 +232,7 @@ export const unclaimTask = async (
  * Completes a task.
  * @param taskId The ID of the task to complete.
  * @param variables Optional variables to pass to the task.
- * @returns A promise that resolves to a PostResponse.
+ * @returns A promise that resolves to the updated Task.
  */
 export const completeTask = async (
   taskId: string,
@@ -240,7 +240,7 @@ export const completeTask = async (
     name: string;
     value: string;
   }>,
-): Promise<PostResponse> => {
+): Promise<Task> => {
   const processManagementClient = await getIGRPProcessClient();
   return (
     await processManagementClient.tasks.completeTask(taskId, { variables })

@@ -10,7 +10,6 @@ export interface ProcessInstancesFilters {
     | "SUSPENDED"
     | "CANCELED"
     | "COMPLETED"
-    | "TERMINATED"
     | undefined;
   dateFrom: string;
   dateTo: string;
