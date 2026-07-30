@@ -362,9 +362,10 @@ export function useProcessConfig({
             .filter(Boolean)
         : [];
 
-      const defaultPriorityDesc = source.priority
+      const priority = source.priority;
+      const defaultPriorityDesc = priority
         ? PRIORITY_OPTIONS.find(
-            (o) => o.value.toString() === source.priority.toString(),
+            (o) => o.value.toString() === priority.toString(),
           )?.label
         : "";
 
