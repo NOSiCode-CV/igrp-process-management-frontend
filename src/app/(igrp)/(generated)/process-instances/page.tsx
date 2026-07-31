@@ -344,14 +344,16 @@ export default function PageProcessinstancesComponent() {
                       href={`/process-instances/${row.original.processInstanceId}`}
                       variant={`ghost`}
                       icon={`Info`}
+
                       action={() => {
                         goToProcessRuntime(rowData);
                       }}
                     ></IGRPDataTableButtonLink>
                     <IGRPDataTableButtonLink
-                      labelTrigger={`Consuta Processo`}
+                      labelTrigger={`Consultar Processo`}
                       variant={`ghost`}
                       icon={`FileSpreadsheet`}
+
                       action={() => {
                         consultarProcess(rowData);
                       }}
@@ -363,6 +365,7 @@ export default function PageProcessinstancesComponent() {
             },
           ]}
           clientFilters={[]}
+
           data={tableData}
         />
       )}

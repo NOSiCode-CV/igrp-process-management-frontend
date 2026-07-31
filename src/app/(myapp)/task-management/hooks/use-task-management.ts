@@ -72,7 +72,7 @@ export function useTaskManagement() {
       const createdDate = new Date(task.startedAt);
       const currentDate = new Date();
       const diffTime = Math.abs(currentDate.getTime() - createdDate.getTime());
-      const priorityValue = task.priority + "";
+      const priorityValue = task.priority;
 
       const assignedBy =
         task.userProfileAssignedBy?.fullName || task.assignedBy;
@@ -91,7 +91,10 @@ export function useTaskManagement() {
         processInstanceId: task.processInstanceId,
         processName: task.processName,
         priority: getPriorityTemplate(
-          getPriorityBadge(task.processKey, priorityValue),
+          getPriorityBadge(
+            task.processKey,
+            priorityValue != null ? String(priorityValue) : "",
+          ),
           priorityValue,
         ),
         statusDesc: task.statusDesc,

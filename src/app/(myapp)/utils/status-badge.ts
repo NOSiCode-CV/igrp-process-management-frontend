@@ -89,9 +89,9 @@ export interface ApiPriorityInfo {
 }
 
 /**
- * Returns badge options for a task priority using API-defined priorities when available.
- * When apiPriority carries an explicit hex color, `badgeStyle` (inline hex) is returned;
- * otherwise a DS `color` is returned so the badge stays theme-aware.
+ * Badge options from process-definition priorities only.
+ * No hardcoded 1–5 fallback (avoids flashing "Baixa"/"Muito Baixa" while the
+ * API priorities are still loading).
  */
 export function getPriorityBadgeFromApi(
   apiPriority: ApiPriorityInfo | undefined,
@@ -101,25 +101,22 @@ export function getPriorityBadgeFromApi(
   color?: IGRPColorVariants;
   badgeStyle?: React.CSSProperties;
 } {
-  if (apiPriority) {
-    const label = apiPriority.label || String(apiPriority.value);
-    if (apiPriority.color) {
-      return {
-        label,
-        badgeStyle: {
-          backgroundColor: `${apiPriority.color}20`,
-          color: apiPriority.color,
-        },
-      };
-    }
+  if (!apiPriority) {
+    return { label: "" };
+  }
+
+  const label = apiPriority.label || String(apiPriority.value);
+  if (apiPriority.color) {
     return {
       label,
-      color: getPriorityColor(fallback).color,
+      badgeStyle: {
+        backgroundColor: `${apiPriority.color}20`,
+        color: apiPriority.color,
+      },
     };
   }
-  const fallbackColor = getPriorityColor(fallback);
   return {
-    label: fallbackColor.label,
-    color: fallbackColor.color,
+    label,
+    color: getPriorityVariant(fallback.priority),
   };
 }

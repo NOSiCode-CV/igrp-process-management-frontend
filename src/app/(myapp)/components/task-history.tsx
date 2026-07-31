@@ -152,16 +152,15 @@ function TaskHistory({ tasks }: TaskHistoryProps) {
             accessorKey: "priority",
             cell: ({ row }) => {
               const task = row.original;
+              const label = getPriorityLabel(task.priority);
+              if (!label) return null;
               return (
                 <IGRPBadge
                   variant="soft"
-                  color={
-                    getPriorityColor({ priority: task.priority || 0 }).color
-                  }
-                  showIcon
-                  iconName="Flag"
+                  color={getPriorityColor({ priority: task.priority! }).color}
+                  className="border-transparent shadow-none"
                 >
-                  {getPriorityLabel(task.priority || 0)}
+                  {label}
                 </IGRPBadge>
               );
             },

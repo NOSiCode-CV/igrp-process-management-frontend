@@ -28,20 +28,49 @@ export interface PriorityBadgeOptions {
   badgeStyle?: React.CSSProperties;
 }
 
+/** True when a priority is present (1–5 scale). Missing/0/blank → empty cell. */
+export function hasPriorityValue(
+  priority: string | number | null | undefined,
+): boolean {
+  if (priority == null) return false;
+  if (typeof priority === "string") {
+    const t = priority.trim();
+    if (!t || t === "undefined" || t === "null") return false;
+    const n = Number(t);
+    return !Number.isNaN(n) && n > 0;
+  }
+  return !Number.isNaN(priority) && priority > 0;
+}
+
+/**
+ * Priority badge aligned with status badges: `variant="soft"` (no hard border look).
+ * Returns empty when there is no priority — no fallback label.
+ */
 export const getPriorityTemplate = (
-  opts: PriorityBadgeOptions,
-  priorityValue: string,
+  opts: PriorityBadgeOptions | null | undefined,
+  priorityValue: string | number | null | undefined,
 ) => {
-  if (opts.badgeStyle) {
+  if (!hasPriorityValue(priorityValue)) return "";
+  const label = opts?.label?.trim();
+  if (!label) return "";
+
+  // Same surface as Estado (`soft`); kill residual border from the DS base class.
+  const badgeClassName = "border-transparent shadow-none";
+
+  if (opts?.badgeStyle) {
     return (
-      <IGRPBadge style={opts.badgeStyle}>
-        {opts.label ?? priorityValue}
+      <IGRPBadge
+        variant="soft"
+        style={opts.badgeStyle}
+        className={badgeClassName}
+      >
+        {label}
       </IGRPBadge>
     );
   }
   return (
-    <IGRPBadge variant="soft" color={opts.color}>
-      {opts.label ?? priorityValue}
+    <IGRPBadge variant="soft" color={opts?.color} className={badgeClassName}>
+      {label}
     </IGRPBadge>
   );
 };
