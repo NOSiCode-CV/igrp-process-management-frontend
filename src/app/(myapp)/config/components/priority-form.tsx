@@ -11,6 +11,7 @@ import {
   Table,
   TableRow,
 } from "@igrp/igrp-framework-react-design-system";
+import type { Priority } from "@igrp/platform-process-management-types";
 
 function PriorityForm({
   priorityOptions,
@@ -24,7 +25,7 @@ function PriorityForm({
   newPriorityValue,
   setNewPriorityValue,
 }: {
-  priorityOptions: any;
+  priorityOptions: Priority[];
   updatePriorityOption: (index: number, field: string, value: string) => void;
   removePriorityOption: (index: number) => void;
   addPriorityOption: () => void;
@@ -48,11 +49,11 @@ function PriorityForm({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {(priorityOptions || []).map((option: any, index: number) => (
-              <TableRow key={index}>
+            {(priorityOptions || []).map((option, index) => (
+              <TableRow key={option.id ?? `${option.code}-${index}`}>
                 <TableCell>
                   <IGRPInputText
-                    value={option.label}
+                    value={option.label ?? ""}
                     onChange={(e) =>
                       updatePriorityOption(index, "label", e.target.value)
                     }
@@ -62,9 +63,9 @@ function PriorityForm({
                 <TableCell>
                   <IGRPInputText
                     type="number"
-                    value={option.value}
+                    value={option.code ?? ""}
                     onChange={(e) =>
-                      updatePriorityOption(index, "value", e.target.value)
+                      updatePriorityOption(index, "code", e.target.value)
                     }
                     className="h-8"
                   />
@@ -72,10 +73,10 @@ function PriorityForm({
                 <TableCell>
                   <IGRPInputColor
                     defaultValue="#ED6C02"
-                    placeholder="Cor (ex.: #ED6C02)" //text-success-500 #00FF00
-                    value={option.color}
+                    placeholder="Cor (ex.: #ED6C02)"
+                    value={option.color ?? "#ED6C02"}
                     onChange={(value) =>
-                      updatePriorityOption(index, "color", value)
+                      updatePriorityOption(index, "color", value ?? "")
                     }
                     format="hex"
                   />
@@ -96,34 +97,33 @@ function PriorityForm({
         </Table>
       ) : (
         <p className="text-sm text-muted-foreground text-center py-4">
-          No priority options defined
+          Nenhuma opção de prioridade definida
         </p>
       )}
 
       <IGRPSeparator />
 
-      {/* Add New Priority Option */}
       <div className="space-y-2">
         <IGRPLabel label="Adicionar Opção de Prioridade"></IGRPLabel>
         <div className="flex gap-2">
           <IGRPInputText
             placeholder="Rótulo (ex.: Alta)"
-            value={newPriorityLabel}
+            value={newPriorityLabel ?? ""}
             onChange={(e) => setNewPriorityLabel(e.target.value)}
             className="flex-1"
           />
           <IGRPInputText
             type="number"
             placeholder="Valor (ex.: 1)"
-            value={newPriorityValue}
+            value={newPriorityValue ?? ""}
             onChange={(e) => setNewPriorityValue(e.target.value)}
             className="w-32"
           />
           <IGRPInputColor
             defaultValue="#ED6C02"
-            placeholder="Cor (ex.: #ED6C02)" //green #00FF00
+            placeholder="Cor (ex.: #ED6C02)"
             value={newPriorityColor || "#ED6C02"}
-            onChange={(value) => setNewPriorityColor(value)}
+            onChange={(value) => setNewPriorityColor(value ?? "")}
             className="w-32"
             format="hex"
           />

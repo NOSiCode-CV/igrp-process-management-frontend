@@ -41,7 +41,7 @@ export function useAvailableTasks() {
       const createdDate = new Date(task.startedAt);
       const now = new Date();
       const diffTime = Math.abs(now.getTime() - createdDate.getTime());
-      const priorityValue = task.priority + "";
+      const priorityValue = task.priority;
 
       return {
         processInfo: getProcessInfo(task.processName, task.processNumber),
@@ -60,7 +60,10 @@ export function useAvailableTasks() {
         createdDate: task.startedAt,
         assignedBy: task.assignedBy,
         priority: getPriorityTemplate(
-          getPriorityBadge(task.processKey, priorityValue),
+          getPriorityBadge(
+            task.processKey,
+            priorityValue != null ? String(priorityValue) : "",
+          ),
           priorityValue,
         ),
       };

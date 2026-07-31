@@ -223,15 +223,18 @@ export function useProcessConfig({
   };
 
   // --- priorityOptions ---
-  const fallbackPrioritys: Priority[] = PRIORITY_OPTIONS.map((o) => ({
-    label: o.label,
-    value: String(o.value),
-    code: String(o.value),
-    weight: Number(o.value) ?? 1,
-    processDefinitionKey: processKey!,
-    color: o.color,
-    id: undefined,
-  }));
+  const fallbackPrioritys: Priority[] = useMemo(
+    () =>
+      PRIORITY_OPTIONS.map((o) => ({
+        label: o.label,
+        code: String(o.value),
+        weight: Number(o.value) || 1,
+        processDefinitionKey: processKey!,
+        color: o.color ?? "",
+        id: undefined,
+      })),
+    [processKey],
+  );
 
   const { data: prioritiesData } = useQuery({
     queryKey: ["process-priorities", processKey],
@@ -240,11 +243,19 @@ export function useProcessConfig({
   });
 
   const defaultPrioritys: Priority[] = useMemo(() => {
-    if (prioritiesData && prioritiesData.length > 0) {
-      return prioritiesData;
-    }
-    return fallbackPrioritys;
-  }, [prioritiesData]);
+    const list =
+      prioritiesData && prioritiesData.length > 0
+        ? prioritiesData
+        : fallbackPrioritys;
+    return list.map((p) => ({
+      ...p,
+      label: p.label ?? "",
+      code: String(p.code ?? ""),
+      color: p.color ?? "",
+      weight: Number(p.weight ?? p.code) || 1,
+      processDefinitionKey: p.processDefinitionKey ?? processKey,
+    }));
+  }, [prioritiesData, fallbackPrioritys, processKey]);
 
   const [priorityOptions, setPrioritys] =
     useState<Priority[]>(fallbackPrioritys);
@@ -270,11 +281,17 @@ export function useProcessConfig({
 
   const updatePriority = (index: number, field: string, value: string) => {
     setPrioritys((prev) =>
-      prev.map((opt, i) =>
-        i === index
-          ? { ...opt, [field as "label" | "value" | "color"]: value }
-          : opt,
-      ),
+      prev.map((opt, i) => {
+        if (i !== index) return opt;
+        if (field === "code") {
+          return {
+            ...opt,
+            code: value,
+            weight: Number(value) || opt.weight,
+          };
+        }
+        return { ...opt, [field]: value };
+      }),
     );
   };
 
@@ -295,11 +312,9 @@ export function useProcessConfig({
     setPrioritys((prev) => [
       ...prev,
       {
-        ...prev,
         label,
-        value,
         code: value,
-        weight: Number(value) ?? 1,
+        weight: Number(value) || 1,
         processDefinitionKey: processKey!,
         color,
       },

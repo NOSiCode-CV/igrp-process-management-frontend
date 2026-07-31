@@ -27,13 +27,14 @@ export const useTaskDetails = (taskId: string) => {
 
   const transformTask = useMemo(() => {
     if (!data) return null;
+    const priorityLabel = getPriorityLabel(data.priority);
     return {
       ...data,
       color: getTaskStatusVariant((data.status as any) || "primary"),
-      priorityLabel: getPriorityLabel(data.priority || 0),
-      priorityVariant: getPriorityVariant(
-        data.priority || 0,
-      ) as IGRPBadgeProps["color"],
+      priorityLabel: priorityLabel || undefined,
+      priorityVariant: priorityLabel
+        ? (getPriorityVariant(data.priority!) as IGRPBadgeProps["color"])
+        : undefined,
       variables: [
         ...(data?.processVariables || []),
         /*  ...(data?.variables || []), */

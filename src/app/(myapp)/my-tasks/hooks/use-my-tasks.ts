@@ -43,7 +43,7 @@ export function useMyTasks() {
       const createdDate = new Date(task.startedAt);
       const currentDate = new Date();
       const diffTime = Math.abs(currentDate.getTime() - createdDate.getTime());
-      const priorityValue = task.priority + "";
+      const priorityValue = task.priority;
 
       return {
         currentStep: task.name,
@@ -51,7 +51,10 @@ export function useMyTasks() {
         startedAt: format(task.startedAt, "dd MMM, HH:mm"),
         duration: formatDuration(diffTime),
         priority: getPriorityTemplate(
-          getPriorityBadge(task.processKey, priorityValue),
+          getPriorityBadge(
+            task.processKey,
+            priorityValue != null ? String(priorityValue) : "",
+          ),
           priorityValue,
         ),
         processKey: task.processKey,

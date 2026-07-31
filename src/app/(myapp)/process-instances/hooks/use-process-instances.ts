@@ -46,7 +46,7 @@ export function useProcessInstances() {
       const createdDate = new Date(instance.startedAt);
       const now = instance.endedAt ? new Date(instance.endedAt) : new Date();
       const diffTime = Math.abs(now.getTime() - createdDate.getTime());
-      const priorityValue = instance.priority + "";
+      const priorityValue = instance.priority;
 
       const startedBy =
         instance.userProfileStartedBy?.fullName || instance.startedBy;
@@ -66,7 +66,10 @@ export function useProcessInstances() {
           instance.status as ProcessInstanceStatus,
         ),
         priority: getPriorityTemplate(
-          getPriorityBadge(instance.procReleaseKey, priorityValue),
+          getPriorityBadge(
+            instance.procReleaseKey,
+            priorityValue != null ? String(priorityValue) : "",
+          ),
           priorityValue,
         ),
         status: getProcessStatusTemplate(

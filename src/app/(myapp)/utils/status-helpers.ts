@@ -72,9 +72,10 @@ export const getTaskStatusLabel = (status: TaskStatus): string => {
  * Get localized label for priority - matching your priority modal labels
  */
 export const getPriorityLabel = (
-  priority: Priority | string | number,
+  priority: Priority | string | number | null | undefined,
 ): string => {
-  const priorityStr = priority.toString();
+  if (priority == null || priority === "") return "";
+  const priorityStr = priority.toString().trim();
   switch (priorityStr) {
     case "5":
       return "Muito Alta";
@@ -87,7 +88,8 @@ export const getPriorityLabel = (
     case "1":
       return "Muito Baixa";
     default:
-      return "Muito Baixa";
+      // Unknown / missing — no invented fallback label.
+      return "";
   }
 };
 
