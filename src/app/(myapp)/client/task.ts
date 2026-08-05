@@ -170,6 +170,35 @@ export const claimTask = async (taskId: string): Promise<PostResponse> => {
   return (await processManagementClient.tasks.claimTask(taskId, {})).data;
 };
 
+/** The API answers 409 when the task is no longer in a claimable status. */
+function isTaskAlreadyAssignedError(error: unknown): boolean {
+  return (error as { status?: number } | null)?.status === 409;
+}
+
+/**
+ * Claims a task, tolerating one that the engine already assigned.
+ *
+ * The first task of a freshly started process is frequently already ASSIGNED
+ * (BPMN assignee, or a retry of this same flow) and the API answers 409. For
+ * callers that only need the task to be open before navigating into it, that
+ * is a success, not a failure. The status check has to happen here: this is a
+ * server action, and in production Next.js masks the error before it reaches
+ * the client, taking `status` with it.
+ *
+ * @returns `true` when this call claimed the task, `false` when it was already assigned.
+ */
+export const claimTaskIfUnassigned = async (
+  taskId: string,
+): Promise<boolean> => {
+  try {
+    await claimTask(taskId);
+    return true;
+  } catch (error) {
+    if (isTaskAlreadyAssignedError(error)) return false;
+    throw error;
+  }
+};
+
 /**
  * Unassigns a task from a user.
  * @param taskId The ID of the task to unassign.

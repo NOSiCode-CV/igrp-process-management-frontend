@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import {
-  claimTask,
+  claimTaskIfUnassigned,
   getTasksByProcessInstance,
 } from "@/app/(myapp)/client/task";
 import {
@@ -134,8 +134,10 @@ export function useProcessOperations(
             if (tasksResponse.content && tasksResponse.content.length > 0) {
               const firstTask = tasksResponse.content[0];
 
-              // Claim the task before redirecting
-              await claimTask(firstTask.id); // You may want to get the actual user from context/session
+              // Claim the task before redirecting. An already ASSIGNED task is
+              // the normal outcome here (the engine assigns the first task to
+              // the starter) and must not abort the redirect.
+              await claimTaskIfUnassigned(firstTask.id);
 
               // Build task execution URL using the first available task
               const taskUrl = await urlConfig.buildTaskExecutionUrl(
@@ -155,6 +157,14 @@ export function useProcessOperations(
               "Error fetching tasks for process instance:",
               taskError,
             );
+            // The process did start, so don't leave the user on the map with
+            // only a success toast and no navigation to explain.
+            igrpToast({
+              type: "info",
+              title: "Tarefa não aberta",
+              description:
+                "O processo foi iniciado, mas não foi possível abrir a primeira tarefa. Consulte-a em Minhas Tarefas.",
+            });
           }
         }
 
