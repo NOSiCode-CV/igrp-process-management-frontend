@@ -9,26 +9,18 @@
  * Docker image works across environments: the value comes from the container
  * env at runtime instead of being inlined into the client bundle at build time.
  *
- * Falls back to the legacy `NEXT_PUBLIC_APP_BASE_RUNTIME_URL` for backward
- * compatibility. Returns "" when unset (callers then resolve the target app
- * from Access Management).
+ * When unset, callers resolve the target app from Access Management
+ * (`applicationBase` → slug/url). Do not set this to a bare gateway host
+ * (e.g. `https://apps-test.inss.gw`) — it must include the owning app prefix
+ * (e.g. `https://apps-test.inss.gw/apps/core`) or be left empty.
  */
 export async function getProcessExecutionBaseUrl(): Promise<string> {
-  const runtimeUrl = process.env.IGRP_PROCESS_EXECUTION_URL || "";
-  const legacyUrl = process.env.NEXT_PUBLIC_APP_BASE_RUNTIME_URL || "";
-  const resolved = runtimeUrl || legacyUrl;
+  const resolved = (process.env.IGRP_PROCESS_EXECUTION_URL || "").trim();
 
-  // Temporary cluster diagnostics: an empty value here makes callers fall back
-  // to the Access Management slug, which is where wrong app routes come from.
+  // Temporary cluster diagnostics: empty → Access Management slug path.
   console.log("[runtime-config:discover] process-execution-base-url", {
-    IGRP_PROCESS_EXECUTION_URL: runtimeUrl,
-    NEXT_PUBLIC_APP_BASE_RUNTIME_URL: legacyUrl,
-    resolved,
-    source: runtimeUrl
-      ? "IGRP_PROCESS_EXECUTION_URL"
-      : legacyUrl
-        ? "NEXT_PUBLIC_APP_BASE_RUNTIME_URL"
-        : "none",
+    IGRP_PROCESS_EXECUTION_URL: resolved,
+    source: resolved ? "IGRP_PROCESS_EXECUTION_URL" : "none",
   });
 
   return resolved;

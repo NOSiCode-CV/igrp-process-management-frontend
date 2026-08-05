@@ -8,9 +8,9 @@ import { getProcessExecutionBaseUrl } from "./runtime-config";
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-// Temporary cluster diagnostics: the target app prefix is resolved from either
-// IGRP_PROCESS_EXECUTION_URL or the Access Management slug, and a wrong value
-// only shows up as a 404 on the redirect. Grep the browser console for this tag.
+// Temporary cluster diagnostics: the target app prefix is resolved from
+// IGRP_PROCESS_EXECUTION_URL (when set) or the Access Management slug. A wrong
+// override only shows up as a 404 on the redirect — grep for this tag.
 const LOG_TAG = "[url-config:discover]";
 
 function logDiscovery(step: string, data: Record<string, unknown>): void {
