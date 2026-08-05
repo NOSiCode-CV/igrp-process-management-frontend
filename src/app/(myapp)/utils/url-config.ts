@@ -18,6 +18,30 @@ function assertProcessInstanceUuid(value: string): string {
   return trimmed;
 }
 
+/**
+ * Resolve the target app prefix for a process route.
+ *
+ * The runtime override wins; otherwise the app is looked up in Access
+ * Management by `applicationBase` (the app that owns the process). Without it
+ * the route would be built against this app's own origin and 404.
+ */
+async function resolveAppHref(applicationBase: string): Promise<string> {
+  const runtimeBaseUrl = await getProcessExecutionBaseUrl();
+  if (runtimeBaseUrl) return runtimeBaseUrl;
+
+  const appCode = (applicationBase ?? "").trim();
+  if (!appCode) {
+    throw new Error(
+      "applicationBase em falta: não é possível resolver a aplicação do processo.",
+    );
+  }
+
+  const application = await getApplication(appCode);
+  const { slug, url } = application;
+
+  return slug ? formatSlug(slug) : (url ?? "");
+}
+
 export function formatSlug(slug: string): string {
   let baseUrl = "";
   if (slug.startsWith("/apps")) {
@@ -55,14 +79,7 @@ export const urlConfig = {
     applicationBase: string,
   ): Promise<string> => {
     const safeProcessInstanceId = assertProcessInstanceUuid(processInstanceId);
-    const runtimeBaseUrl = await getProcessExecutionBaseUrl();
-    if (runtimeBaseUrl) {
-      return `${runtimeBaseUrl}/process/view/${safeProcessInstanceId}`;
-    }
-    const application = await getApplication(applicationBase);
-    const { slug, url } = application;
-
-    const href = slug ? formatSlug(slug) : (url ?? "");
+    const href = await resolveAppHref(applicationBase);
 
     return `${href}/process/view/${safeProcessInstanceId}`;
   },
@@ -82,14 +99,7 @@ export const urlConfig = {
     taskId: string,
     applicationBase: string,
   ): Promise<string> => {
-    const runtimeBaseUrl = await getProcessExecutionBaseUrl();
-    if (runtimeBaseUrl) {
-      return `${runtimeBaseUrl}/process/${procReleaseKey}/${processInstanceId}/${taskKey}/${taskId}`;
-    }
-    const application = await getApplication(applicationBase);
-    const { slug, url } = application;
-
-    const href = slug ? formatSlug(slug) : (url ?? "");
+    const href = await resolveAppHref(applicationBase);
 
     return `${href}/process/${procReleaseKey}/${processInstanceId}/${taskKey}/${taskId}`;
   },

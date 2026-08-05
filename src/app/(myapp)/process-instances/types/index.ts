@@ -58,4 +58,6 @@ export interface ProcessInstanceTableRow {
   procReleaseKey: string;
   startedBy: string;
   businessKey: string;
+  /** App onde o processo corre — prefixo do URL de consulta/execução. */
+  applicationBase: string;
 }
