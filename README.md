@@ -183,7 +183,6 @@ Coming soon
 - **When empty**: The app resolves the target from Access Management (`getApplication(applicationBase)` → `slug` / `url`), so cluster routes keep the correct `/apps/<slug>` prefix
 - **Cluster note**: Prefer leaving this empty in multi-app clusters so each process opens in its owning app. Set it only when all processes run in a single fixed execution app
 - **Example (cluster, fixed Core app)**: `https://apps-test.inss.gw/apps/core`
-- **Do not use**: `NEXT_PUBLIC_APP_BASE_RUNTIME_URL` — that legacy fallback pointed at the gateway host without the app slug and produced broken routes like `/process/...` instead of `/apps/core/process/...`
 
 ### Synchronization Variables
 
