@@ -66,6 +66,27 @@ export function formatSlug(slug: string): string {
 }
 
 /**
+ * Absolute URL of the page that is opening the task, appended as `returnUrl`.
+ *
+ * The execution app lives behind another basePath (often another host), so it
+ * cannot guess where the user came from. Declaring the origin here is what
+ * makes the "Voltar" button of the success dialog land back on this list
+ * instead of falling back to `/`. No-op on the server (no current page).
+ */
+function currentPageReturnUrl(): string | null {
+  if (typeof window === "undefined") return null;
+  return window.location.href;
+}
+
+function withReturnUrl(target: string, returnUrl: string | null): string {
+  if (!returnUrl) return target;
+
+  const separator = target.includes("?") ? "&" : "?";
+
+  return `${target}${separator}returnUrl=${encodeURIComponent(returnUrl)}`;
+}
+
+/**
  * URL builders for process management
  */
 export const urlConfig = {
@@ -101,7 +122,10 @@ export const urlConfig = {
   ): Promise<string> => {
     const href = await resolveAppHref(applicationBase);
 
-    return `${href}/process/${procReleaseKey}/${processInstanceId}/${taskKey}/${taskId}`;
+    return withReturnUrl(
+      `${href}/process/${procReleaseKey}/${processInstanceId}/${taskKey}/${taskId}`,
+      currentPageReturnUrl(),
+    );
   },
 
   /**
