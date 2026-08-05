@@ -15,13 +15,5 @@
  * (e.g. `https://apps-test.inss.gw/apps/core`) or be left empty.
  */
 export async function getProcessExecutionBaseUrl(): Promise<string> {
-  const resolved = (process.env.IGRP_PROCESS_EXECUTION_URL || "").trim();
-
-  // Temporary cluster diagnostics: empty → Access Management slug path.
-  console.log("[runtime-config:discover] process-execution-base-url", {
-    IGRP_PROCESS_EXECUTION_URL: resolved,
-    source: resolved ? "IGRP_PROCESS_EXECUTION_URL" : "none",
-  });
-
-  return resolved;
+  return (process.env.IGRP_PROCESS_EXECUTION_URL || "").trim();
 }
