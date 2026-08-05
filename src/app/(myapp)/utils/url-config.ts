@@ -8,20 +8,6 @@ import { getProcessExecutionBaseUrl } from "./runtime-config";
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-// Temporary cluster diagnostics: the target app prefix is resolved from
-// IGRP_PROCESS_EXECUTION_URL (when set) or the Access Management slug. A wrong
-// override only shows up as a 404 on the redirect — grep for this tag.
-const LOG_TAG = "[url-config:discover]";
-
-function logDiscovery(step: string, data: Record<string, unknown>): void {
-  console.log(LOG_TAG, step, {
-    ...data,
-    // Which screen triggered the build (my-tasks, task-management, …).
-    calledFrom:
-      typeof window === "undefined" ? "server" : window.location.pathname,
-  });
-}
-
 function assertProcessInstanceUuid(value: string): string {
   const trimmed = value.trim();
   if (!UUID_RE.test(trimmed)) {
@@ -41,37 +27,19 @@ function assertProcessInstanceUuid(value: string): string {
  */
 async function resolveAppHref(applicationBase: string): Promise<string> {
   const runtimeBaseUrl = await getProcessExecutionBaseUrl();
-
-  logDiscovery("resolveAppHref:input", {
-    applicationBase,
-    runtimeBaseUrl,
-    source: runtimeBaseUrl ? "runtime-env" : "access-management",
-  });
-
   if (runtimeBaseUrl) return runtimeBaseUrl;
 
   const appCode = (applicationBase ?? "").trim();
   if (!appCode) {
-    logDiscovery("resolveAppHref:missing-application-base", {
-      applicationBase,
-    });
     throw new Error(
       "applicationBase em falta: não é possível resolver a aplicação do processo.",
     );
   }
+
   const application = await getApplication(appCode);
   const { slug, url } = application;
-  const href = slug ? formatSlug(slug) : (url ?? "");
 
-  logDiscovery("resolveAppHref:resolved", {
-    appCode,
-    slug,
-    url,
-    href,
-    usedFallbackUrl: !slug,
-  });
-
-  return href;
+  return slug ? formatSlug(slug) : (url ?? "");
 }
 
 export function formatSlug(slug: string): string {
@@ -112,16 +80,8 @@ export const urlConfig = {
   ): Promise<string> => {
     const safeProcessInstanceId = assertProcessInstanceUuid(processInstanceId);
     const href = await resolveAppHref(applicationBase);
-    const target = `${href}/process/view/${safeProcessInstanceId}`;
 
-    logDiscovery("buildProcessInstanceUrl", {
-      processInstanceId: safeProcessInstanceId,
-      applicationBase,
-      href,
-      target,
-    });
-
-    return target;
+    return `${href}/process/view/${safeProcessInstanceId}`;
   },
 
   /**
@@ -139,20 +99,9 @@ export const urlConfig = {
     taskId: string,
     applicationBase: string,
   ): Promise<string> => {
-    logDiscovery("buildTaskExecutionUrl:input", {
-      procReleaseKey,
-      processInstanceId,
-      taskKey,
-      taskId,
-      applicationBase,
-    });
-
     const href = await resolveAppHref(applicationBase);
-    const target = `${href}/process/${procReleaseKey}/${processInstanceId}/${taskKey}/${taskId}`;
 
-    logDiscovery("buildTaskExecutionUrl:target", { href, target });
-
-    return target;
+    return `${href}/process/${procReleaseKey}/${processInstanceId}/${taskKey}/${taskId}`;
   },
 
   /**
