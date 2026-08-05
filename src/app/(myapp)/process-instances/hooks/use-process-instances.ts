@@ -80,6 +80,7 @@ export function useProcessInstances() {
         startedBy: startedBy,
         statusDesc: instance.statusDesc,
         businessKey: getBusinessKeyTemplate(instance.businessKey ?? ""),
+        applicationBase: instance.applicationBase,
       };
     });
   }, [processInstancesState.processInstances, getPriorityBadge]);
