@@ -94,8 +94,8 @@ export function VariablesView({ variables }: VariablesViewProps) {
             filterFn: IGRPDataTableFacetedFilterFn,
           },
           {
+            id: "type",
             header: "Tipo",
-            accessorKey: "value",
             cell: ({ row }) => {
               const variable = row.original;
               const type = getTypeFromValue(variable.value);
@@ -129,6 +129,7 @@ export function VariablesView({ variables }: VariablesViewProps) {
             filterFn: IGRPDataTableFacetedFilterFn,
           },
           {
+            id: "value",
             header: "Valor",
             accessorKey: "value",
             cell: ({ row }) => {
