@@ -16,13 +16,12 @@ export async function getApplications(): Promise<ApplicationDTO[]> {
 }
 
 export async function getApplication(appCode: string): Promise<ApplicationDTO> {
-  const client = await getClientAccess();
+  const applications = await getApplications();
+  const application = applications.find((app) => app.code === appCode);
 
-  try {
-    const result = await client.applications.getApplicationByCode(appCode);
-    return result.data as ApplicationDTO;
-  } catch (error: unknown) {
-    console.error("[apps] Não foi possível obter os dados:", error);
-    throw error;
+  if (!application) {
+    throw new Error(`Aplicação não encontrada: ${appCode}`);
   }
+
+  return application;
 }
