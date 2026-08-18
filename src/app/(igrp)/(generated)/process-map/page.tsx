@@ -110,7 +110,10 @@ export default function PageProcessmapComponent() {
                   setOpen={pm.priorityModal.setOpen}
                   onSave={pm.priorityModal.onSave}
                 ></PriorityModal>
-                <LoadingPage isLoading={pm.loading}></LoadingPage>
+                <LoadingPage
+                  isLoading={pm.loading}
+                  message="A carregar mapa..."
+                ></LoadingPage>
               </>
             ),
           },
@@ -159,20 +162,30 @@ export default function PageProcessmapComponent() {
                         </div>
                       </IGRPCardHeader>
                       <IGRPCardContent className={cn('space-y-4', 'space-x-3', 'space-y-3')}>
-                        <AreaTreeNodeComponent
-                          nodes={pm.manageAreas.areas}
-                          expandedNodes={pm.manageAreas.expandedNodes}
-                          onToggle={pm.toggleNode}
-                          onDelete={pm.manageAreas.handleDeleteArea}
-                          onRemoveProcess={pm.manageAreas.handleRemoveProcess}
-                          onEdit={(node, parentAreaId) => {
-                            setOpenArea(true);
-                            pm.manageAreas.areaForm.openModal(node as ExtendedArea, parentAreaId);
-                          }}
-                          onAddSubarea={(parentAreaId) =>
-                            pm.manageAreas.areaForm.openModal(undefined, parentAreaId)
-                          }
-                        ></AreaTreeNodeComponent>
+                        {pm.loading ? (
+                          <LoadingPage
+                            isLoading={true}
+                            message="A carregar áreas..."
+                          />
+                        ) : (
+                          <AreaTreeNodeComponent
+                            nodes={pm.manageAreas.areas}
+                            expandedNodes={pm.manageAreas.expandedNodes}
+                            onToggle={pm.toggleNode}
+                            onDelete={pm.manageAreas.handleDeleteArea}
+                            onRemoveProcess={pm.manageAreas.handleRemoveProcess}
+                            onEdit={(node, parentAreaId) => {
+                              setOpenArea(true);
+                              pm.manageAreas.areaForm.openModal(
+                                node as ExtendedArea,
+                                parentAreaId,
+                              );
+                            }}
+                            onAddSubarea={(parentAreaId) =>
+                              pm.manageAreas.areaForm.openModal(undefined, parentAreaId)
+                            }
+                          ></AreaTreeNodeComponent>
+                        )}
                       </IGRPCardContent>
                       <IGRPCardFooter></IGRPCardFooter>
                     </IGRPCard>
@@ -208,11 +221,15 @@ export default function PageProcessmapComponent() {
                   isEditing={!!pm.manageAreas.areaForm.modalState.editingArea}
                   formData={pm.manageAreas.areaForm.formData}
                   allProcesses={pm.allProcessesManage?.content}
-                  setOpen={(open) =>
-                    !pm.manageAreas.areaForm.modalState.isOpen
-                      ? pm.manageAreas.areaForm.openModal()
-                      : pm.manageAreas.areaForm.closeModal()
-                  }
+                  setOpen={(next) => {
+                    if (next) {
+                      if (!pm.manageAreas.areaForm.modalState.isOpen) {
+                        pm.manageAreas.areaForm.openModal();
+                      }
+                      return;
+                    }
+                    pm.manageAreas.areaForm.closeModal();
+                  }}
                   onClose={pm.manageAreas.areaForm.closeModal}
                   onSave={(data) =>
                     pm.manageAreas.areaForm.modalState.editingArea

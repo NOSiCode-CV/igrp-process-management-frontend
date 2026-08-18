@@ -1,4 +1,6 @@
+import { useState } from "react";
 import {
+  IGRPAlertDialog,
   IGRPBadge,
   IGRPButton,
   IGRPIcon,
@@ -16,6 +18,8 @@ function AreaDetails({
   onEdit: (area: ExtendedArea, parentId?: string) => void;
   onDelete: (areaId: string) => Promise<void>;
 }) {
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const { process: processes, parentId } = selectedArea || {};
 
   return (
@@ -81,18 +85,54 @@ function AreaDetails({
               onClick={() => onEdit(selectedArea, parentId)}
               className="flex-1"
               iconName="Edit"
+              disabled={isDeleting}
             >
               Edit
             </IGRPButton>
             <IGRPButton
               variant="destructive"
-              onClick={() => onDelete(selectedArea?.id)}
+              onClick={() => setConfirmDelete(true)}
               className="flex-1"
               iconName="Trash"
+              loading={isDeleting}
+              loadingText="A eliminar..."
+              disabled={isDeleting}
             >
               Delete
             </IGRPButton>
           </div>
+          <IGRPAlertDialog
+            title="Excluir área"
+            open={confirmDelete}
+            onOpenChange={(open) => {
+              if (isDeleting) return;
+              setConfirmDelete(open);
+            }}
+            description="Tem certeza que deseja excluir esta área? Todas as subáreas também serão removidas."
+            iconName="Trash2"
+            showIcon={true}
+            variant="destructive"
+            actionLabel={isDeleting ? "A eliminar..." : "Excluir"}
+            cancelLabel="Cancelar"
+            actionProps={{ disabled: isDeleting }}
+            cancelProps={{ disabled: isDeleting }}
+            onAction={() => {
+              if (!selectedArea?.id) return;
+              void (async () => {
+                setIsDeleting(true);
+                try {
+                  await onDelete(selectedArea.id);
+                  setConfirmDelete(false);
+                } finally {
+                  setIsDeleting(false);
+                }
+              })();
+            }}
+            onCancel={() => {
+              if (isDeleting) return;
+              setConfirmDelete(false);
+            }}
+          ></IGRPAlertDialog>
         </div>
       ) : (
         <div className="text-center py-12 text-muted-foreground">

@@ -67,6 +67,8 @@ export default function PageConfigComponent() {
 
   const [filterProcess, setFilterProcess] = useState<string | undefined>(``);
 
+  const [isResetting, setIsResetting] = useState<boolean>(false);
+
   const { igrpToast } = useIGRPToast();
 
   function handleAddGroup(value: any): void {
@@ -90,6 +92,22 @@ export default function PageConfigComponent() {
       return;
     }
     saveConfigurationMutation.mutate();
+  }
+
+  async function handleResetConfiguration(): Promise<void> {
+    if (isResetting || saveConfigurationMutation.isPending) return;
+    setIsResetting(true);
+    try {
+      if (selectedProcess?.id) {
+        numberingConfig.loadConfig();
+        assignGroups.loadConfig();
+        priorityConfig.loadConfig();
+        userTasks.loadConfig();
+      }
+      await loadAllProcesses();
+    } finally {
+      setIsResetting(false);
+    }
   }
 
   function generateSampleNumber(): string {
@@ -145,9 +163,9 @@ export default function PageConfigComponent() {
     setTaskNewGroup('');
   }
 
-  function onArchiveSuccess(): void {
-    loadAllProcesses();
+  async function onArchiveSuccess(): Promise<void> {
     setSelectedProcess(undefined);
+    await loadAllProcesses();
   }
 
   const {
@@ -266,7 +284,10 @@ export default function PageConfigComponent() {
                   variant={`secondary`}
                   size={`default`}
                   showIcon={false}
-                  onClick={() => {}}
+                  loading={isResetting}
+                  loadingText={`A recarregar...`}
+                  disabled={isResetting || saveConfigurationMutation.isPending}
+                  onClick={handleResetConfiguration}
                 >
                   Cancelar
                 </IGRPButton>
@@ -276,6 +297,9 @@ export default function PageConfigComponent() {
                   variant={`default`}
                   size={`default`}
                   showIcon={false}
+                  loading={saveConfigurationMutation.isPending}
+                  loadingText={`A gravar...`}
+                  disabled={isResetting || saveConfigurationMutation.isPending}
                   onClick={handleSaveConfiguration}
                 >
                   Guardar Configuração
@@ -580,7 +604,10 @@ export default function PageConfigComponent() {
                                 open={editingTask !== undefined}
                                 editingTask={editingTask}
                                 setOpen={(open) => !open && closeTaskEditor()}
-                                onSave={(req) => selectedProcess?.id && userTasks.handleSave(req)}
+                                onSave={async (req) => {
+                                  if (!selectedProcess?.id) return;
+                                  await userTasks.handleSave(req);
+                                }}
                               ></TaskEditor>
                             )}
                           </IGRPCardContent>

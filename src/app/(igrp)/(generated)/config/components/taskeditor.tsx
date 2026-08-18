@@ -37,7 +37,7 @@ export default function Taskeditor({
   open: boolean;
   setOpen: (open: boolean) => void;
   editingTask: any;
-  onSave: (req: any) => string;
+  onSave: (req: any) => void | Promise<void>;
   availableGroups?: string;
 }) {
   const [formKey, setFormKey] = useState<string>(`''`);
@@ -49,6 +49,8 @@ export default function Taskeditor({
   const [defaultDueDate, setDefaultDueDate] = useState<string>(`''`);
 
   const [newGroupInput, setNewGroupInput] = useState<string>(`''`);
+
+  const [isSaving, setIsSaving] = useState<boolean>(false);
 
   const { igrpToast } = useIGRPToast();
 
@@ -68,8 +70,8 @@ export default function Taskeditor({
     setNewGroupInput('');
   }
 
-  function handleSave(): void {
-    if (!editingTask?.key || !editingTask?.name) return;
+  async function handleSave(): Promise<void> {
+    if (!editingTask?.key || !editingTask?.name || isSaving) return;
     const req: CreateProcessArtifactRequest = {
       key: editingTask.key,
       name: editingTask.name,
@@ -78,8 +80,13 @@ export default function Taskeditor({
       dueDate: defaultDueDate.trim(),
       priority: Number(defaultPriority),
     };
-    onSave(req);
-    setOpen(false);
+    setIsSaving(true);
+    try {
+      await onSave(req);
+      setOpen(false);
+    } finally {
+      setIsSaving(false);
+    }
   }
 
   useEffect(() => {
@@ -181,6 +188,7 @@ export default function Taskeditor({
                   variant={`outline`}
                   size={`default`}
                   showIcon={false}
+                  disabled={isSaving}
                   onClick={(open) => setOpen(!open)}
                 >
                   Cancelar
@@ -191,6 +199,9 @@ export default function Taskeditor({
                   variant={`default`}
                   size={`default`}
                   showIcon={false}
+                  loading={isSaving}
+                  loadingText={`A gravar...`}
+                  disabled={isSaving}
                   onClick={handleSave}
                 >
                   Guardar Alterações

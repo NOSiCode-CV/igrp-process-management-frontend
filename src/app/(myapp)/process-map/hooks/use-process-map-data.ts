@@ -56,7 +56,8 @@ export function useProcessMapData() {
 
   const {
     data: queryData,
-    isLoading: loading,
+    isPending,
+    isFetching,
     error: queryError,
   } = useQuery({
     queryKey: PROCESS_MAP_AREAS_QUERY_KEY,
@@ -85,7 +86,9 @@ export function useProcessMapData() {
   }, [queryData]);
 
   const refreshData = useCallback(() => {
-    queryClient.refetchQueries({ queryKey: PROCESS_MAP_AREAS_QUERY_KEY });
+    return queryClient.invalidateQueries({
+      queryKey: PROCESS_MAP_AREAS_QUERY_KEY,
+    });
   }, [queryClient]);
 
   const loadSubareas = useCallback(async (_parentAreaId: string) => {
@@ -95,7 +98,7 @@ export function useProcessMapData() {
   return {
     areas,
     loadedNodes,
-    loading,
+    loading: isPending || isFetching,
     error,
     loadSubareas,
     refreshData,

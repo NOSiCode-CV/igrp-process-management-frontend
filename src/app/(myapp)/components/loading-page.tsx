@@ -7,16 +7,19 @@ function LoadingPage({
 }: {
   isLoading: boolean;
   error?: boolean;
-  message?: "loading";
+  message?: string;
 }) {
   if (isLoading && !error) {
     return (
-      <div className="flex items-center gap2 flex-col">
+      <div className="flex items-center gap-2 flex-col py-10">
         <IGRPLoadingSpinner />
-        <span> {message}</span>
+        <span className="text-sm text-muted-foreground">
+          {message || "A carregar..."}
+        </span>
       </div>
     );
   }
+  return null;
 }
 
 export { LoadingPage };

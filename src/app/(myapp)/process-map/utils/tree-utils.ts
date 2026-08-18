@@ -1,5 +1,10 @@
 import { Process } from "@igrp/platform-process-management-types";
 import { ExtendedArea } from "../types";
+import {
+  isCatalogAccessible,
+  processKeyOf,
+  resolveAssociatedProcess,
+} from "./process-identity";
 
 /**
  * Converts flat areas with processes into a hierarchical tree structure
@@ -22,28 +27,31 @@ export function buildProcessTree(
     parentId?: string,
   ): ExtendedArea | null {
     // Add active processes as children. When filtering by access, keep only the
-    // ones the current user can reach (matched against allProcesses by release id).
+    // ones the current user can reach (matched against the catalog by processKey
+    // so a new publish does not drop the association).
     const areaProcesses = area.process || [];
     const processNodes: ExtendedArea[] = areaProcesses
       .filter(
         (process: Process) =>
           process.status === "ACTIVE" &&
-          (!filterByAccess ||
-            allProcesses.some((p) => p.id === process.releaseId)),
+          (!filterByAccess || isCatalogAccessible(process, allProcesses)),
       )
-      .map((process: Process) => ({
-        ...process,
-        id: `process-${process.id}`,
-        name: process.name || process.processKey || "Unnamed Process",
-        type: "process",
-        level: level + 1,
-        parentId: area.id,
-        data: process,
-        hasChildren: false,
-        isLoaded: true,
-        applicationBase: applicationBase,
-        code: "",
-      }));
+      .map((process: Process) => {
+        const resolved = resolveAssociatedProcess(process, allProcesses);
+        return {
+          ...resolved,
+          id: `process-${process.id || processKeyOf(process)}`,
+          name: resolved.name || resolved.processKey || "Unnamed Process",
+          type: "process",
+          level: level + 1,
+          parentId: area.id,
+          data: resolved,
+          hasChildren: false,
+          isLoaded: true,
+          applicationBase: applicationBase,
+          code: "",
+        };
+      });
 
     // Add subareas as children (recursively), dropping the ones the user has no
     // access to.

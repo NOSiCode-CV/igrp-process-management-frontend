@@ -26,14 +26,20 @@ export function ActionsItem({
   onImportSuccess,
 }: {
   processDefinitionId: string;
-  onArchiveSuccess?: () => void;
-  onImportSuccess?: () => void;
+  onArchiveSuccess?: () => void | Promise<void>;
+  onImportSuccess?: () => void | Promise<void>;
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isArchiving, setIsArchiving] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { igrpToast } = useIGRPToast();
+  const isBusy = isArchiving || isExporting || isImporting;
 
   const handleArchive = async () => {
+    if (isArchiving) return;
+    setIsArchiving(true);
     try {
       await archiveProcessDefinition(processDefinitionId);
       igrpToast({
@@ -41,7 +47,8 @@ export function ActionsItem({
         description: "A definição de processo foi arquivada com sucesso",
         type: "success",
       });
-      onArchiveSuccess?.();
+      await onArchiveSuccess?.();
+      setIsOpen(false);
     } catch (error) {
       console.error(error);
       igrpToast({
@@ -50,11 +57,13 @@ export function ActionsItem({
         type: "error",
       });
     } finally {
-      setIsOpen(false);
+      setIsArchiving(false);
     }
   };
 
   const handleExport = async () => {
+    if (isExporting) return;
+    setIsExporting(true);
     try {
       const data = await exportProcessDefinition(processDefinitionId);
       const json = JSON.stringify(data, null, 2);
@@ -78,17 +87,20 @@ export function ActionsItem({
         type: "error",
       });
     } finally {
-      setIsOpen(false);
+      setIsExporting(false);
     }
   };
 
   const handleImportClick = () => {
+    if (isBusy) return;
     fileInputRef.current?.click();
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    e.target.value = "";
+    if (!file || isImporting) return;
+    setIsImporting(true);
     try {
       const text = await file.text();
       const data = JSON.parse(text) as ProcessDefinitionSchema;
@@ -98,7 +110,7 @@ export function ActionsItem({
         description: "A definição de processo foi importada com sucesso",
         type: "success",
       });
-      onImportSuccess?.();
+      await onImportSuccess?.();
     } catch (error) {
       console.error(error);
       igrpToast({
@@ -109,6 +121,8 @@ export function ActionsItem({
             : "Ocorreu um erro ao importar a definição de processo",
         type: "error",
       });
+    } finally {
+      setIsImporting(false);
     }
   };
 
@@ -124,19 +138,25 @@ export function ActionsItem({
       />
       <IGRPDropdownMenu>
         <IGRPDropdownMenuTrigger asChild>
-          <IGRPButton variant="outline" aria-label="Abrir menu">
+          <IGRPButton
+            variant="outline"
+            aria-label="Abrir menu"
+            loading={isBusy}
+            loadingText="A processar..."
+            disabled={isBusy}
+          >
             <IGRPIcon iconName="EllipsisVertical" />
           </IGRPButton>
         </IGRPDropdownMenuTrigger>
         <IGRPDropdownMenuContent>
           <IGRPDropdownMenuGroup>
             {processDefinitionId && (
-              <IGRPDropdownMenuItem onClick={handleExport}>
+              <IGRPDropdownMenuItem onClick={handleExport} disabled={isBusy}>
                 <IGRPIcon iconName="Download" />
                 Export
               </IGRPDropdownMenuItem>
             )}
-            <IGRPDropdownMenuItem onClick={handleImportClick}>
+            <IGRPDropdownMenuItem onClick={handleImportClick} disabled={isBusy}>
               <IGRPIcon iconName="Upload" />
               Import new
             </IGRPDropdownMenuItem>
@@ -147,6 +167,7 @@ export function ActionsItem({
               <IGRPDropdownMenuGroup>
                 <IGRPDropdownMenuItem
                   variant="destructive"
+                  disabled={isBusy}
                   onClick={() => setIsOpen(!isOpen)}
                 >
                   <IGRPIcon iconName="Archive" />
@@ -161,15 +182,23 @@ export function ActionsItem({
       <IGRPAlertDialog
         title="Arquivar"
         open={isOpen}
-        onOpenChange={setIsOpen}
+        onOpenChange={(open) => {
+          if (isArchiving) return;
+          setIsOpen(open);
+        }}
         description="Are you sure you want to archive this process definition?"
         iconName="Archive"
         showIcon={true}
         variant="destructive"
-        actionLabel="Archive"
+        actionLabel={isArchiving ? "A arquivar..." : "Archive"}
         cancelLabel="Cancel"
-        onAction={handleArchive}
+        actionProps={{ disabled: isArchiving }}
+        cancelProps={{ disabled: isArchiving }}
+        onAction={() => {
+          void handleArchive();
+        }}
         onCancel={() => {
+          if (isArchiving) return;
           setIsOpen(false);
         }}
       ></IGRPAlertDialog>

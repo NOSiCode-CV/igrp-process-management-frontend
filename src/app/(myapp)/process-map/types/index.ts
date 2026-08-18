@@ -120,6 +120,7 @@ export interface AreaFormData {
   description: string;
   applicationBase: string;
   parentId?: string; // Changed from area_fk to area_id
+  color?: string;
   processes?: Process[];
 }
 

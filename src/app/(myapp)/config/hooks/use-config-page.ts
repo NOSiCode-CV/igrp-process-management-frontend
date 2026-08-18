@@ -60,7 +60,7 @@ export function useConfigPage({
     userTasks: userTasksConfig,
   } = processConfig;
 
-  const { data, isLoading: loading } = useQuery({
+  const { data, isLoading: loading, isFetching } = useQuery({
     queryKey: ["all-processes", filterProcess],
     queryFn: async () => {
       const response = await getProcesses({ processName: filterProcess });
@@ -80,10 +80,9 @@ export function useConfigPage({
     placeholderData: keepPreviousData,
   });
 
-  const loadAllProcesses = () => {
-    queryClient.invalidateQueries({
-      queryKey: ["all-processes", filterProcess],
-    });
+  const loadAllProcesses = async () => {
+    await queryClient.invalidateQueries({ queryKey: ["all-processes"] });
+    await queryClient.refetchQueries({ queryKey: ["all-processes"] });
   };
 
   const saveConfigurationMutation = useMutation({
@@ -101,6 +100,7 @@ export function useConfigPage({
     },
     onSuccess: () => {
       igrpToast(SAVE_SUCCESS);
+      void loadAllProcesses();
     },
     onError: (error) => {
       console.error(error);
@@ -117,7 +117,7 @@ export function useConfigPage({
   return {
     allProcesses: data ?? [],
     availableGroups,
-    loading,
+    loading: loading || isFetching,
     loadAllProcesses,
     assignGroups: processConfig.assignGroups,
     numberingConfig: processConfig.numberingConfig,

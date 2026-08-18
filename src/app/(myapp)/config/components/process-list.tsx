@@ -42,7 +42,13 @@ function ProcessList({
   }
 
   return (
-    <div className="max-h-[60vh] overflow-y-auto">
+    <div className="relative max-h-[60vh] overflow-y-auto">
+      {loading && (
+        <div className="sticky top-0 z-10 flex items-center justify-center gap-2 bg-background/80 px-3 py-2 text-xs text-muted-foreground backdrop-blur-sm">
+          <IGRPIcon iconName="LoaderCircle" className="h-3.5 w-3.5 animate-spin" />
+          A recarregar...
+        </div>
+      )}
       {list.map((item: any) => (
         <ProcessItem
           key={item.id}

@@ -11,6 +11,7 @@ import { IGRPFormHandle } from '@igrp/igrp-framework-react-design-system';
 import { z } from 'zod';
 import { IGRPOptionsProps } from '@igrp/igrp-framework-react-design-system';
 import { AddChecklistItem } from '@/app/(myapp)/config/components/add-checklist-item';
+import { processKeyOf } from '@/app/(myapp)/process-map/utils/process-identity';
 import {
   IGRPModalDialog,
   IGRPModalDialogContent,
@@ -52,9 +53,15 @@ export default function Areamodal({
 }) {
   z.config(z.locales.en());
 
+  const hasApplications = (options?.applications?.length ?? 0) > 0;
+
   const form1 = z.object({
-    applicationBase: z.string().nonempty(),
-    applicationBaseText: z.string().nonempty(),
+    applicationBase: hasApplications
+      ? z.string().nonempty()
+      : z.string().optional(),
+    applicationBaseText: hasApplications
+      ? z.string().optional()
+      : z.string().nonempty(),
     name: z.string().nonempty(),
     code: z.string().nonempty(),
     color: z.string().optional(),
@@ -80,37 +87,60 @@ export default function Areamodal({
   const [form1Data, setForm1Data] = useState<any>(initForm1);
 
   const [editingArea, setEditingArea] = useState<void | undefined>(undefined);
+  const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [selectedProcesses, setSelectedProcesses] = useState<any[]>([]);
+  const selectedProcessesRef = useRef<any[]>([]);
+  const didInitSelectionRef = useRef<boolean>(false);
 
   const { igrpToast } = useIGRPToast();
 
-  async function handleFormSubmit(data: z.infer<any>): Promise<void | undefined> {
-    const formProcesses = (formData as { processes?: unknown[] })?.processes;
-    const next = { ...data, processes: formProcesses };
+  function syncSelected(nextProcesses: any[]): void {
+    selectedProcessesRef.current = nextProcesses;
+    setSelectedProcesses(nextProcesses);
+  }
 
+  async function handleFormSubmit(data: z.infer<any>): Promise<void | undefined> {
+    if (isSaving) return;
+    const applicationBase = (
+      hasApplications ? data.applicationBase : data.applicationBaseText || data.applicationBase
+    )?.trim();
+    if (!applicationBase) return;
+    const next = {
+      ...data,
+      applicationBase,
+      applicationBaseText: applicationBase,
+      processes: selectedProcessesRef.current,
+    };
     onFormChange(next);
-    const response = onSave(next);
-    if (response) onClose();
+    setIsSaving(true);
+    try {
+      await onSave(next);
+      onClose();
+    } finally {
+      setIsSaving(false);
+    }
   }
 
   function handleAddItem(item: any): void {
+    const key = processKeyOf(item);
+    if (!key) return;
+    if (selectedProcessesRef.current.some((process) => processKeyOf(process) === key)) {
+      return;
+    }
+    const nextProcesses = [...selectedProcessesRef.current, item];
+    syncSelected(nextProcesses);
     const data = formform1Ref.current?.getValues();
-
-    const nextProcesses = [...(data?.processes || []), item];
-    const next = { ...data, processes: nextProcesses };
-    setForm1Data(next);
-    onFormChange(next);
-
-    formform1Ref.current?.setValue('processes', nextProcesses);
+    onFormChange({ ...data, processes: nextProcesses });
   }
 
   function handleRemoveItem(item: any): void {
-    const key = item?.key ?? item?.processKey;
-    const nextProcesses = (form1Data.processes || []).filter(
-      (p: any) => (p?.key ?? p?.processKey) !== key,
+    const key = processKeyOf(item);
+    const nextProcesses = selectedProcessesRef.current.filter(
+      (process) => processKeyOf(process) !== key,
     );
-    const next = { ...form1Data, processes: nextProcesses };
-    setForm1Data(next);
-    onFormChange(next);
+    syncSelected(nextProcesses);
+    const data = formform1Ref.current?.getValues();
+    onFormChange({ ...data, processes: nextProcesses });
   }
 
   const isUpdatingRef = useRef<boolean>(false);
@@ -121,6 +151,22 @@ export default function Areamodal({
         applicationBaseText: (formData as any).applicationBase,
       });
   }, [formData]);
+
+  useEffect(() => {
+    if (!open) {
+      didInitSelectionRef.current = false;
+      selectedProcessesRef.current = [];
+      setSelectedProcesses([]);
+      setIsSaving(false);
+      return;
+    }
+    if (didInitSelectionRef.current) return;
+    const initial = [...(formData.processes || [])];
+    if (isEditing && initial.length === 0) return;
+    didInitSelectionRef.current = true;
+    selectedProcessesRef.current = initial;
+    setSelectedProcesses(initial);
+  }, [open, isEditing, formData.processes]);
 
   const title = isEditing ? 'Editar Área' : 'Adicionar Nova Área';
   const modalDescription = isEditing
@@ -180,18 +226,24 @@ export default function Areamodal({
 
   const processesItems = (allProcesses || []).map((process: any) => ({
     ...process,
-    key: process.id,
+    key: process.processKey || process.id,
     name: process.name || process.processKey,
   }));
 
-  const itemsChecked = (formData.processes || []).map((process: any) => ({
+  const itemsChecked = selectedProcesses.map((process: any) => ({
     ...process,
-    key: process.releaseId ?? process.id,
+    key: processKeyOf(process),
   }));
 
   return (
     <div className={cn('component')}>
-      <IGRPModalDialog onOpenChange={setOpen} open={open}>
+      <IGRPModalDialog
+        onOpenChange={(next) => {
+          if (isSaving) return;
+          setOpen(next);
+        }}
+        open={open}
+      >
         <IGRPModalDialogContent size={`lg`}>
           <IGRPModalDialogHeader>
             <IGRPModalDialogTitle id={`modalDialogTitle1`}>{title}</IGRPModalDialogTitle>
@@ -229,6 +281,7 @@ export default function Areamodal({
                   label={`Aplicação`}
                   showIcon={false}
                   required={true}
+                  placeholder={`ex.: INSS Core`}
                 ></IGRPInputText>
               )}
               <IGRPInputText
@@ -280,16 +333,18 @@ export default function Areamodal({
                 label={`processes`}
                 required={false}
               ></IGRPInputHidden>
-
-              <AddChecklistItem
-                label={`Associar Processos`}
-                availableItems={processesItems}
-                items={itemsChecked}
-                addItem={handleAddItem}
-                removeItem={handleRemoveItem}
-              ></AddChecklistItem>
             </>
           </IGRPForm>
+
+          <div className={cn('mt-4')}>
+            <AddChecklistItem
+              label={`Associar Processos`}
+              availableItems={processesItems}
+              items={itemsChecked}
+              addItem={handleAddItem}
+              removeItem={handleRemoveItem}
+            ></AddChecklistItem>
+          </div>
           <IGRPModalDialogFooter className={cn()}>
             <div
               className={cn(
@@ -303,7 +358,13 @@ export default function Areamodal({
                 variant={`default`}
                 size={`default`}
                 showIcon={false}
-                onClick={() => formform1Ref.current?.submit()}
+                loading={isSaving}
+                loadingText={`A gravar...`}
+                disabled={isSaving}
+                onClick={() => {
+                  if (isSaving) return;
+                  formform1Ref.current?.submit();
+                }}
               >
                 Gravar
               </IGRPButton>

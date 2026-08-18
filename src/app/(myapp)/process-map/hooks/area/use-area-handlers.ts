@@ -7,12 +7,17 @@ import {
   updateArea,
 } from "@/app/(myapp)/client/area";
 import {
+  associateProcessToArea,
+  removeProcessFromArea,
+} from "@/app/(myapp)/client/area-process";
+import {
   CreateAreaRequest,
   Process,
   UpdateAreaRequest,
 } from "@igrp/platform-process-management-types";
 import { findAreaById } from "../../utils/area-hierarchy";
 import { AreaFormData, ExtendedArea } from "../../types";
+import { processKeyOf, removeIdsOf } from "../../utils/process-identity";
 
 export function useAreaHandlers(
   areas: ExtendedArea[],
@@ -35,13 +40,17 @@ export function useAreaHandlers(
       const newArea = await createArea(formData as CreateAreaRequest);
 
       for (const process of formData.processes || []) {
-        await handleAssociateProcess(newArea.id, {
-          ...process,
-          releaseId: process.id,
+        const processKey = processKeyOf(process);
+        if (!processKey) continue;
+        await associateProcessToArea(newArea.id, {
+          processKey,
+          releaseId: process.id || process.releaseId || "",
+          version: process.version ?? "",
+          name: process.name ?? processKey,
         });
       }
 
-      refreshData();
+      await refreshData();
 
       igrpToast({
         type: "success",
@@ -56,21 +65,66 @@ export function useAreaHandlers(
     }
   };
 
+  const removeAssociation = async (areaId: string, process: Process) => {
+    const ids = removeIdsOf(process);
+    if (ids.length === 0) {
+      throw new Error("Missing process definition id");
+    }
+    let lastError: unknown;
+    for (const id of ids) {
+      try {
+        await removeProcessFromArea(areaId, id);
+        return;
+      } catch (error) {
+        lastError = error;
+      }
+    }
+    throw lastError;
+  };
+
   const handleUpdateArea = async (areaId: string, formData: AreaFormData) => {
     try {
+      const { processes: nextProcesses = [], ...areaFields } = formData;
       const updatedArea = await updateArea(
         areaId,
-        formData as UpdateAreaRequest,
+        areaFields as UpdateAreaRequest,
       );
 
-      for (const process of formData.processes || []) {
-        await handleAssociateProcess(areaId, {
-          ...process,
-          releaseId: process.releaseId ?? process.id,
+      const existing = areaForm.originalProcesses;
+      const nextByKey = new Map(
+        nextProcesses
+          .map((process) => [processKeyOf(process), process] as const)
+          .filter(([key]) => key.length > 0),
+      );
+
+      const toRemove = existing.filter((process) => {
+        const key = processKeyOf(process);
+        if (!key) return true;
+        const next = nextByKey.get(key);
+        return !next || next !== process;
+      });
+      const toAdd = nextProcesses.filter((process) => {
+        const key = processKeyOf(process);
+        if (!key) return false;
+        const previous = existing.find((item) => processKeyOf(item) === key);
+        return !previous || previous !== process;
+      });
+
+      for (const process of toRemove) {
+        await removeAssociation(areaId, process);
+      }
+
+      for (const process of toAdd) {
+        const processKey = processKeyOf(process);
+        await associateProcessToArea(areaId, {
+          processKey,
+          releaseId: process.id || process.releaseId || "",
+          version: process.version ?? "",
+          name: process.name ?? processKey,
         });
       }
 
-      refreshData();
+      await refreshData();
 
       igrpToast({
         type: "success",
@@ -81,6 +135,11 @@ export function useAreaHandlers(
       return updatedArea;
     } catch (error) {
       console.error("Error updating area:", error);
+      igrpToast({
+        type: "error",
+        title: "Erro",
+        description: "Erro ao atualizar área. Tente novamente.",
+      });
       throw error;
     }
   };
@@ -89,7 +148,7 @@ export function useAreaHandlers(
     try {
       await deleteArea(areaId);
 
-      refreshData();
+      await refreshData();
       igrpToast({
         type: "success",
         title: "Sucesso",

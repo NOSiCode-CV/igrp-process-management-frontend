@@ -22,7 +22,7 @@ import {
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 export function useProcessOperations(
-  refreshData: () => void,
+  refreshData: () => void | Promise<unknown>,
   router?: AppRouterInstance,
 ) {
   const [selectedProcess, setSelectedProcess] = useState<Process | undefined>();
@@ -41,7 +41,7 @@ export function useProcessOperations(
     setSelectedProcess(process);
   }, []);
 
-  const { data, isLoading: loading } = useQuery({
+  const { data, isPending: mapPending, isFetching: mapFetching } = useQuery({
     queryKey: ["all-processes-map"],
     queryFn: async () => {
       const response = await getProcesses({ filterByCurrentUser: true });
@@ -58,7 +58,11 @@ export function useProcessOperations(
   // admin action that must see ALL processes, not just the current user's — so
   // this query drops `filterByCurrentUser`. "Ver Mapa" keeps the filtered
   // `data` above for its access-scoped tree.
-  const { data: manageData } = useQuery({
+  const {
+    data: manageData,
+    isPending: managePending,
+    isFetching: manageFetching,
+  } = useQuery({
     queryKey: ["all-processes-map-manage"],
     queryFn: async () => {
       const response = await getProcesses({});
@@ -235,5 +239,6 @@ export function useProcessOperations(
     handleAssociateProcess,
     allProcesses: data,
     allProcessesManage: manageData,
+    loading: mapPending || mapFetching || managePending || manageFetching,
   };
 }

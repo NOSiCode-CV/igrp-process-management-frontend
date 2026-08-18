@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { ExtendedArea, ProcessMapHookReturn } from "../types";
 import { useProcessMapData } from "./use-process-map-data";
 import { useTreeExpansion } from "./use-tree-expansion";
@@ -12,6 +12,7 @@ import { useAccessManagement } from "../../access-management/hooks";
 import { useAreaHandlers } from "./area/use-area-handlers";
 import { useProcessOperations } from "./use-process-operations";
 import { getAllAreasFlat } from "../utils/area-hierarchy";
+import { findNodeById } from "../utils/tree-utils";
 
 export function useProcessMap(
   router?: AppRouterInstance,
@@ -22,7 +23,7 @@ export function useProcessMap(
   const [processKey, setProcessKey] = useState<string | undefined>(undefined);
 
   // Data management
-  const { areas, loadedNodes, loading, error, loadSubareas, refreshData } =
+  const { areas, loadedNodes, loading: areasLoading, error, loadSubareas, refreshData } =
     useProcessMapData();
 
   // Tree expansion state
@@ -38,6 +39,7 @@ export function useProcessMap(
     handleAssociateProcess,
     allProcesses,
     allProcessesManage,
+    loading: processesLoading,
   } = useProcessOperations(refreshData, router);
 
   const { igrpToast } = useIGRPToast();
@@ -54,6 +56,26 @@ export function useProcessMap(
   // Search functionality
   const { searchTerm, setSearchTerm, filteredNodes, clearSearch } =
     useTreeSearch(treeNodes);
+
+  useEffect(() => {
+    if (!activeArea?.id) return;
+    const fresh = findNodeById(manageNodes, activeArea.id);
+    if (!fresh) {
+      setActiveArea(undefined);
+      return;
+    }
+    setActiveArea((current) => {
+      if (
+        current &&
+        current.id === fresh.id &&
+        current.process === fresh.process &&
+        current.name === fresh.name
+      ) {
+        return current;
+      }
+      return fresh;
+    });
+  }, [manageNodes, activeArea?.id]);
 
   // Enhanced toggle node that also loads subareas when expanding
   const toggleNode = useCallback(
@@ -154,7 +176,7 @@ export function useProcessMap(
     expandedNodes,
     loadedNodes,
     selectedProcess,
-    loading,
+    loading: areasLoading || processesLoading,
     error,
 
     // Computed values

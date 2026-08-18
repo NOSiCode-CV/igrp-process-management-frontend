@@ -9,9 +9,9 @@ import {
 interface NodeActionsProps {
   node: ExtendedArea;
   onEdit: (node: ExtendedArea, parentAreaId?: string) => void;
-  onDelete: (nodeId: string) => void;
+  onDelete: (nodeId: string) => void | Promise<void>;
   onAddSubarea: (nodeId: string) => void;
-  onRemoveProcess: (nodeId: string, processId: string) => void;
+  onRemoveProcess: (nodeId: string, processId: string) => void | Promise<void>;
 }
 
 export function AreaActions({
@@ -22,6 +22,7 @@ export function AreaActions({
   onRemoveProcess,
 }: NodeActionsProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const { type, data } = node;
 
@@ -50,6 +51,7 @@ export function AreaActions({
             iconName={"Pencil"}
             size={"icon"}
             variant={"ghost"}
+            disabled={isDeleting}
           ></IGRPButton>
         </>
       )}
@@ -63,6 +65,8 @@ export function AreaActions({
         iconName="Trash2"
         size={"icon"}
         variant={"ghost"}
+        loading={isDeleting}
+        disabled={isDeleting}
       ></IGRPButton>
 
       {isAreaOrSubarea && (
@@ -76,13 +80,17 @@ export function AreaActions({
           iconName={"Plus"}
           size={"icon"}
           variant={"ghost"}
+          disabled={isDeleting}
         ></IGRPButton>
       )}
 
       <IGRPAlertDialog
         title="Excluir"
         open={isOpen}
-        onOpenChange={setIsOpen}
+        onOpenChange={(open) => {
+          if (isDeleting) return;
+          setIsOpen(open);
+        }}
         description={
           isAreaOrSubarea
             ? "Tem certeza que deseja excluir esta área? Todas as subáreas também serão removidas."
@@ -91,14 +99,27 @@ export function AreaActions({
         iconName="Trash2"
         showIcon={true}
         variant="destructive"
-        actionLabel="Excluir"
-        cancelLabel="Cancel"
+        actionLabel={isDeleting ? "A eliminar..." : "Excluir"}
+        cancelLabel="Cancelar"
+        actionProps={{ disabled: isDeleting }}
+        cancelProps={{ disabled: isDeleting }}
         onAction={() => {
-          isAreaOrSubarea
-            ? onDelete(node.id)
-            : onRemoveProcess(data?.areaId ?? "", data?.id ?? "");
+          void (async () => {
+            setIsDeleting(true);
+            try {
+              if (isAreaOrSubarea) {
+                await onDelete(node.id);
+              } else {
+                await onRemoveProcess(data?.areaId ?? "", data?.id ?? "");
+              }
+              setIsOpen(false);
+            } finally {
+              setIsDeleting(false);
+            }
+          })();
         }}
         onCancel={() => {
+          if (isDeleting) return;
           setIsOpen(false);
         }}
       ></IGRPAlertDialog>
