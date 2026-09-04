@@ -20,7 +20,6 @@ import {
   IGRPHeadline,
   IGRPCardContent,
   IGRPButton,
-  IGRPSeparator,
 } from '@igrp/igrp-framework-react-design-system';
 import { useTaskDetails } from '@/app/(myapp)/task-management/hooks/use-task-details';
 
@@ -63,6 +62,7 @@ export default function PageDetalhedatarefaComponent({
               showIcon={true}
               iconName={`CircleCheck`}
               iconPlacement={`start`}
+
               color={(task?.color as any) || 'primary'}
             >
               {task?.statusDesc}
@@ -77,7 +77,7 @@ export default function PageDetalhedatarefaComponent({
                 <IGRPHeadline
                   id={`headline2`}
                   title={`Informação da Tarefa`}
-                  description={undefined}
+                  description={``}
                   variant={`h6`}
                   roleColor={`solid`}
                   color={`primary`}
@@ -156,24 +156,6 @@ export default function PageDetalhedatarefaComponent({
                     >
                       Libertar
                     </IGRPButton>
-
-                    <IGRPSeparator
-                      id={`separator1`}
-                      orientation={`horizontal`}
-                      className={cn('col-span-1')}
-                    ></IGRPSeparator>
-
-                    <IGRPButton
-                      id={`button5`}
-                      variant={`destructive`}
-                      size={`default`}
-                      showIcon={true}
-                      iconName={`CircleX`}
-                      className={cn('flex justify-start', 'col-span-1')}
-                      onClick={() => {}}
-                    >
-                      Cancelar Tarefa
-                    </IGRPButton>
                   </div>
                 )}
                 {task?.status === 'COMPLETED' && (
@@ -191,7 +173,7 @@ export default function PageDetalhedatarefaComponent({
             <IGRPHeadline
               id={`headline1`}
               title={`Variáveis`}
-              description={undefined}
+              description={``}
               variant={`h6`}
               roleColor={`solid`}
               color={`primary`}
@@ -208,7 +190,7 @@ export default function PageDetalhedatarefaComponent({
             <IGRPHeadline
               id={`headline4`}
               title={`Eventos`}
-              description={undefined}
+              description={``}
               variant={`h6`}
               roleColor={`solid`}
               color={`primary`}
