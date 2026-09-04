@@ -6,6 +6,11 @@ import { getProcessInstanceById } from "../../client/process-instances";
 import { getActivityProgress } from "../../client/activity";
 import { ActivityProgress } from "@igrp/platform-process-management-types";
 import { formatDuration } from "../../utils/columns-template";
+import {
+  getProcessInstanceStatusLabel,
+  getProcessInstanceStatusVariant,
+  type ProcessInstanceStatus,
+} from "../../utils/status-helpers";
 import { IGRPColorVariants } from "@igrp/igrp-framework-react-design-system";
 
 export const useProcessDetails = (processInstanceId: string) => {
@@ -88,11 +93,20 @@ export const useProcessDetails = (processInstanceId: string) => {
       ? new Date(data?.processInstance?.endedAt)
       : new Date();
     const diff = Math.abs(now.getTime() - created.getTime());
-    const status = data?.processInstance?.status;
+    const status = data?.processInstance?.status as
+      | ProcessInstanceStatus
+      | undefined;
     return {
       ...data?.processInstance,
-      color:
-        status === "COMPLETED" ? "success" : ("secondary" as IGRPColorVariants),
+      // Localized label + DS color from the shared status helpers (aligned with
+      // the list/dashboard). Overrides the raw backend statusDesc (e.g.
+      // "CANCELED" -> "Cancelado", destructive color).
+      color: status
+        ? getProcessInstanceStatusVariant(status)
+        : ("secondary" as IGRPColorVariants),
+      statusDesc: status
+        ? getProcessInstanceStatusLabel(status)
+        : data?.processInstance?.statusDesc,
       duration: formatDuration(diff) as string,
       startedBy,
     };

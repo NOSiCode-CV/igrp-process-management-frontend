@@ -54,39 +54,39 @@ function FilterActives({
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-sm text-muted-foreground">Active filters:</span>
           {dateFrom && (
-            <IGRPBadge variant="soft" className="gap-1.5 pr-1.5">
-              <IGRPIcon iconName="Calendar" />
-              <span>
-                {dateFrom}
-                {dateTo && ` / ${dateTo}`}
+            <IGRPBadge variant="soft" className="pr-1.5">
+              <span className="inline-flex items-center gap-1.5">
+                <IGRPIcon iconName="Calendar" className="size-3 shrink-0" />
+                <span className="whitespace-nowrap">
+                  {dateFrom}
+                  {dateTo && ` / ${dateTo}`}
+                </span>
+                <button
+                  onClick={clearDateRange}
+                  className="ml-1 inline-flex items-center rounded p-0.5 hover:bg-muted"
+                >
+                  <IGRPIcon iconName="X" className="size-3 shrink-0" />
+                </button>
               </span>
-              <button
-                onClick={clearDateRange}
-                className="ml-1 hover:bg-muted rounded p-0.5"
-              >
-                <IGRPIcon iconName="X" />
-              </button>
             </IGRPBadge>
           )}
           {variables
             .filter((f) => f.value !== "")
             .map((filter) => (
-              <IGRPBadge
-                key={filter.id}
-                variant="soft"
-                className="gap-1.5 pr-1.5"
-              >
-                <span className="font-mono text-xs">{filter.name}</span>
-                <span className="text-muted-foreground">
-                  {getSymbol(filter.operator)}
+              <IGRPBadge key={filter.id} variant="soft" className="pr-1.5">
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="font-mono text-xs">{filter.name}</span>
+                  <span className="text-muted-foreground">
+                    {getSymbol(filter.operator)}
+                  </span>
+                  <span className="font-medium">{filter.value}</span>
+                  <button
+                    onClick={() => removeVariableFilter(filter.id)}
+                    className="ml-1 inline-flex items-center rounded p-0.5 hover:bg-muted"
+                  >
+                    <IGRPIcon iconName="X" className="size-3 shrink-0" />
+                  </button>
                 </span>
-                <span className="font-medium">{filter.value}</span>
-                <button
-                  onClick={() => removeVariableFilter(filter.id)}
-                  className="ml-1 hover:bg-muted rounded p-0.5"
-                >
-                  <IGRPIcon iconName="X" />
-                </button>
               </IGRPBadge>
             ))}
         </div>

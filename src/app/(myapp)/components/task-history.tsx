@@ -190,15 +190,16 @@ function TaskHistory({ tasks }: TaskHistoryProps) {
                     <IGRPBadge
                       variant="outline"
                       className={cn(
-                        "flex flex-row items-center gap-1",
                         task.status === "COMPLETED"
                           ? "text-[oklch(0.7_0.18_150)] border-[oklch(0.7_0.18_150)]"
                           : "text-muted-foreground",
                       )}
                     >
-                      <IGRPIcon iconName="CircleCheck" className="h-3 w-3" />
-                      <span className="text-sm">
-                        {getStatusLabel(task.status)}
+                      <span className="inline-flex items-center gap-1 [&>svg]:size-3 [&>svg]:shrink-0">
+                        <IGRPIcon iconName="CircleCheck" className="h-3 w-3" />
+                        <span className="text-sm">
+                          {getStatusLabel(task.status)}
+                        </span>
                       </span>
                     </IGRPBadge>
                   )}
@@ -236,10 +237,12 @@ function TaskHistory({ tasks }: TaskHistoryProps) {
                         <IGRPBadge
                           variant="soft"
                           color={getTypeColor(variable.value)}
-                          className={`text-[10px] px-1.5 py-0 flex items-center gap-1`}
+                          className={`text-[10px] px-1.5 py-0`}
                         >
-                          {getTypeIcon(variable.value)}
-                          {getTypeFromValue(variable.value)}
+                          <span className="inline-flex items-center gap-1 [&>svg]:size-3 [&>svg]:shrink-0">
+                            {getTypeIcon(variable.value)}
+                            {getTypeFromValue(variable.value)}
+                          </span>
                         </IGRPBadge>
                         <span className="text-sm font-medium text-foreground font-mono">
                           {variable.name}
