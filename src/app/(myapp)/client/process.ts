@@ -41,7 +41,7 @@ export const getProcesses = async (
   const superAdmin = await isCurrentUserSuperAdmin();
   const params = {
     ...filter,
-    filterByCurrentUser:false,//superAdmin ? false : filter?.filterByCurrentUser,
+    filterByCurrentUser: superAdmin ? false : filter?.filterByCurrentUser,
     page: 0,
     size: DEFAULT_PAGE_SIZE,
   };
