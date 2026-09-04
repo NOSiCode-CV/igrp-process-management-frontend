@@ -1,21 +1,17 @@
-"use client";
-
+'use client';
 /* THIS FILE WAS GENERATED AUTOMATICALLY BY iGRP STUDIO. */
 /* DO NOT MODIFY IT BECAUSE IT COULD BE REWRITTEN AT ANY TIME. */
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { use, useState, useEffect, useRef } from "react";
-import {
-  cn,
-  useIGRPMenuNavigation,
-  useIGRPToast,
-} from "@igrp/igrp-framework-react-design-system";
-import { StatCard } from "@/app/(myapp)/components/stat-card";
-import { ActivityTimeline } from "@/app/(myapp)/components/activity-timeline";
-import { TaskHistory } from "@/app/(myapp)/components/task-history";
-import { VariablesView } from "@/app/(myapp)/components/variables-view";
+import { use, useState, useEffect, useRef } from 'react';
+import { cn, useIGRPMenuNavigation, useIGRPToast } from '@igrp/igrp-framework-react-design-system';
+import { ProcessCancelAction } from '@/app/(myapp)/process-instances/components/process-cancel-action';
+import { StatCard } from '@/app/(myapp)/components/stat-card';
+import { ActivityTimeline } from '@/app/(myapp)/components/activity-timeline';
+import { TaskHistory } from '@/app/(myapp)/components/task-history';
+import { VariablesView } from '@/app/(myapp)/components/variables-view';
 import {
   IGRPPageHeader,
   IGRPBadge,
@@ -24,9 +20,9 @@ import {
   IGRPCard,
   IGRPCardContent,
   IGRPHeadline,
-} from "@igrp/igrp-framework-react-design-system";
-import { useProcessDetails } from "@/app/(myapp)/process-instances/hooks/use-process-details";
-import { format, formatDistanceToNow } from "date-fns";
+} from '@igrp/igrp-framework-react-design-system';
+import { useProcessDetails } from '@/app/(myapp)/process-instances/hooks/use-process-details';
+import { format, formatDistanceToNow } from 'date-fns';
 
 export default function PageViewComponent({
   params,
@@ -41,8 +37,8 @@ export default function PageViewComponent({
     useProcessDetails(processInstanceId);
 
   return (
-    <div className={cn("page", "space-y-6")}>
-      <div className={cn("section", " space-y-6")}>
+    <div className={cn('page', 'space-y-6')}>
+      <div className={cn('section', ' space-y-6')}>
         <IGRPPageHeader
           id={`pageHeader1`}
           iconBackButton={`ArrowLeft`}
@@ -50,7 +46,7 @@ export default function PageViewComponent({
           urlBackButton={`/process-instances`}
           variant={`h3`}
           description={process?.number}
-          title={process?.name || "Process Details"}
+          title={process?.name || 'Process Details'}
         >
           <div className="flex items-center gap-2">
             <IGRPBadge
@@ -60,35 +56,30 @@ export default function PageViewComponent({
               showIcon={true}
               iconName={`CircleCheck`}
               iconPlacement={`start`}
-              badgeClassName={cn()}
-              color={process?.color || "secondary"}
+
+              color={process?.color || 'secondary'}
             >
               {process?.statusDesc}
             </IGRPBadge>
+
+            <ProcessCancelAction
+              processInstanceId={processInstanceId}
+              status={process?.status}
+            ></ProcessCancelAction>
           </div>
         </IGRPPageHeader>
 
-        <div
-          className={cn("grid", "md:grid-cols-2 ", "lg:grid-cols-4 ", " gap-4")}
-        >
+        <div className={cn('grid', 'md:grid-cols-2 ', 'lg:grid-cols-4 ', ' gap-4')}>
           <StatCard
             icon={`GitBranch`}
             label={`Business Key`}
             value={process?.businessKey}
           ></StatCard>
-          <StatCard
-            icon={`User`}
-            label={`Iniciado Por`}
-            value={process?.startedBy}
-          ></StatCard>
+          <StatCard icon={`User`} label={`Iniciado Por`} value={process?.startedBy}></StatCard>
           <StatCard
             icon={`Calendar`}
             label={`Iniciado em`}
-            value={
-              process?.startedAt
-                ? format(process?.startedAt, "MMM d, yyyy HH:mm")
-                : undefined
-            }
+            value={process?.startedAt ? format(process?.startedAt, 'MMM d, yyyy HH:mm') : undefined}
             subvalue={
               process?.startedAt
                 ? formatDistanceToNow(process?.startedAt, { addSuffix: true })
@@ -98,11 +89,7 @@ export default function PageViewComponent({
           <StatCard
             icon={`Clock`}
             label={`Duração`}
-            subvalue={
-              process?.endedAt
-                ? format(process.endedAt, "MMM d, yyyy HH:mm")
-                : undefined
-            }
+            subvalue={process?.endedAt ? format(process.endedAt, 'MMM d, yyyy HH:mm') : undefined}
             value={process?.duration}
           ></StatCard>
         </div>
@@ -112,17 +99,18 @@ export default function PageViewComponent({
           iconPlacement={`start`}
           badgePlacement={`end`}
           orientation={`horizontal`}
+
           items={[
             {
               value: `tabsItem1-DkyH`,
               label: `Linha do Tempo de Eventos`,
               icon: `ArrowRight`,
-              badgeVariant: `solid`,
-              badgeColor: `primary`,
+              badgeVariant: `solid` as const,
+              badgeColor: `primary` as const,
               content: (
                 <>
-                  <IGRPCard id={`card1`} className={cn()}>
-                    <IGRPCardContent className={cn("space-x-3", "space-y-3")}>
+                  <IGRPCard id={`card1`}>
+                    <IGRPCardContent>
                       <IGRPHeadline
                         id={`headline2`}
                         title={`Ocorrência dos Eventos`}
@@ -130,14 +118,11 @@ export default function PageViewComponent({
                         roleColor={`solid`}
                         color={`primary`}
                         showIcon={false}
-                        className={cn("")}
-                        description={
-                          activityProgress?.length + " eventos registadas"
-                        }
+
+                        description={activityProgress?.length + ' eventos registadas'}
                       ></IGRPHeadline>
-                      <ActivityTimeline
-                        activities={activityProgress}
-                      ></ActivityTimeline>
+
+                      <ActivityTimeline activities={activityProgress}></ActivityTimeline>
                     </IGRPCardContent>
                   </IGRPCard>
                 </>
@@ -148,11 +133,11 @@ export default function PageViewComponent({
               value: `tabsItem2-s81g`,
               label: `Histórico de Tarefas`,
               icon: `ArrowRight`,
-              badgeVariant: `solid`,
-              badgeColor: `primary`,
+              badgeVariant: `solid` as const,
+              badgeColor: `primary` as const,
               content: (
                 <>
-                  <IGRPCard id={`card2`} className={cn()}>
+                  <IGRPCard id={`card2`}>
                     <IGRPCardContent>
                       <IGRPHeadline
                         id={`headline1`}
@@ -161,8 +146,10 @@ export default function PageViewComponent({
                         roleColor={`solid`}
                         color={`primary`}
                         showIcon={false}
-                        description={taskHistory.length + " tarefas concluídas"}
+
+                        description={taskHistory.length + ' tarefas concluídas'}
                       ></IGRPHeadline>
+
                       <TaskHistory tasks={taskHistory}></TaskHistory>
                     </IGRPCardContent>
                   </IGRPCard>
@@ -174,11 +161,11 @@ export default function PageViewComponent({
               value: `tabsItem3-GmnQ`,
               label: `Variáveis`,
               icon: `ArrowRight`,
-              badgeVariant: `solid`,
-              badgeColor: `primary`,
+              badgeVariant: `solid` as const,
+              badgeColor: `primary` as const,
               content: (
                 <>
-                  <IGRPCard id={`card3`} className={cn()}>
+                  <IGRPCard id={`card3`}>
                     <IGRPCardContent>
                       <IGRPHeadline
                         id={`headline3`}
@@ -187,10 +174,10 @@ export default function PageViewComponent({
                         roleColor={`solid`}
                         color={`primary`}
                         showIcon={false}
-                        description={
-                          variables.length + " variáveis encontradas"
-                        }
+
+                        description={variables.length + ' variáveis encontradas'}
                       ></IGRPHeadline>
+
                       <VariablesView variables={variables}></VariablesView>
                     </IGRPCardContent>
                   </IGRPCard>

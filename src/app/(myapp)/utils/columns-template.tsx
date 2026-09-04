@@ -149,7 +149,7 @@ const processStatusColor = (
       return "secondary";
     case "COMPLETED":
       return "success";
-    case "CANCELLED":
+    case "CANCELED":
     case "TERMINATED":
       return "destructive";
     default:

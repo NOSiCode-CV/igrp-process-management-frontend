@@ -5,7 +5,7 @@ export type ProcessInstanceStatus =
   | "CREATED"
   | "RUNNING"
   | "SUSPENDED"
-  | "CANCELLED"
+  | "CANCELED"
   | "COMPLETED"
   | "TERMINATED";
 
@@ -14,7 +14,7 @@ export type TaskStatus =
   | "CREATED"
   | "ASSIGNED"
   | "COMPLETED"
-  | "CANCELLED"
+  | "CANCELED"
   | "DELETED"
   | "SUSPENDED";
 
@@ -37,7 +37,7 @@ export const getProcessInstanceStatusLabel = (
       return "Em execução";
     case "SUSPENDED":
       return "Suspenso";
-    case "CANCELLED":
+    case "CANCELED":
       return "Cancelado";
     case "COMPLETED":
       return "Concluído";
@@ -57,7 +57,7 @@ export const getTaskStatusLabel = (status: TaskStatus): string => {
       return "Atribuído";
     case "COMPLETED":
       return "Completo";
-    case "CANCELLED":
+    case "CANCELED":
       return "Cancelado";
     case "SUSPENDED":
       return "Suspenso";
@@ -106,7 +106,7 @@ export const getProcessInstanceStatusVariant = (
       return "warning";
     case "SUSPENDED":
       return "secondary";
-    case "CANCELLED":
+    case "CANCELED":
       return "destructive";
     case "COMPLETED":
       return "success";
@@ -128,7 +128,7 @@ export const getTaskStatusVariant = (status: TaskStatus): BadgeVariant => {
       return "warning";
     case "COMPLETED":
       return "success";
-    case "CANCELLED":
+    case "CANCELED":
       return "destructive";
     case "DELETED":
       return "secondary";

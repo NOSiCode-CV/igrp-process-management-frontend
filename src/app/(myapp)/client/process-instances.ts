@@ -60,6 +60,24 @@ export const getProcessInstanceById = async (
 };
 
 /**
+ * Cancels a running process instance.
+ * @param id The ID of the process instance to cancel.
+ * @param obsCancel Optional note explaining the cancellation.
+ * @returns A promise that resolves to the updated (canceled) process instance.
+ */
+export const cancelProcessInstance = async (
+  id: string,
+  obsCancel?: string,
+): Promise<ProcessInstance> => {
+  const processManagementClient = await getIGRPProcessClient();
+  const response = await processManagementClient.processes.cancelProcessInstance(
+    id,
+    { obsCancel: obsCancel || undefined },
+  );
+  return response.data;
+};
+
+/**
  * Gets running process instances for a specific application base.
  * @param applicationBase The application base.
  * @returns A promise that resolves to an array of running process instances.

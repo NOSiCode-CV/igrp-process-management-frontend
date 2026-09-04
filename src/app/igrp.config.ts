@@ -78,6 +78,7 @@ export default {
     "config/components/selected-items",
     "config/components/actions-item",
     "config/components/priority-form",
+    "process-instances/components/process-cancel-action",
     "process-map/components/area/area-tree-node",
     "process-map/components/area/area-details",
   ],
