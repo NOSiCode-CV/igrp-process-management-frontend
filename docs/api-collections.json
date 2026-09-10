@@ -6,7 +6,7 @@
   },
   "servers": [
     {
-      "url": "https://api-gateway-test.inss.gw",
+      "url": "https://api.example.com",
       "description": "Generated server url"
     }
   ],

@@ -281,7 +281,7 @@ export default function Areamodal({
                   label={`Aplicação`}
                   showIcon={false}
                   required={true}
-                  placeholder={`ex.: INSS Core`}
+                  placeholder={`ex.: Core`}
                 ></IGRPInputText>
               )}
               <IGRPInputText

@@ -11,8 +11,8 @@
  *
  * When unset, callers resolve the target app from Access Management
  * (`applicationBase` → slug/url). Do not set this to a bare gateway host
- * (e.g. `https://apps-test.inss.gw`) — it must include the owning app prefix
- * (e.g. `https://apps-test.inss.gw/apps/core`) or be left empty.
+ * (e.g. `https://apps.example.com`) — it must include the owning app prefix
+ * (e.g. `https://apps.example.com/apps/core`) or be left empty.
  */
 export async function getProcessExecutionBaseUrl(): Promise<string> {
   return (process.env.IGRP_PROCESS_EXECUTION_URL || "").trim();
