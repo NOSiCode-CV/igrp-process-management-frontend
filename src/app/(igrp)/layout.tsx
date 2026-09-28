@@ -3,6 +3,7 @@ import type { IGRPLayoutConfigArgs } from "@igrp/framework-next-types";
 import { IGRPSectionPermissions } from "@igrp/framework-next-ui";
 
 import { createConfig } from "@/igrp.template.config";
+import { SessionGuard } from "@/components/session-guard";
 import { getLayoutConfig, verifySession } from "@/lib/dal";
 import { IGRPQueryProvider } from "@/providers/query-provider";
 
@@ -25,6 +26,7 @@ export default async function IGRPRootLayout({
   return (
     <IGRPSectionPermissions state={claims}>
       <IGRPQueryProvider>
+        <SessionGuard basePath={process.env.NEXT_PUBLIC_BASE_PATH ?? ""} />
         <IGRPLayoutFull config={config}>{children}</IGRPLayoutFull>
       </IGRPQueryProvider>
     </IGRPSectionPermissions>

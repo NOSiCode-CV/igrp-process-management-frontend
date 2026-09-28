@@ -219,6 +219,27 @@ export async function serverSession() {
 export async function getSession() {
   if (isAuthBypass()) return null;
   const session = await auth.getSession();
+
+  // A session that carries an `error` flag means the OIDC refresh failed (the
+  // refresh token expired or the issuer rejected it). The framework's
+  // getSession() only fires `onSessionExpired` on hard cookie expiry, so it
+  // hands this dead session back non-null — which left protected pages
+  // rendering a broken shell (header/nav 401s) with no redirect, recoverable
+  // only by manually visiting /login. Treat it as expired and complete the
+  // teardown via /logout (mirrors `onSessionExpired`) so the user is sent to
+  // re-authenticate instead of sitting on a half-loaded page.
+  const sessionError =
+    session && typeof session === "object" && "error" in session
+      ? (session as { error?: unknown }).error
+      : undefined;
+  if (sessionError) {
+    console.warn(
+      "[getSession] session carries error flag (refresh failed) — redirecting to /logout:",
+      sessionError,
+    );
+    redirect("/logout");
+  }
+
   // Seed the per-request access-client config so downstream consumers in the
   // same request (e.g. igrpGetClaims, server actions) can read the token.
   // Mirrors serverSession(); IGRPLayoutFull also seeds later but renders after
