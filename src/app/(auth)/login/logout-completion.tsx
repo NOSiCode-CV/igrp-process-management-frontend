@@ -42,8 +42,14 @@ export function LogoutCompletion() {
         // full reload also forces every server component to re-read the now-
         // cleared session.
         clearLogoutPending();
+        // `?loggedOut=1` keeps /login on the manual form instead of auto
+        // signing the user straight back in — a user who just signed out must
+        // see the form, not be bounced back to the IdP (which would show the
+        // credentials screen if the IdP logout failed to end the SSO session).
         const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
-        window.location.replace(`${window.location.origin}${basePath}/login`);
+        window.location.replace(
+          `${window.location.origin}${basePath}/login?loggedOut=1`,
+        );
       }
     })();
   }, []);
