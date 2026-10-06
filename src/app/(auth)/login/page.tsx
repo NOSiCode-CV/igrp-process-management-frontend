@@ -3,13 +3,14 @@ import { redirect } from "next/navigation";
 
 import { getAuthProviderIdFromEnv } from "@igrp/framework-next-auth";
 import { IGRPAuthCarousel, IGRPAuthForm } from "@igrp/framework-next-ui";
+import { cn } from "@igrp/igrp-framework-react-design-system";
 
 import { carouselItems, loginConfig } from "@/config/login";
 import { siteConfig } from "@/config/site";
 import { LOGOUT_PENDING_COOKIE } from "@/lib/logout-pending";
 import { isAuthBypass, sanitizeCallbackUrl } from "@/lib/utilities";
-import { cn } from "@/lib/utils";
 
+import { AutoSignIn } from "./auto-sign-in";
 import { LogoutCompletion } from "./logout-completion";
 
 const { sliderPosition, texts } = loginConfig;
@@ -38,7 +39,7 @@ export default async function AuthPage({
     return <LogoutCompletion />;
   }
 
-  const { callbackUrl } = await searchParams;
+  const { callbackUrl, error, loggedOut } = await searchParams;
   // Drop callbackUrl values that would bounce the user back to /login (or
   // /logout) after the OIDC round-trip — those produce the nested
   // `?callbackUrl=…?callbackUrl=…` chain. Fall back to `/` so a successful
@@ -46,12 +47,12 @@ export default async function AuthPage({
   const safeCallbackUrl = sanitizeCallbackUrl(callbackUrl) ?? "/";
   const providerId = getAuthProviderIdFromEnv(process.env);
 
-  return (
+  const loginForm = (
     <section className="flex min-h-screen flex-col md:flex-row">
       <div
         className={cn(
           "relative hidden w-full md:block md:w-1/2",
-          "lg:order-first hidden lg:block",
+          "lg:order-first",
           sliderPosition === "right" && "lg:order-last",
         )}
       >
@@ -66,4 +67,24 @@ export default async function AuthPage({
       />
     </section>
   );
+
+  // Auto sign-in: start the OIDC round-trip straight away so a live IdP (SSO)
+  // session logs the user in without clicking "Entrar" — needed because each
+  // co-hosted app has its own basePath-scoped session cookie. The manual form
+  // stays for: a NextAuth error redirect (`?error=`, would loop), a completed
+  // logout (`?loggedOut=1`, the user just chose to leave), or when disabled via
+  // IGRP_LOGIN_AUTO_SIGNIN=false.
+  const autoSignInEnabled =
+    process.env.IGRP_LOGIN_AUTO_SIGNIN?.trim().toLowerCase() !== "false";
+  if (autoSignInEnabled && !error && !loggedOut) {
+    return (
+      <AutoSignIn
+        providerId={providerId}
+        callbackUrl={safeCallbackUrl}
+        fallback={loginForm}
+      />
+    );
+  }
+
+  return loginForm;
 }

@@ -1,18 +1,38 @@
+import { existsSync, realpathSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import type { NextConfig } from "next";
 import type { RemotePattern } from "next/dist/shared/lib/image-config";
 
-/** This app's own directory. */
 const appDir = path.dirname(fileURLToPath(import.meta.url));
+const monorepoRoot = path.resolve(appDir, "../..");
 
-/** Monorepo root — stops Turbopack from traversing to D:\ while keeping the pnpm .pnpm store in scope for symlink resolution. */
-const turbopackRoot = path.resolve(appDir, "../..");
-
-// const turbopackRoot = path.dirname(fileURLToPath(import.meta.url));
+const turbopackRoot = existsSync(path.join(monorepoRoot, "pnpm-workspace.yaml"))
+  ? monorepoRoot
+  : appDir;
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
+
+// The design system (ESM) imports `lucide-react/dynamicIconImports` without an
+// extension, and lucide-react has no `exports` map, so strict ESM resolution
+// can't find the `.mjs` file. Alias it to the design system's own lucide copy
+// (its peer; lucide-react isn't a direct dependency here). Drop once the design
+// system imports the full path.
+const lucideDynamicIconImports = `./${path
+  .relative(
+    appDir,
+    path.join(
+      realpathSync(
+        path.join(
+          appDir,
+          "node_modules/@igrp/igrp-framework-react-design-system",
+        ),
+      ),
+      "../../lucide-react/dynamicIconImports.mjs",
+    ),
+  )
+  .replaceAll("\\", "/")}`;
 
 const getRemotePatterns = () => {
   const patterns: Array<{
@@ -40,11 +60,6 @@ const getRemotePatterns = () => {
 
 const nextConfig: NextConfig = {
   output: "standalone",
-  // Pin the standalone tracing root to THIS app. Without it, Next infers a
-  // monorepo root above the app (multiple lockfiles up the tree) and nests the
-  // build — server.js lands in `.next/standalone/app/server.js` instead of the
-  // root, so the Docker image's `node server.js` @ /app crashes (MODULE_NOT_FOUND).
-  outputFileTracingRoot: appDir,
   basePath: basePath,
   images: {
     remotePatterns: getRemotePatterns(),
@@ -52,6 +67,9 @@ const nextConfig: NextConfig = {
   typedRoutes: true,
   turbopack: {
     root: turbopackRoot,
+    resolveAlias: {
+      "lucide-react/dynamicIconImports": lucideDynamicIconImports,
+    },
   },
   experimental: {
     authInterrupts: true,

@@ -1,3 +1,4 @@
+// Permission: open to all authenticated users — demo page with no sensitive data.
 import { redirect } from "next/navigation";
 
 import { IgrpConfigError } from "@igrp/framework-next/errors";
