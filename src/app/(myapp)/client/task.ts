@@ -80,6 +80,12 @@ export const getMyTasks = async (
   const processManagementClient = await getIGRPProcessClient();
   const response = await processManagementClient.tasks.getMyTasks({
     ...params,
+    // "Minhas Tarefas" must ALWAYS be scoped to the signed-in user — even for a
+    // super admin. Without this, the `/me` endpoint returns other users' tasks
+    // to a super admin, and acting on one (claim/execute) fails because it is
+    // assigned to someone else. The super-admin bypass applies to the other
+    // lists (task-management / available / process map), never here.
+    filterByCurrentUser: true,
     status: "ASSIGNED",
     page: 0,
     size: DEFAULT_PAGE_SIZE,
