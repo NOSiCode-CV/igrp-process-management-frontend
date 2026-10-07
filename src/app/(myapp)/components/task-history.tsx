@@ -15,8 +15,6 @@ import {
   getTypeFromValue,
   getTypeIcon,
 } from "../utils/columns-template";
-import { getPriorityLabel } from "../utils/status-helpers";
-import { getPriorityColor } from "../utils/status-badge";
 import {
   ActivityProgress,
   TaskVariables,
@@ -143,25 +141,6 @@ function TaskHistory({ tasks }: TaskHistoryProps) {
                     {task.assignee || "-"}
                   </span>
                 </div>
-              );
-            },
-            filterFn: IGRPDataTableFacetedFilterFn,
-          },
-          {
-            header: "Prioridade",
-            accessorKey: "priority",
-            cell: ({ row }) => {
-              const task = row.original;
-              const label = getPriorityLabel(task.priority);
-              if (!label) return null;
-              return (
-                <IGRPBadge
-                  variant="soft"
-                  color={getPriorityColor({ priority: task.priority! }).color}
-                  className="border-transparent shadow-none"
-                >
-                  {label}
-                </IGRPBadge>
               );
             },
             filterFn: IGRPDataTableFacetedFilterFn,
