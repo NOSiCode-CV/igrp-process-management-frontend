@@ -1,6 +1,6 @@
 "use server";
 
-import type { ApplicationDTO } from "@igrp/platform-access-management-client-ts";
+import type { ApplicationDTO } from "./access-management-client.stub";
 import { getClientAccess } from "./access-client";
 
 export async function getApplications(): Promise<ApplicationDTO[]> {

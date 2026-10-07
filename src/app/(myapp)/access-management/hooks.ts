@@ -1,4 +1,4 @@
-import { ApplicationDTO } from "@igrp/platform-access-management-client-ts";
+import { ApplicationDTO } from "./access-management-client.stub";
 import { getApplications } from "./applications";
 import { useEffect, useState } from "react";
 

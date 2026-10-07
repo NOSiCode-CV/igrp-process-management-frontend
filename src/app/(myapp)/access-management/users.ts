@@ -1,9 +1,11 @@
 "use server";
 
+// Build stub — the real `@igrp/platform-access-management-client-ts` was dropped
+// in the 0.2 migration. See access-management-client.stub.ts.
 import {
   AccessManagementClient,
   IGRPUserDTO,
-} from "@igrp/platform-access-management-client-ts";
+} from "./access-management-client.stub";
 
 export interface BusinessUserOption {
   value: string; // user id (assignee identity used by the API)
