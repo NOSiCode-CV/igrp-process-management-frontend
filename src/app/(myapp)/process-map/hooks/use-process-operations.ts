@@ -41,7 +41,11 @@ export function useProcessOperations(
     setSelectedProcess(process);
   }, []);
 
-  const { data, isPending: mapPending, isFetching: mapFetching } = useQuery({
+  const {
+    data,
+    isPending: mapPending,
+    isFetching: mapFetching,
+  } = useQuery({
     queryKey: ["all-processes-map"],
     queryFn: async () => {
       const response = await getProcesses({ filterByCurrentUser: true });

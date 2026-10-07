@@ -2136,9 +2136,7 @@
         {
           "type": "env.remove",
           "file": ".env",
-          "keys": [
-            "IGRP_SESSION_REFETCH_INTERVAL"
-          ]
+          "keys": ["IGRP_SESSION_REFETCH_INTERVAL"]
         }
       ],
       "fileHashes": {
