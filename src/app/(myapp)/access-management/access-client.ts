@@ -1,4 +1,4 @@
-import { AccessManagementClient } from "./access-management-client.stub";
+import { AccessManagementClient } from "@igrp/platform-access-management-client-ts";
 
 import { auth } from "@/lib/auth";
 
