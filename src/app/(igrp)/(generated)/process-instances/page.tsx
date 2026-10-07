@@ -64,6 +64,7 @@ export default function PageProcessinstancesComponent() {
   }
 
   async function consultarProcess(row: any): Promise<void> {
+    // Navigate to task execution page using centralized URL config
     const taskUrl = await urlConfig.buildProcessInstanceUrl(
       row.processInstanceId,
       row.applicationBase,
@@ -218,7 +219,7 @@ export default function PageProcessinstancesComponent() {
           value={statstatsCard3Value}
         ></IGRPStatsCard>
       </div>
-      <div className={cn(' border rounded-sm')}>
+      <div className={cn(' border rounded-sm p-3')}>
         <TaskProcessFilter
           isProcess={true}
           onSearch={handleSearchSubmit}

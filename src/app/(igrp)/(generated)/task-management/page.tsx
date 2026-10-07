@@ -290,7 +290,7 @@ export default function PageTaskmanagementComponent() {
           value={statstatsCard3Value}
         ></IGRPStatsCard>
       </div>
-      <div className={cn(' border rounded-sm')}>
+      <div className={cn(' border rounded-sm p-3')}>
         <TaskProcessFilter
           showTaskFilters={true}
           onSearch={handleSearchSubmit}
@@ -414,12 +414,14 @@ export default function PageTaskmanagementComponent() {
                       href={`/task-management/${row.original.taskId}`}
                       variant={`ghost`}
                       icon={`ClipboardList`}
+
                       action={() => {}}
                     ></IGRPDataTableButtonLink>
                     <IGRPDataTableButtonLink
                       labelTrigger={`Atribuir Tarefa`}
                       variant={`ghost`}
                       icon={`UserCheck`}
+
                       action={() => {
                         handleOpenAssignModal(rowData);
                       }}
@@ -431,6 +433,7 @@ export default function PageTaskmanagementComponent() {
             },
           ]}
           clientFilters={[]}
+
           data={tableData}
         />
       )}
