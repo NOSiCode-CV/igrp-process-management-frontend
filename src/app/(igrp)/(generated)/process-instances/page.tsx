@@ -232,7 +232,6 @@ export default function PageProcessinstancesComponent() {
       {!loading && (
         <IGRPDataTable<Table1, Table1>
           id={`processes`}
-          showFilter={true}
           showPagination={true}
           paginationClassName={`px-3 pb-3`}
           className={cn('border-0 border-solid border-[#000000]')}

@@ -258,7 +258,6 @@ export default function PageMytasksComponent() {
       {!loading && (
         <IGRPDataTable<Table1, Table1>
           id={`table1`}
-          showFilter={true}
           showPagination={true}
           paginationClassName={`px-3 pb-3`}
           columns={[
