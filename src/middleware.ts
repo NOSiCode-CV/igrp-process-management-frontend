@@ -1,3 +1,4 @@
+import { staleAuthCookies } from "@igrp/framework-next-auth/cookies";
 import { type NextRequest, NextResponse } from "next/server";
 
 // Edge runtime: import the instance from its Edge-safe module, NOT "@/lib/auth"
@@ -142,6 +143,32 @@ function isAuthUiPath(pathname: string): boolean {
  * server components can build a callbackUrl when they need to redirect to login.
  */
 export async function middleware(request: NextRequest) {
+  return expireStaleAuthCookies(request, await handleRequest(request));
+}
+
+/**
+ * Expires this app's previous-generation auth cookies on whatever response the
+ * middleware produced (pass-through or redirect alike).
+ *
+ * Auth cookies are now confined to the app's basePath, under a new name. The
+ * names this app used to write at `Path=/` are no longer read, but the browser
+ * keeps sending them to every path on the host — including the IdP — until
+ * they expire. `staleAuthCookies` derives those names from this app's basePath
+ * only, so another co-hosted app's cookies are never touched. A no-op once the
+ * old cookies are gone, and always for a root-path app.
+ */
+function expireStaleAuthCookies(
+  request: NextRequest,
+  response: NextResponse,
+): NextResponse {
+  const names = request.cookies.getAll().map((cookie) => cookie.name);
+  for (const { name, options } of staleAuthCookies(BASE_PATH, names)) {
+    response.cookies.set(name, "", options);
+  }
+  return response;
+}
+
+async function handleRequest(request: NextRequest): Promise<NextResponse> {
   const { pathname, search } = request.nextUrl;
   const currentPath = pathname + search;
 
