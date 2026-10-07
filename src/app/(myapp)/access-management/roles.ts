@@ -5,7 +5,7 @@
 import {
   AccessManagementClient,
   RoleDTO,
-} from "./access-management-client.stub";
+} from "@igrp/platform-access-management-client-ts";
 
 /**
  * A selectable candidate group derived from access-management.
