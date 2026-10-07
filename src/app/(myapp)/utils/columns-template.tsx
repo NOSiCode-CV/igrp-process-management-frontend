@@ -185,8 +185,12 @@ export const getProgressTemplate = (progress: string, status: string) => {
     <div className="flex items-center gap-2">
       <Progress
         value={progressValue}
-        className={`w-18 h-2 flex-1`}
-        indicatorClassName={`bg-primary ${progressColorClass}`}
+        // DS 0.2 dropped `indicatorClassName`; colour the fill through its
+        // data-slot instead (the indicator already defaults to bg-primary).
+        className={cn(
+          "w-18 h-2 flex-1",
+          `[&_[data-slot=progress-indicator]]:${progressColorClass}`,
+        )}
       />
       <span className="text-xs text-muted-foreground font-mono w-10">
         {completedTasks}/{totalTasks}
