@@ -1,9 +1,14 @@
-import { IGRPLabel, ScrollArea } from "@igrp/igrp-framework-react-design-system";
+import {
+  IGRPLabel,
+  ScrollArea,
+} from "@igrp/igrp-framework-react-design-system";
 
-function checklistKeyOf(item?: {
-  processKey?: string;
-  key?: string;
-} | null): string {
+function checklistKeyOf(
+  item?: {
+    processKey?: string;
+    key?: string;
+  } | null,
+): string {
   return (item?.processKey || item?.key || "").trim();
 }
 

@@ -23,8 +23,14 @@ export function useProcessMap(
   const [processKey, setProcessKey] = useState<string | undefined>(undefined);
 
   // Data management
-  const { areas, loadedNodes, loading: areasLoading, error, loadSubareas, refreshData } =
-    useProcessMapData();
+  const {
+    areas,
+    loadedNodes,
+    loading: areasLoading,
+    error,
+    loadSubareas,
+    refreshData,
+  } = useProcessMapData();
 
   // Tree expansion state
   const { expandedNodes, toggleNode: originalToggleNode } = useTreeExpansion();
