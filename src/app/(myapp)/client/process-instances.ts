@@ -70,10 +70,10 @@ export const cancelProcessInstance = async (
   obsCancel?: string,
 ): Promise<ProcessInstance> => {
   const processManagementClient = await getIGRPProcessClient();
-  const response = await processManagementClient.processes.cancelProcessInstance(
-    id,
-    { obsCancel: obsCancel || undefined },
-  );
+  const response =
+    await processManagementClient.processes.cancelProcessInstance(id, {
+      obsCancel: obsCancel || undefined,
+    });
   return response.data;
 };
 

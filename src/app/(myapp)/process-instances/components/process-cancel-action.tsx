@@ -93,8 +93,8 @@ function ProcessCancelAction({
           <IGRPModalDialogHeader>
             <IGRPModalDialogTitle>Cancelar Processo</IGRPModalDialogTitle>
             <IGRPModalDialogDescription>
-              Tem a certeza que deseja cancelar este processo? Esta ação não pode
-              ser revertida.
+              Tem a certeza que deseja cancelar este processo? Esta ação não
+              pode ser revertida.
             </IGRPModalDialogDescription>
           </IGRPModalDialogHeader>
 

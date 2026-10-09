@@ -5,7 +5,7 @@
 import {
   AccessManagementClient,
   IGRPUserDTO,
-} from "./access-management-client.stub";
+} from "@igrp/platform-access-management-client-ts";
 
 export interface BusinessUserOption {
   value: string; // user id (assignee identity used by the API)

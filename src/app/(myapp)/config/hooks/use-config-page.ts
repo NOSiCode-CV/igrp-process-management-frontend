@@ -60,7 +60,11 @@ export function useConfigPage({
     userTasks: userTasksConfig,
   } = processConfig;
 
-  const { data, isLoading: loading, isFetching } = useQuery({
+  const {
+    data,
+    isLoading: loading,
+    isFetching,
+  } = useQuery({
     queryKey: ["all-processes", filterProcess],
     queryFn: async () => {
       const response = await getProcesses({ processName: filterProcess });

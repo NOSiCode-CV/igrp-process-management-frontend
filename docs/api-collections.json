@@ -40,9 +40,7 @@
   "paths": {
     "/tasks-instances/assignment-rules/{id}": {
       "put": {
-        "tags": [
-          "TaskInstances"
-        ],
+        "tags": ["TaskInstances"],
         "summary": "PUT method to handle operations for Update task assignment rule",
         "description": "PUT method to handle operations for Update task assignment rule",
         "operationId": "updateTaskAssignmentRule",
@@ -81,9 +79,7 @@
         }
       },
       "delete": {
-        "tags": [
-          "TaskInstances"
-        ],
+        "tags": ["TaskInstances"],
         "summary": "DELETE method to handle operations for Delete task assignment rule",
         "description": "DELETE method to handle operations for Delete task assignment rule",
         "operationId": "deleteTaskAssignmentRule",
@@ -113,9 +109,7 @@
     },
     "/process-definitions/{processKey}/priorities": {
       "get": {
-        "tags": [
-          "ProcessDefinition"
-        ],
+        "tags": ["ProcessDefinition"],
         "summary": "GET method to handle operations for Get priorities by process definition key",
         "description": "GET method to handle operations for Get priorities by process definition key",
         "operationId": "getPrioritiesByProcessDefinitionKey",
@@ -144,9 +138,7 @@
         }
       },
       "put": {
-        "tags": [
-          "ProcessDefinition"
-        ],
+        "tags": ["ProcessDefinition"],
         "summary": "PUT method to handle operations for Configure priority",
         "description": "PUT method to handle operations for Configure priority",
         "operationId": "configurePriority",
@@ -190,9 +182,7 @@
     },
     "/process-definitions/{id}/artifacts/{taskKey}": {
       "put": {
-        "tags": [
-          "ProcessDefinition"
-        ],
+        "tags": ["ProcessDefinition"],
         "summary": "PUT method to handle operations for Configure artifact",
         "description": "PUT method to handle operations for Configure artifact",
         "operationId": "configureArtifact",
@@ -241,9 +231,7 @@
     },
     "/areas/{id}": {
       "get": {
-        "tags": [
-          "Areas"
-        ],
+        "tags": ["Areas"],
         "summary": "GET method to handle operations for getAreaById",
         "description": "GET method to handle operations for getAreaById",
         "operationId": "getAreaById",
@@ -272,9 +260,7 @@
         }
       },
       "put": {
-        "tags": [
-          "Areas"
-        ],
+        "tags": ["Areas"],
         "summary": "PUT method to handle operations for updateArea",
         "description": "PUT method to handle operations for updateArea",
         "operationId": "updateArea",
@@ -313,9 +299,7 @@
         }
       },
       "delete": {
-        "tags": [
-          "Areas"
-        ],
+        "tags": ["Areas"],
         "summary": "DELETE method to handle operations for deleteArea",
         "description": "DELETE method to handle operations for deleteArea",
         "operationId": "deleteArea",
@@ -345,9 +329,7 @@
     },
     "/tasks-instances/{id}/unclaim": {
       "post": {
-        "tags": [
-          "TaskInstances"
-        ],
+        "tags": ["TaskInstances"],
         "summary": "POST method to handle operations for Un claim task",
         "description": "POST method to handle operations for Un claim task",
         "operationId": "unClaimTask",
@@ -387,9 +369,7 @@
     },
     "/tasks-instances/{id}/save": {
       "post": {
-        "tags": [
-          "TaskInstances"
-        ],
+        "tags": ["TaskInstances"],
         "summary": "POST method to handle operations for Save task",
         "description": "POST method to handle operations for Save task",
         "operationId": "saveTask",
@@ -430,9 +410,7 @@
     },
     "/tasks-instances/{id}/complete": {
       "post": {
-        "tags": [
-          "TaskInstances"
-        ],
+        "tags": ["TaskInstances"],
         "summary": "POST method to handle operations for Complete task",
         "description": "POST method to handle operations for Complete task",
         "operationId": "completeTask",
@@ -473,9 +451,7 @@
     },
     "/tasks-instances/{id}/claim": {
       "post": {
-        "tags": [
-          "TaskInstances"
-        ],
+        "tags": ["TaskInstances"],
         "summary": "POST method to handle operations for Claim task",
         "description": "POST method to handle operations for Claim task",
         "operationId": "claimTask",
@@ -505,9 +481,7 @@
     },
     "/tasks-instances/{id}/assign": {
       "post": {
-        "tags": [
-          "TaskInstances"
-        ],
+        "tags": ["TaskInstances"],
         "summary": "POST method to handle operations for Assign task",
         "description": "POST method to handle operations for Assign task",
         "operationId": "assignTask",
@@ -547,9 +521,7 @@
     },
     "/tasks-instances/search": {
       "post": {
-        "tags": [
-          "TaskInstances"
-        ],
+        "tags": ["TaskInstances"],
         "summary": "POST method to handle operations for List task instances",
         "description": "POST method to handle operations for List task instances",
         "operationId": "listTaskInstances",
@@ -713,9 +685,7 @@
     },
     "/tasks-instances/me": {
       "post": {
-        "tags": [
-          "TaskInstances"
-        ],
+        "tags": ["TaskInstances"],
         "summary": "POST method to handle operations for Get all my tasks",
         "description": "POST method to handle operations for Get all my tasks",
         "operationId": "getAllMyTasks",
@@ -847,9 +817,7 @@
     },
     "/process-instances": {
       "post": {
-        "tags": [
-          "ProcessInstance"
-        ],
+        "tags": ["ProcessInstance"],
         "summary": "POST method to handle operations for Create start process instance",
         "description": "POST method to handle operations for Create start process instance",
         "operationId": "createStartProcessInstance",
@@ -880,9 +848,7 @@
     },
     "/process-instances/{id}/timer/reschedule": {
       "post": {
-        "tags": [
-          "ProcessInstance"
-        ],
+        "tags": ["ProcessInstance"],
         "summary": "POST method to handle operations for Reschedule timer",
         "description": "POST method to handle operations for Reschedule timer",
         "operationId": "rescheduleTimer",
@@ -922,9 +888,7 @@
     },
     "/process-instances/{id}/start": {
       "post": {
-        "tags": [
-          "ProcessInstance"
-        ],
+        "tags": ["ProcessInstance"],
         "summary": "POST method to handle operations for Start process instance by id",
         "description": "POST method to handle operations for Start process instance by id",
         "operationId": "startProcessInstanceById",
@@ -965,9 +929,7 @@
     },
     "/process-instances/{id}/cancel": {
       "post": {
-        "tags": [
-          "ProcessInstance"
-        ],
+        "tags": ["ProcessInstance"],
         "summary": "POST method to handle operations for Cancel process instance",
         "description": "POST method to handle operations for Cancel process instance",
         "operationId": "cancelProcessInstance",
@@ -1007,9 +969,7 @@
     },
     "/process-instances/search": {
       "post": {
-        "tags": [
-          "ProcessInstance"
-        ],
+        "tags": ["ProcessInstance"],
         "summary": "POST method to handle operations for List process instances",
         "description": "POST method to handle operations for List process instances",
         "operationId": "listProcessInstances",
@@ -1124,9 +1084,7 @@
     },
     "/process-instances/event": {
       "post": {
-        "tags": [
-          "ProcessInstance"
-        ],
+        "tags": ["ProcessInstance"],
         "summary": "POST method to handle operations for Trigger process event",
         "description": "POST method to handle operations for Trigger process event",
         "operationId": "triggerProcessEvent",
@@ -1156,9 +1114,7 @@
     },
     "/process-instances/create": {
       "post": {
-        "tags": [
-          "ProcessInstance"
-        ],
+        "tags": ["ProcessInstance"],
         "summary": "POST method to handle operations for Create process instance",
         "description": "POST method to handle operations for Create process instance",
         "operationId": "createProcessInstance",
@@ -1189,9 +1145,7 @@
     },
     "/process-definitions/{processDefinitionKey}/sequence": {
       "get": {
-        "tags": [
-          "ProcessDefinition"
-        ],
+        "tags": ["ProcessDefinition"],
         "summary": "GET method to handle operations for Get process sequence",
         "description": "GET method to handle operations for Get process sequence",
         "operationId": "getProcessSequence",
@@ -1220,9 +1174,7 @@
         }
       },
       "post": {
-        "tags": [
-          "ProcessDefinition"
-        ],
+        "tags": ["ProcessDefinition"],
         "summary": "POST method to handle operations for Create process sequence",
         "description": "POST method to handle operations for Create process sequence",
         "operationId": "createProcessSequence",
@@ -1263,9 +1215,7 @@
     },
     "/process-definitions/{id}/unassign": {
       "post": {
-        "tags": [
-          "ProcessDefinition"
-        ],
+        "tags": ["ProcessDefinition"],
         "summary": "POST method to handle operations for Un assign process definition",
         "description": "POST method to handle operations for Un assign process definition",
         "operationId": "unAssignProcessDefinition",
@@ -1305,9 +1255,7 @@
     },
     "/process-definitions/{id}/unarchive": {
       "post": {
-        "tags": [
-          "ProcessDefinition"
-        ],
+        "tags": ["ProcessDefinition"],
         "summary": "POST method to handle operations for Un archive process definition",
         "description": "POST method to handle operations for Un archive process definition",
         "operationId": "unArchiveProcessDefinition",
@@ -1337,9 +1285,7 @@
     },
     "/process-definitions/{id}/assign": {
       "post": {
-        "tags": [
-          "ProcessDefinition"
-        ],
+        "tags": ["ProcessDefinition"],
         "summary": "POST method to handle operations for Assign process definition",
         "description": "POST method to handle operations for Assign process definition",
         "operationId": "assignProcessDefinition",
@@ -1379,9 +1325,7 @@
     },
     "/process-definitions/import": {
       "post": {
-        "tags": [
-          "ProcessDefinition"
-        ],
+        "tags": ["ProcessDefinition"],
         "summary": "POST method to handle operations for Import process definition",
         "description": "POST method to handle operations for Import process definition",
         "operationId": "importProcessDefinition",
@@ -1411,9 +1355,7 @@
     },
     "/process-definitions/deploy": {
       "post": {
-        "tags": [
-          "ProcessDefinition"
-        ],
+        "tags": ["ProcessDefinition"],
         "summary": "POST method to handle operations for Deploy process",
         "description": "POST method to handle operations for Deploy process",
         "operationId": "deployProcess",
@@ -1444,9 +1386,7 @@
     },
     "/areas": {
       "get": {
-        "tags": [
-          "Areas"
-        ],
+        "tags": ["Areas"],
         "summary": "GET method to handle operations for listAreas",
         "description": "GET method to handle operations for listAreas",
         "operationId": "listAreas",
@@ -1525,9 +1465,7 @@
         }
       },
       "post": {
-        "tags": [
-          "Areas"
-        ],
+        "tags": ["Areas"],
         "summary": "POST method to handle operations for createArea",
         "description": "POST method to handle operations for createArea",
         "operationId": "createArea",
@@ -1558,9 +1496,7 @@
     },
     "/areas/{areaId}/process-definitions": {
       "get": {
-        "tags": [
-          "Areas"
-        ],
+        "tags": ["Areas"],
         "summary": "GET method to handle operations for listProcessDefinitions",
         "description": "GET method to handle operations for listProcessDefinitions",
         "operationId": "listProcessDefinitions",
@@ -1631,9 +1567,7 @@
         }
       },
       "post": {
-        "tags": [
-          "Areas"
-        ],
+        "tags": ["Areas"],
         "summary": "POST method to handle operations for createProcessDefinition",
         "description": "POST method to handle operations for createProcessDefinition",
         "operationId": "createProcessDefinition",
@@ -1674,9 +1608,7 @@
     },
     "/tasks-instances/{id}": {
       "get": {
-        "tags": [
-          "TaskInstances"
-        ],
+        "tags": ["TaskInstances"],
         "summary": "GET method to handle operations for Get task instance by id",
         "description": "GET method to handle operations for Get task instance by id",
         "operationId": "getTaskInstanceById",
@@ -1707,9 +1639,7 @@
     },
     "/tasks-instances/{id}/variables": {
       "get": {
-        "tags": [
-          "TaskInstances"
-        ],
+        "tags": ["TaskInstances"],
         "summary": "GET method to handle operations for Get task variables by id",
         "description": "GET method to handle operations for Get task variables by id",
         "operationId": "getTaskVariablesById",
@@ -1740,9 +1670,7 @@
     },
     "/tasks-instances/status": {
       "get": {
-        "tags": [
-          "TaskInstances"
-        ],
+        "tags": ["TaskInstances"],
         "summary": "GET method to handle operations for List task instance status",
         "description": "GET method to handle operations for List task instance status",
         "operationId": "listTaskInstanceStatus",
@@ -1763,9 +1691,7 @@
     },
     "/tasks-instances/stats": {
       "get": {
-        "tags": [
-          "TaskInstances"
-        ],
+        "tags": ["TaskInstances"],
         "summary": "GET method to handle operations for Get task instance statistics",
         "description": "GET method to handle operations for Get task instance statistics",
         "operationId": "getTaskInstanceStatistics",
@@ -1786,9 +1712,7 @@
     },
     "/tasks-instances/stats/me": {
       "get": {
-        "tags": [
-          "TaskInstances"
-        ],
+        "tags": ["TaskInstances"],
         "summary": "GET method to handle operations for Get my task instance statistics",
         "description": "GET method to handle operations for Get my task instance statistics",
         "operationId": "getMyTaskInstanceStatistics",
@@ -1809,9 +1733,7 @@
     },
     "/tasks-instances/event_type": {
       "get": {
-        "tags": [
-          "TaskInstances"
-        ],
+        "tags": ["TaskInstances"],
         "summary": "GET method to handle operations for List task instance event type",
         "description": "GET method to handle operations for List task instance event type",
         "operationId": "listTaskInstanceEventType",
@@ -1832,9 +1754,7 @@
     },
     "/tasks-instances/assignment-rules": {
       "get": {
-        "tags": [
-          "TaskInstances"
-        ],
+        "tags": ["TaskInstances"],
         "summary": "GET method to handle operations for List task assignment rules",
         "description": "GET method to handle operations for List task assignment rules",
         "operationId": "listTaskAssignmentRules",
@@ -1893,10 +1813,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "enum": [
-                "ALWAYS",
-                "ONE_TIME"
-              ]
+              "enum": ["ALWAYS", "ONE_TIME"]
             }
           },
           {
@@ -1959,9 +1876,7 @@
     },
     "/process-instances/{id}": {
       "get": {
-        "tags": [
-          "ProcessInstance"
-        ],
+        "tags": ["ProcessInstance"],
         "summary": "GET method to handle operations for Get process instance by id",
         "description": "GET method to handle operations for Get process instance by id",
         "operationId": "getProcessInstanceById",
@@ -1992,9 +1907,7 @@
     },
     "/process-instances/{id}/task-status": {
       "get": {
-        "tags": [
-          "ProcessInstance"
-        ],
+        "tags": ["ProcessInstance"],
         "summary": "GET method to handle operations for Get task status",
         "description": "GET method to handle operations for Get task status",
         "operationId": "getTaskStatus",
@@ -2025,9 +1938,7 @@
     },
     "/process-instances/status": {
       "get": {
-        "tags": [
-          "ProcessInstance"
-        ],
+        "tags": ["ProcessInstance"],
         "summary": "GET method to handle operations for List process instance status",
         "description": "GET method to handle operations for List process instance status",
         "operationId": "listProcessInstanceStatus",
@@ -2048,9 +1959,7 @@
     },
     "/process-instances/stats": {
       "get": {
-        "tags": [
-          "ProcessInstance"
-        ],
+        "tags": ["ProcessInstance"],
         "summary": "GET method to handle operations for Get process instance statistics",
         "description": "GET method to handle operations for Get process instance statistics",
         "operationId": "getProcessInstanceStatistics",
@@ -2071,9 +1980,7 @@
     },
     "/process-definitions": {
       "get": {
-        "tags": [
-          "ProcessDefinition"
-        ],
+        "tags": ["ProcessDefinition"],
         "summary": "GET method to handle operations for List deployments",
         "description": "GET method to handle operations for List deployments",
         "operationId": "listDeployments",
@@ -2148,9 +2055,7 @@
     },
     "/process-definitions/{id}/export": {
       "get": {
-        "tags": [
-          "ProcessDefinition"
-        ],
+        "tags": ["ProcessDefinition"],
         "summary": "GET method to handle operations for Export process definition",
         "description": "GET method to handle operations for Export process definition",
         "operationId": "exportProcessDefinition",
@@ -2181,9 +2086,7 @@
     },
     "/process-definitions/{id}/deployed-artifacts": {
       "get": {
-        "tags": [
-          "ProcessDefinition"
-        ],
+        "tags": ["ProcessDefinition"],
         "summary": "GET method to handle operations for Get deployed artifacts by process definition id",
         "description": "GET method to handle operations for Get deployed artifacts by process definition id",
         "operationId": "getDeployedArtifactsByProcessDefinitionId",
@@ -2214,9 +2117,7 @@
     },
     "/process-definitions/{id}/artifacts": {
       "get": {
-        "tags": [
-          "ProcessDefinition"
-        ],
+        "tags": ["ProcessDefinition"],
         "summary": "GET method to handle operations for Get artifacts by process definition id",
         "description": "GET method to handle operations for Get artifacts by process definition id",
         "operationId": "getArtifactsByProcessDefinitionId",
@@ -2247,9 +2148,7 @@
     },
     "/areas/status": {
       "get": {
-        "tags": [
-          "Areas"
-        ],
+        "tags": ["Areas"],
         "summary": "GET method to handle operations for listAreaStatus",
         "description": "GET method to handle operations for listAreaStatus",
         "operationId": "listAreaStatus",
@@ -2270,9 +2169,7 @@
     },
     "/activities/{id}": {
       "get": {
-        "tags": [
-          "Activities"
-        ],
+        "tags": ["Activities"],
         "summary": "GET method to handle operations for Get activity by id",
         "description": "GET method to handle operations for Get activity by id",
         "operationId": "getActivityById",
@@ -2303,9 +2200,7 @@
     },
     "/activities/progress": {
       "get": {
-        "tags": [
-          "Activities"
-        ],
+        "tags": ["Activities"],
         "summary": "GET method to handle operations for Get activity progress",
         "description": "GET method to handle operations for Get activity progress",
         "operationId": "getActivityProgress",
@@ -2344,9 +2239,7 @@
     },
     "/activities/instances": {
       "get": {
-        "tags": [
-          "Activities"
-        ],
+        "tags": ["Activities"],
         "summary": "GET method to handle operations for Get activity instances",
         "description": "GET method to handle operations for Get activity instances",
         "operationId": "getActivityInstances",
@@ -2385,9 +2278,7 @@
     },
     "/process-definitions/{id}/archive": {
       "delete": {
-        "tags": [
-          "ProcessDefinition"
-        ],
+        "tags": ["ProcessDefinition"],
         "summary": "DELETE method to handle operations for Archive process definition",
         "description": "DELETE method to handle operations for Archive process definition",
         "operationId": "archiveProcessDefinition",
@@ -2417,9 +2308,7 @@
     },
     "/process-definitions/priorities/{id}": {
       "delete": {
-        "tags": [
-          "ProcessDefinition"
-        ],
+        "tags": ["ProcessDefinition"],
         "summary": "DELETE method to handle operations for Delete priority",
         "description": "DELETE method to handle operations for Delete priority",
         "operationId": "deletePriority",
@@ -2449,9 +2338,7 @@
     },
     "/process-definitions/artifacts/{id}": {
       "delete": {
-        "tags": [
-          "ProcessDefinition"
-        ],
+        "tags": ["ProcessDefinition"],
         "summary": "DELETE method to handle operations for Delete artifact",
         "description": "DELETE method to handle operations for Delete artifact",
         "operationId": "deleteArtifact",
@@ -2481,9 +2368,7 @@
     },
     "/areas/{areaId}/process-definitions/{processDefinitionId}": {
       "delete": {
-        "tags": [
-          "Areas"
-        ],
+        "tags": ["Areas"],
         "summary": "DELETE method to handle operations for removeProcessDefinition",
         "description": "DELETE method to handle operations for removeProcessDefinition",
         "operationId": "removeProcessDefinition",
@@ -2550,10 +2435,7 @@
           },
           "assignmentMode": {
             "type": "string",
-            "enum": [
-              "ALWAYS",
-              "ONE_TIME"
-            ]
+            "enum": ["ALWAYS", "ONE_TIME"]
           },
           "priority": {
             "type": "integer",
@@ -2633,11 +2515,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "code",
-          "label",
-          "weight"
-        ]
+        "required": ["code", "label", "weight"]
       },
       "ProcessArtifactDTO": {
         "type": "object",
@@ -2692,10 +2570,7 @@
             "format": "int32"
           }
         },
-        "required": [
-          "formKey",
-          "name"
-        ]
+        "required": ["formKey", "name"]
       },
       "AreaDTO": {
         "type": "object",
@@ -2722,10 +2597,7 @@
           },
           "status": {
             "type": "string",
-            "enum": [
-              "ACTIVE",
-              "INACTIVE"
-            ]
+            "enum": ["ACTIVE", "INACTIVE"]
           },
           "statusDesc": {
             "type": "string"
@@ -2787,10 +2659,7 @@
           },
           "status": {
             "type": "string",
-            "enum": [
-              "ACTIVE",
-              "INACTIVE"
-            ]
+            "enum": ["ACTIVE", "INACTIVE"]
           },
           "statusDesc": {
             "type": "string"
@@ -2817,13 +2686,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "areaId",
-          "id",
-          "processKey",
-          "releaseId",
-          "version"
-        ]
+        "required": ["areaId", "id", "processKey", "releaseId", "version"]
       },
       "AreaRequestDTO": {
         "type": "object",
@@ -2851,11 +2714,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "applicationBase",
-          "code",
-          "name"
-        ]
+        "required": ["applicationBase", "code", "name"]
       },
       "UnclaimTaskDTO": {
         "type": "object",
@@ -3281,11 +3140,7 @@
           },
           "value": {}
         },
-        "required": [
-          "name",
-          "operator",
-          "value"
-        ]
+        "required": ["name", "operator", "value"]
       },
       "VariablesFilterDTO": {
         "type": "object",
@@ -3316,13 +3171,7 @@
           },
           "status": {
             "type": "string",
-            "enum": [
-              "RUNNING",
-              "CREATED",
-              "SUSPENDED",
-              "CANCELED",
-              "COMPLETED"
-            ]
+            "enum": ["RUNNING", "CREATED", "SUSPENDED", "CANCELED", "COMPLETED"]
           },
           "statusDesc": {
             "type": "string"
@@ -3405,19 +3254,14 @@
           },
           "assignmentMode": {
             "type": "string",
-            "enum": [
-              "ALWAYS",
-              "ONE_TIME"
-            ]
+            "enum": ["ALWAYS", "ONE_TIME"]
           },
           "priority": {
             "type": "integer",
             "format": "int32"
           }
         },
-        "required": [
-          "taskKey"
-        ]
+        "required": ["taskKey"]
       },
       "StartProcessRequestDTO": {
         "type": "object",
@@ -3453,10 +3297,7 @@
             }
           }
         },
-        "required": [
-          "applicationBase",
-          "processKey"
-        ]
+        "required": ["applicationBase", "processKey"]
       },
       "TimerRescheduleDTO": {
         "type": "object",
@@ -3469,9 +3310,7 @@
             "format": "int64"
           }
         },
-        "required": [
-          "seconds"
-        ]
+        "required": ["seconds"]
       },
       "ProcessVariablesRequestDTO": {
         "type": "object",
@@ -3573,10 +3412,7 @@
             "format": "int32"
           }
         },
-        "required": [
-          "applicationBase",
-          "processKey"
-        ]
+        "required": ["applicationBase", "processKey"]
       },
       "ProcessSequenceDTO": {
         "type": "object",
@@ -3665,9 +3501,7 @@
             "minLength": 1
           }
         },
-        "required": [
-          "candidateGroups"
-        ]
+        "required": ["candidateGroups"]
       },
       "ProcessPackageDTO": {
         "type": "object",
@@ -3707,12 +3541,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "applicationBase",
-          "bpmnXml",
-          "processKey",
-          "processName"
-        ]
+        "required": ["applicationBase", "bpmnXml", "processKey", "processName"]
       },
       "ProcessDeploymentDTO": {
         "type": "object",
@@ -3782,12 +3611,7 @@
             "minLength": 1
           }
         },
-        "required": [
-          "applicationBase",
-          "bpmnXml",
-          "key",
-          "resourceName"
-        ]
+        "required": ["applicationBase", "bpmnXml", "key", "resourceName"]
       },
       "ProcessDefinitionRequestDTO": {
         "type": "object",
@@ -3808,11 +3632,7 @@
             "minLength": 1
           }
         },
-        "required": [
-          "name",
-          "processKey",
-          "releaseId"
-        ]
+        "required": ["name", "processKey", "releaseId"]
       },
       "TaskVariablesFormsDTO": {
         "type": "object",
@@ -3843,10 +3663,7 @@
             "minLength": 1
           }
         },
-        "required": [
-          "label",
-          "value"
-        ]
+        "required": ["label", "value"]
       },
       "TaskInstanceStatsDTO": {
         "type": "object",
@@ -3931,9 +3748,7 @@
             ]
           }
         },
-        "required": [
-          "taskKey"
-        ]
+        "required": ["taskKey"]
       },
       "ProcessInstanceStatsDTO": {
         "type": "object",
