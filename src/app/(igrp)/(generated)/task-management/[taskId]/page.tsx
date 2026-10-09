@@ -117,20 +117,21 @@ export default function PageDetalhedatarefaComponent({
                       Concluir Tarefa
                     </IGRPButton>
 
-                    <IGRPButton
-                      id={`button2`}
-                      variant={`outline`}
-                      size={`default`}
-                      showIcon={true}
-                      iconName={`UserPlus`}
-                      className={cn('flex justify-start', 'col-span-1')}
-                      onClick={() => {
-                        setDelegateTask(!delegateTask);
-                      }}
-                    >
-                      Delegar
-                    </IGRPButton>
-
+                    {task?.status !== 'ASSIGNED' && (
+                      <IGRPButton
+                        id={`button2`}
+                        variant={`outline`}
+                        size={`default`}
+                        showIcon={true}
+                        iconName={`UserPlus`}
+                        className={cn('flex justify-start', 'col-span-1')}
+                        onClick={() => {
+                          setDelegateTask(!delegateTask);
+                        }}
+                      >
+                        Delegar
+                      </IGRPButton>
+                    )}
                     <IGRPButton
                       id={`button3`}
                       variant={`outline`}
