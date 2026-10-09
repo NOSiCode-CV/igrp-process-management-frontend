@@ -139,6 +139,9 @@ export const getAvailableTasks = async (
     candidateUsers: candidateUsers || undefined,
     name: name || undefined,
     priority: priority ?? undefined,
+    // Scope to tasks the signed-in user can actually claim (they are a
+    // candidate for). Set explicitly rather than relying on the backend default.
+    filterByCurrentUser: true,
     status: "CREATED",
     page: 0,
     size: DEFAULT_PAGE_SIZE,

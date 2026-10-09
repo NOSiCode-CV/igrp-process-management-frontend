@@ -83,7 +83,10 @@ function FilterData({
           )}
         </IGRPButton>
       </PopoverTrigger>
-      <PopoverContent className="w-[480px] p-4" align="start">
+      <PopoverContent
+        className="w-[min(480px,calc(100vw-2rem))] max-w-[480px] p-4"
+        align="start"
+      >
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h4 className="font-medium text-sm">

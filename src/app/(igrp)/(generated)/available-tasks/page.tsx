@@ -126,7 +126,7 @@ export default function PageAvailabletasksComponent() {
           cardBorder={`rounded-lg`}
           cardVariant={`info`}
           iconBackground={`square`}
-          title={undefined}
+          title={``}
           titleSize={`sm`}
           valueSize={`2xl`}
           showIcon={true}
@@ -142,7 +142,7 @@ export default function PageAvailabletasksComponent() {
           value={statstatsCard1Value}
         ></IGRPStatsCard>
       </div>
-      <div className={cn(' border rounded-sm')}>
+      <div className={cn(' border rounded-sm p-3')}>
         <TaskProcessFilter
           showTaskFilters={true}
           onSearch={handleSearch}
@@ -247,6 +247,7 @@ export default function PageAvailabletasksComponent() {
                       labelTrigger={`Assumir Tarefa`}
                       variant={`ghost`}
                       icon={`CheckCheck`}
+
                       action={() => {
                         onClaimTask(rowData.taskId);
                       }}
@@ -258,6 +259,7 @@ export default function PageAvailabletasksComponent() {
             },
           ]}
           clientFilters={[]}
+
           data={tableData}
         />
       )}

@@ -244,7 +244,7 @@ export default function PageMytasksComponent() {
           value={statstatsCard3Value}
         ></IGRPStatsCard>
       </div>
-      <div className={cn(' border rounded-lg')}>
+      <div className={cn(' border rounded-lg p-3')}>
         <TaskProcessFilter
           showTaskFilters={true}
           hideCandidateUsers={true}
@@ -258,7 +258,6 @@ export default function PageMytasksComponent() {
       {!loading && (
         <IGRPDataTable<Table1, Table1>
           id={`table1`}
-          showFilter={true}
           showPagination={true}
           paginationClassName={`px-3 pb-3`}
           columns={[
@@ -327,6 +326,7 @@ export default function PageMytasksComponent() {
                       labelTrigger={`Executar Tarefa`}
                       variant={`ghost`}
                       icon={`Play`}
+
                       action={() => {
                         executeTask(rowData);
                       }}
@@ -335,6 +335,7 @@ export default function PageMytasksComponent() {
                       labelTrigger={`Libertar Tarefa`}
                       variant={`ghost`}
                       icon={`UserX`}
+
                       action={() => {
                         handleOpenUnclaimModal(rowData);
                       }}
@@ -346,6 +347,7 @@ export default function PageMytasksComponent() {
             },
           ]}
           clientFilters={[]}
+
           data={tableData}
         />
       )}
