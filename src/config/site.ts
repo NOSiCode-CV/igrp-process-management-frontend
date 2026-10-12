@@ -10,7 +10,8 @@ export const siteConfig = {
   },
   logo: {
     src: "/logo-no-text.png",
-    srcDark: "/logo-no-text.png",
+    // Set `srcDark` only for a distinct dark-mode asset: when present, the
+    // login form renders a second <Image> and swaps the two with `dark:hidden`.
     width: 100,
     height: 60,
   },
