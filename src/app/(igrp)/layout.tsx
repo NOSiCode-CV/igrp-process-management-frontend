@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { IGRPLayoutFull, igrpGetClaims } from "@igrp/framework-next";
 import { IGRPSectionPermissions } from "@igrp/framework-next-ui";
 
-import { AppSearch } from "@/components/header/app-search";
+import { AppSearch } from "@/components/app-search";
 import { createConfig } from "@/igrp.template.config";
 import { getLayoutConfig, verifySession } from "@/lib/dal";
 import {
