@@ -58,9 +58,24 @@ const getRemotePatterns = () => {
   return patterns;
 };
 
+// Home redirect at the routing layer, not in `(igrp)/page.tsx`: a `redirect()`
+// thrown from the page only fires after `(igrp)/layout.tsx` has verified the
+// session, built the config and started the Access Management menu fetches —
+// all thrown away. Config redirects run before middleware and render nothing.
+// NEXT_PUBLIC_* is inlined at build time, so this matches what the page sees.
+// An invalid slug (no leading "/") gets no redirect here: the page still throws
+// the typed `IGRP_APP_HOME_SLUG_INVALID` error, rendered by `(igrp)/error.tsx`.
+const homeSlug = process.env.NEXT_PUBLIC_IGRP_APP_HOME_SLUG || "/";
+
+const getRedirects = async () =>
+  homeSlug !== "/" && homeSlug.startsWith("/")
+    ? [{ source: "/", destination: homeSlug, permanent: false }]
+    : [];
+
 const nextConfig: NextConfig = {
   output: "standalone",
   basePath: basePath,
+  redirects: getRedirects,
   images: {
     remotePatterns: getRemotePatterns(),
   },

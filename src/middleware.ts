@@ -1,5 +1,6 @@
-import { staleAuthCookies } from "@igrp/framework-next-auth/cookies";
 import { type NextRequest, NextResponse } from "next/server";
+
+import { staleAuthCookies } from "@igrp/framework-next-auth/cookies";
 
 // Edge runtime: import the instance from its Edge-safe module, NOT "@/lib/auth"
 // (which also carries Node-only session helpers — see lib/auth-instance.ts).
