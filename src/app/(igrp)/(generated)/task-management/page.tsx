@@ -416,15 +416,17 @@ export default function PageTaskmanagementComponent() {
 
                       action={() => {}}
                     ></IGRPDataTableButtonLink>
-                    <IGRPDataTableButtonLink
-                      labelTrigger={`Atribuir Tarefa`}
-                      variant={`ghost`}
-                      icon={`UserCheck`}
+                    {rowData?.status !== 'COMPLETED' && rowData?.status !== 'ASSIGNED' && (
+                      <IGRPDataTableButtonLink
+                        labelTrigger={`Atribuir Tarefa`}
+                        variant={`ghost`}
+                        icon={`UserCheck`}
 
-                      action={() => {
-                        handleOpenAssignModal(rowData);
-                      }}
-                    ></IGRPDataTableButtonLink>
+                        action={() => {
+                          handleOpenAssignModal(rowData);
+                        }}
+                      ></IGRPDataTableButtonLink>
+                    )}
                   </IGRPDataTableRowAction>
                 );
               },
