@@ -173,16 +173,16 @@ Coming soon
 | `IGRP_SYNC_ACCESS` | Enable synchronization of applications, resources, and menus with the IGRP Access Management API | `true` |
 | `IGRP_M2M_SERVICE_ID` | Unique identifier for your service in the IGRP Access Management system (required when `IGRP_SYNC_ACCESS=true`) | - |
 | `IGRP_M2M_TOKEN` | Authentication token for machine-to-machine API calls (required when `IGRP_SYNC_ACCESS=true`) | - |
-| `IGRP_PROCESS_EXECUTION_URL` | Base URL of the process-execution app (where task / consultation routes live) | `https://apps-test.inss.gw/apps/core` |
+| `IGRP_PROCESS_EXECUTION_URL` | Base URL of the process-execution app (where task / consultation routes live) | `https://apps.example.com/apps/core` |
 
 ### Process Execution Variables
 
 #### `IGRP_PROCESS_EXECUTION_URL`
 - **Purpose**: Base URL used to build task execution and process consultation links (`buildTaskExecutionUrl`, `buildProcessInstanceUrl`)
-- **Usage**: Full origin + app slug of the app that hosts `/process/...` (e.g. INSS Core). When set, it overrides the Access Management lookup by `applicationBase`
+- **Usage**: Full origin + app slug of the app that hosts `/process/...` (e.g. the Core app). When set, it overrides the Access Management lookup by `applicationBase`
 - **When empty**: The app resolves the target from Access Management (`getApplication(applicationBase)` → `slug` / `url`), so cluster routes keep the correct `/apps/<slug>` prefix
 - **Cluster note**: Prefer leaving this empty in multi-app clusters so each process opens in its owning app. Set it only when all processes run in a single fixed execution app
-- **Example (cluster, fixed Core app)**: `https://apps-test.inss.gw/apps/core`
+- **Example (cluster, fixed Core app)**: `https://apps.example.com/apps/core`
 
 ### Synchronization Variables
 
