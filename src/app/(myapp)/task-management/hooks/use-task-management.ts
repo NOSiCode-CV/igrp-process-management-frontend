@@ -1,15 +1,19 @@
-import { useState, useCallback, useMemo } from "react";
-import { getTasks, assignTask } from "../../client/task";
-import {
-  getDateTemplate,
-  getProcessInfo,
-  getPriorityTemplate,
-  formatDuration,
-} from "../../utils/columns-template";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useProcessPriorities } from "../../hooks/use-process-priorities";
-import { routeSearchTerm } from "../../utils/search-routing";
+import { useCallback, useMemo, useState } from "react";
 import {
+  clearAssignCandidateGroups,
+  setAssignCandidateGroups,
+} from "../../access-management/assign-user-scope";
+import { assignTask, getTasks } from "../../client/task";
+import { useProcessPriorities } from "../../hooks/use-process-priorities";
+import {
+  formatDuration,
+  getDateTemplate,
+  getPriorityTemplate,
+  getProcessInfo,
+} from "../../utils/columns-template";
+import { routeSearchTerm } from "../../utils/search-routing";
+import type {
   AssignTaskModalState,
   TaskManagementFilters,
   TaskManagementState,
@@ -90,6 +94,7 @@ export function useTaskManagement() {
         processKey: task.processKey,
         processInstanceId: task.processInstanceId,
         processName: task.processName,
+        candidateGroups: task.candidateGroups,
         priority: getPriorityTemplate(
           getPriorityBadge(
             task.processKey,
@@ -146,6 +151,9 @@ export function useTaskManagement() {
 
   // Handle opening assign task modal
   const handleOpenAssignModal = useCallback((task: TaskManagementTableRow) => {
+    // Scope the modal's user picker to this task's candidate groups so it lists
+    // only users who can actually perform the task.
+    setAssignCandidateGroups(task.candidateGroups);
     setAssignModalState({
       isOpen: true,
       selectedTask: task,
@@ -154,6 +162,7 @@ export function useTaskManagement() {
 
   // Handle closing assign task modal
   const handleCloseAssignModal = useCallback(() => {
+    clearAssignCandidateGroups();
     setAssignModalState({
       isOpen: false,
       selectedTask: null,

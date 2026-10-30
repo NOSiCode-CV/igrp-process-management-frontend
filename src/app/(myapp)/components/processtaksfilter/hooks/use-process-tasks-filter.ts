@@ -1,13 +1,13 @@
-import { useMemo, useEffect, useRef } from "react";
-import { useFilterData } from "./use-filter-data";
-import {
+import type {
   DateRange,
   IGRPOptionsProps,
 } from "@igrp/igrp-framework-react-design-system";
-import { VariableFilter } from "../../filter-data";
 import { format } from "date-fns";
+import { useEffect, useMemo, useRef } from "react";
 import { useBusinessGroups } from "../../../access-management/use-business-groups";
-import { useBusinessUsers } from "../../../access-management/use-business-users";
+import { useAllBusinessUsers } from "../../../access-management/use-business-users";
+import type { VariableFilter } from "../../filter-data";
+import { useFilterData } from "./use-filter-data";
 
 export function useProcessTasksFilter(
   setSelectAreaOptions: (options: IGRPOptionsProps[]) => void,
@@ -73,7 +73,7 @@ export function useProcessTasksFilter(
 
   // Candidate groups / users come from access-management (beta.19 filters).
   const { groupOptions } = useBusinessGroups();
-  const { userOptions } = useBusinessUsers();
+  const { userOptions } = useAllBusinessUsers();
 
   const transformedCandidateGroupOptions = useMemo((): IGRPOptionsProps[] => {
     return groupOptions.map((option) => ({

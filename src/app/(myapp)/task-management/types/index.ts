@@ -1,4 +1,7 @@
-import { Task, VariableParams } from "@igrp/platform-process-management-types";
+import type {
+  Task,
+  VariableParams,
+} from "@igrp/platform-process-management-types";
 
 export interface TaskManagementFilters {
   processNumber?: string;
@@ -50,6 +53,8 @@ export interface TaskManagementTableRow {
   processKey?: string;
   processInstanceId?: string;
   processName?: string;
+  /** Comma-separated candidate role codes — scopes the assign user picker. */
+  candidateGroups?: string;
 }
 
 export interface AssignTaskModalState {

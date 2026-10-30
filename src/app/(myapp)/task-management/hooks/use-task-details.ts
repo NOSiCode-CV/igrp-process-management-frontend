@@ -1,15 +1,19 @@
+import {
+  type IGRPBadgeProps,
+  useIGRPToast,
+} from "@igrp/igrp-framework-react-design-system";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useCallback, useEffect, useMemo } from "react";
+import {
+  clearAssignCandidateGroups,
+  setAssignCandidateGroups,
+} from "../../access-management/assign-user-scope";
 import { assignTask, getTaskById, unclaimTask } from "../../client/task";
 import {
   getPriorityLabel,
   getPriorityVariant,
   getTaskStatusVariant,
 } from "../../utils/status-helpers";
-import {
-  IGRPBadgeProps,
-  useIGRPToast,
-} from "@igrp/igrp-framework-react-design-system";
-import { useCallback, useMemo } from "react";
 
 export const useTaskDetails = (taskId: string) => {
   const { igrpToast } = useIGRPToast();
@@ -44,6 +48,13 @@ export const useTaskDetails = (taskId: string) => {
       ],
     };
   }, [data]);
+
+  // This page delegates a single task, so scope the "Delegar" modal's user
+  // picker to that task's candidate groups while the page is mounted.
+  useEffect(() => {
+    setAssignCandidateGroups(data?.candidateGroups);
+    return () => clearAssignCandidateGroups();
+  }, [data?.candidateGroups]);
 
   const refetchTask = useCallback(() => {
     queryClient.refetchQueries({ queryKey: ["task-details", taskId] });

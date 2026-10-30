@@ -173,7 +173,12 @@ export default function Commonusertaskmodalform({
                     gridSize={`default`}
                     label={`Atribuir tarefa a:`}
                     required={true}
-                    className={cn("col-span-1")}
+                    labelClassName={cn("mb-3")}
+                    className={cn(
+                      "col-span-1",
+                      "[&_[data-slot=radio-group]>div]:items-center",
+                      "[&_[data-slot=radio-group-item]]:mt-0",
+                    )}
                     onValueChange={(e) => {
                       setAtribuirTask(e);
                     }}

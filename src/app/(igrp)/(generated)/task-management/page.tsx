@@ -180,7 +180,10 @@ export default function PageTaskmanagementComponent() {
       </IGRPPageHeader>
 
       <div
-        className={cn('grid', 'md:grid-cols-5 ', 'lg:grid-cols-5 ', 'xl:grid-cols-5 ', ' gap-4')}
+        className={cn(
+          'flex flex-wrap gap-4',
+          '[&>*]:flex-1 [&>*]:basis-40 [&>*]:min-w-40',
+        )}
       >
         <IGRPStatsCard
           id={`statsCard1`}
