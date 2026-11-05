@@ -4,8 +4,9 @@ import { useEffect, useRef, useState } from "react";
 
 import { signOut } from "@igrp/framework-next-auth/client";
 import { IGRPTemplateLoading } from "@igrp/framework-next-ui";
+import { useTranslations } from "next-intl";
 
-import { getLogoutUrl } from "@/actions/igrp/auth";
+import { getLogoutUrl, markHostLogout } from "@/actions/igrp/auth";
 import { markLogoutPending } from "@/lib/logout-pending";
 import { reportError } from "@/lib/report-error";
 
@@ -49,6 +50,7 @@ function buildLoginUrl(): string {
 type EndSessionPost = { action: string; fields: Record<string, string> };
 
 export default function LogoutPage() {
+  const t = useTranslations("auth");
   // When set, the end-session POST form is rendered and auto-submitted. We use
   // POST rather than a `window.location` GET so `id_token_hint` (the full
   // signed ID token) rides in the request body — never the URL, browser
@@ -175,6 +177,12 @@ export default function LogoutPage() {
         reportError(error, { segment: "(auth)/logout" });
       }
 
+      // Explicit logout: tell co-hosted apps. Still under the watchdog; a
+      // failure must not block the navigation below.
+      await markHostLogout().catch((error) =>
+        reportError(error, { segment: "(auth)/logout" }),
+      );
+
       clearTimeout(fallbackTimeout);
       console.warn(
         "[logout][client] IdP SSO session may persist; falling back to /login",
@@ -200,7 +208,7 @@ export default function LogoutPage() {
   return (
     <>
       <IGRPTemplateLoading
-        text="A terminar sessão..."
+        text={t("signingOut")}
         appCode={process.env.NEXT_PUBLIC_IGRP_APP_CODE}
       />
       {endSessionPost && (

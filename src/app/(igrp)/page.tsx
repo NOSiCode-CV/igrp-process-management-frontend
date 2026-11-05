@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { igrpGetClaims } from "@igrp/framework-next";
 import { IgrpConfigError } from "@igrp/framework-next/errors";
 import { getAuthProviderIdFromEnv } from "@igrp/framework-next-auth";
+import { getTranslations } from "next-intl/server";
 
 import { type HomeLayer, HomeOverview } from "@/components/home-overview";
 import { getPackageJson } from "@/lib/config/get-pkj";
@@ -15,7 +16,7 @@ export default async function Home() {
 
   // Fail fast with a typed, translatable error rather than a raw `Error`
   // string. Caught by `(igrp)/error.tsx` → `IGRPSegmentError` → copy lookup
-  // by `code` in `src/config/error-messages.ts`.
+  // by `code` in the framework's chrome catalog.
   if (!root.startsWith("/")) {
     throw new IgrpConfigError(
       "IGRP_APP_HOME_SLUG_INVALID",
@@ -36,6 +37,7 @@ export default async function Home() {
     verifySession(),
     igrpGetClaims(),
   ]);
+  const t = await getTranslations("home.layers");
 
   const app = getPackageJson();
   const bypass = isAuthBypass();
@@ -50,6 +52,7 @@ export default async function Home() {
         bypass,
         userName: session.user?.name || session.user?.email || "",
         claimsState,
+        t,
       })}
     />
   );
@@ -58,16 +61,19 @@ export default async function Home() {
 /**
  * The request's path through the framework, in the order it happened. Only
  * plain strings cross to the client — no token, no claim list, no internal
- * URL: this page is visible to every authenticated user.
+ * URL: this page is visible to every authenticated user. The strings are
+ * translated here (`home.layers`), so the client gets final text.
  */
 function buildLayers({
   bypass,
   userName,
   claimsState,
+  t,
 }: {
   bypass: boolean;
   userName: string;
   claimsState: Awaited<ReturnType<typeof igrpGetClaims>>;
+  t: Awaited<ReturnType<typeof getTranslations<"home.layers">>>;
 }): HomeLayer[] {
   const amConfigured = Boolean(process.env.IGRP_ACCESS_MANAGEMENT_API);
 
@@ -75,22 +81,24 @@ function buildLayers({
     {
       id: "middleware",
       icon: "ShieldCheck",
-      name: "Middleware",
-      value: bypass ? "Deixa passar todos os pedidos" : "Exige sessão iniciada",
+      name: t("middleware.name"),
+      value: bypass ? t("middleware.valueBypass") : t("middleware.valueAuth"),
       detail: bypass
-        ? "A autenticação está desligada neste ambiente."
-        : "Pedidos sem sessão são enviados para o login.",
+        ? t("middleware.detailBypass")
+        : t("middleware.detailAuth"),
       file: "src/middleware.ts",
       state: bypass ? "preview" : "ok",
     },
     {
       id: "session",
       icon: "UserRound",
-      name: "Sessão",
-      value: userName || "Sessão sem nome de utilizador",
+      name: t("session.name"),
+      value: userName || t("session.valueEmpty"),
       detail: bypass
-        ? "Utilizador fictício de pré-visualização."
-        : `Iniciada com ${getAuthProviderIdFromEnv(process.env)}.`,
+        ? t("session.detailBypass")
+        : t("session.detailAuth", {
+            provider: getAuthProviderIdFromEnv(process.env),
+          }),
       file: "src/lib/dal.ts",
       state: bypass ? "preview" : "ok",
     },
@@ -98,9 +106,9 @@ function buildLayers({
       ? {
           id: "access-management",
           icon: "Network",
-          name: "Access Management",
-          value: "Menus e aplicações de exemplo",
-          detail: "Os dados vêm de src/temp, sem chamadas ao servidor.",
+          name: t("accessManagement.name"),
+          value: t("accessManagement.valueBypass"),
+          detail: t("accessManagement.detailBypass"),
           file: "src/igrp.template.config.ts",
           state: "preview",
         }
@@ -108,19 +116,18 @@ function buildLayers({
         ? {
             id: "access-management",
             icon: "Network",
-            name: "Access Management",
-            value: "Ligado",
-            detail: "Fornece os menus, as aplicações e o utilizador.",
+            name: t("accessManagement.name"),
+            value: t("accessManagement.valueOk"),
+            detail: t("accessManagement.detailOk"),
             file: "src/igrp.template.config.ts",
             state: "ok",
           }
         : {
             id: "access-management",
             icon: "Network",
-            name: "Access Management",
-            value: "Sem endereço configurado",
-            detail:
-              "Defina IGRP_ACCESS_MANAGEMENT_API no .env para carregar os menus.",
+            name: t("accessManagement.name"),
+            value: t("accessManagement.valueMissing"),
+            detail: t("accessManagement.detailMissing"),
             file: ".env",
             state: "error",
           },
@@ -128,33 +135,35 @@ function buildLayers({
       ? {
           id: "permissions",
           icon: "KeyRound",
-          name: "Permissões",
+          name: t("permissions.name"),
           value: claimsState.claims.isSuperAdmin
-            ? "Acesso total"
-            : `${claimsState.claims.permissions.length} ${claimsState.claims.permissions.length === 1 ? "permissão" : "permissões"}`,
+            ? t("permissions.valueAll")
+            : t("permissions.valueCount", {
+                count: claimsState.claims.permissions.length,
+              }),
           detail: bypass
-            ? "Em pré-visualização todas as verificações passam."
+            ? t("permissions.detailBypass")
             : claimsState.claims.org
-              ? `Departamento ativo: ${claimsState.claims.org}.`
-              : "Sem departamento ativo no token.",
+              ? t("permissions.detailOrg", { org: claimsState.claims.org })
+              : t("permissions.detailNoOrg"),
           file: ".igrpstudio/permissions.json",
           state: bypass ? "preview" : "ok",
         }
       : {
           id: "permissions",
           icon: "KeyRound",
-          name: "Permissões",
-          value: "Não foi possível ler o token",
-          detail: "Todas as verificações de permissão negam o acesso.",
+          name: t("permissions.name"),
+          value: t("permissions.valueError"),
+          detail: t("permissions.detailError"),
           file: "src/app/(igrp)/layout.tsx",
           state: "error",
         },
     {
       id: "page",
       icon: "PanelsTopLeft",
-      name: "Esta página",
-      value: "Apresentada",
-      detail: "Aparece quando não há uma rota inicial definida.",
+      name: t("page.name"),
+      value: t("page.value"),
+      detail: t("page.detail"),
       file: "src/app/(igrp)/page.tsx",
       state: "ok",
     },

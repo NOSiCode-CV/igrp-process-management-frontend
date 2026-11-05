@@ -1,19 +1,28 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
+import { IGRPLocaleSwitcher } from "@igrp/framework-next/i18n/client";
 import { getAuthProviderIdFromEnv } from "@igrp/framework-next-auth";
 import { IGRPAuthCarousel, IGRPAuthForm } from "@igrp/framework-next-ui";
-import { cn } from "@igrp/igrp-framework-react-design-system";
+import { cn } from "@igrp/igrp-framework-react-design-system/cn";
+import { getTranslations } from "next-intl/server";
 
-import { carouselItems, loginConfig } from "@/config/login";
+import { carouselImages, loginConfig } from "@/config/login";
 import { siteConfig } from "@/config/site";
+import { setLocale } from "@/i18n/actions";
 import { LOGOUT_PENDING_COOKIE } from "@/lib/logout-pending";
+import {
+  SILENT_SSO_COOKIE,
+  shouldAttemptSilentSso,
+  silentSsoCallbackUrl,
+} from "@/lib/silent-sso";
 import { isAuthBypass, sanitizeCallbackUrl } from "@/lib/utilities";
 
-import { AutoSignIn } from "./auto-sign-in";
 import { LogoutCompletion } from "./logout-completion";
+import { SessionEndedCompletion } from "./session-ended-completion";
+import { SilentSignIn } from "./silent-sign-in";
 
-const { sliderPosition, texts } = loginConfig;
+const { sliderPosition } = loginConfig;
 const { logo, name } = siteConfig;
 
 export default async function AuthPage({
@@ -39,16 +48,59 @@ export default async function AuthPage({
     return <LogoutCompletion />;
   }
 
-  const { callbackUrl, error, loggedOut } = await searchParams;
+  const { callbackUrl, error, reason } = await searchParams;
+  // AM answered 401: clear this app's session client-side, then reload /login
+  // without `reason` so silent SSO can run.
+  if (reason === "session_ended") {
+    return <SessionEndedCompletion />;
+  }
+  const silentSso = cookieStore.get(SILENT_SSO_COOKIE);
   // Drop callbackUrl values that would bounce the user back to /login (or
   // /logout) after the OIDC round-trip — those produce the nested
-  // `?callbackUrl=…?callbackUrl=…` chain. Fall back to `/` so a successful
-  // login lands on the app home.
-  const safeCallbackUrl = sanitizeCallbackUrl(callbackUrl) ?? "/";
+  // `?callbackUrl=…?callbackUrl=…` chain. After a failed silent attempt the
+  // query value is NextAuth's absolute URL, which this rejects, so the value
+  // the attempt set out with is recovered from its cookie. Fall back to `/`
+  // so a successful login lands on the app home.
+  const safeCallbackUrl =
+    sanitizeCallbackUrl(callbackUrl) ??
+    silentSsoCallbackUrl(silentSso?.value) ??
+    "/";
   const providerId = getAuthProviderIdFromEnv(process.env);
 
-  const loginForm = (
-    <section className="flex min-h-screen flex-col md:flex-row">
+  // Silent SSO: still signed in at the IdP (e.g. coming from another app) →
+  // straight into the app with no click. See lib/silent-sso.ts.
+  if (
+    shouldAttemptSilentSso({
+      alreadyTried: silentSso !== undefined,
+      error,
+      providerId,
+    })
+  ) {
+    return (
+      <SilentSignIn providerId={providerId} callbackUrl={safeCallbackUrl} />
+    );
+  }
+
+  const t = await getTranslations("login");
+  const texts = {
+    ...loginConfig.texts,
+    welcome: t("welcome"),
+    description: t("description"),
+    copyright: t("copyright"),
+  };
+  const carouselItems = (
+    Object.keys(carouselImages) as (keyof typeof carouselImages)[]
+  ).map((key) => ({
+    image: carouselImages[key],
+    title: t(`carousel.${key}.title`),
+    description: t(`carousel.${key}.description`),
+  }));
+
+  return (
+    <section className="relative flex min-h-screen flex-col md:flex-row">
+      <div className="absolute top-8 right-16 z-10">
+        <IGRPLocaleSwitcher action={setLocale} />
+      </div>
       <div
         className={cn(
           "relative hidden w-full md:block md:w-1/2",
@@ -67,24 +119,4 @@ export default async function AuthPage({
       />
     </section>
   );
-
-  // Auto sign-in: start the OIDC round-trip straight away so a live IdP (SSO)
-  // session logs the user in without clicking "Entrar" — needed because each
-  // co-hosted app has its own basePath-scoped session cookie. The manual form
-  // stays for: a NextAuth error redirect (`?error=`, would loop), a completed
-  // logout (`?loggedOut=1`, the user just chose to leave), or when disabled via
-  // IGRP_LOGIN_AUTO_SIGNIN=false.
-  const autoSignInEnabled =
-    process.env.IGRP_LOGIN_AUTO_SIGNIN?.trim().toLowerCase() !== "false";
-  if (autoSignInEnabled && !error && !loggedOut) {
-    return (
-      <AutoSignIn
-        providerId={providerId}
-        callbackUrl={safeCallbackUrl}
-        fallback={loginForm}
-      />
-    );
-  }
-
-  return loginForm;
 }
