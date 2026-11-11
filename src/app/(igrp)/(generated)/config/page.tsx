@@ -584,7 +584,7 @@ export default function PageConfigComponent() {
                                     return (
                                       <IGRPDataTableRowAction>
                                         <IGRPDataTableButtonLink
-                                          labelTrigger={`Link`}
+                                          labelTrigger={`Editar`}
                                           variant={`ghost`}
                                           icon={`Pencil`}
                                           className={cn('size-11')}
