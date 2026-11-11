@@ -119,23 +119,44 @@ export default function Taskprocessfilter({
 
   return (
     <div className={cn('component')}>
-      <div className={cn('flex flex-row flex-wrap items-center justify-start gap-2', ' flex-1')}>
-        <IGRPInputSearch
-          id={`inputSearch1`}
-          label={``}
-          showStartIcon={true}
-          startIcon={`Search`}
-          submitIcon={`ArrowRight`}
-          required={false}
-          submitButtonLabel={`Pesquisar`}
-          placeholder={`Pesquisar por nome ou nº processo`}
-          className={cn('py-1 flex-1 max-w-sm')}
-          setValueChange={(value) => setSearchTerm(value)}
-          onSearch={handleSearchSubmit}
-          value={searchTerm}
-        ></IGRPInputSearch>
+      {/*
+        Responsive filter bar: a single flat flex so every control wraps
+        uniformly. Mobile stacks (flex-col, children stretch full-width); from
+        `sm` up it is a wrapping row where the search grows (flex-1) and each
+        control keeps a sensible width. The DS combobox and date picker default
+        to w-full, so they are explicitly bounded to w-auto from `sm` — that is
+        what kept them from sharing a row before.
+      */}
+      <div
+        className={cn(
+          'flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center',
+        )}
+      >
+        {/*
+          Each control is wrapped in a div that IS the flex item: the DS
+          components put className on inner nodes and default their outer element
+          to w-full, so the layout is controlled from these wrappers instead.
+          Search grows; the others keep a sensible min width and wrap as needed;
+          everything is full-width when stacked on mobile.
+        */}
+        <div className={cn('w-full sm:flex-1 sm:min-w-[16rem]')}>
+          <IGRPInputSearch
+            id={`inputSearch1`}
+            label={``}
+            showStartIcon={true}
+            startIcon={`Search`}
+            submitIcon={`ArrowRight`}
+            required={false}
+            submitButtonLabel={`Pesquisar`}
+            placeholder={`Pesquisar por nome ou nº processo`}
+            className={cn('py-1')}
+            setValueChange={(value) => setSearchTerm(value)}
+            onSearch={handleSearchSubmit}
+            value={searchTerm}
+          ></IGRPInputSearch>
+        </div>
 
-        <div className={cn('grid', 'grid-cols-1 ', 'md:grid-cols-3 ', 'lg:grid-cols-3 ', ' gap-4')}>
+        <div className={cn('w-full sm:w-auto sm:min-w-[11rem]')}>
           <IGRPCombobox
             id={`Status`}
             label={``}
@@ -145,31 +166,35 @@ export default function Taskprocessfilter({
             showSearch={true}
             showIcon={false}
             iconName={`CornerDownRight`}
-            className={cn('col-span-1')}
             onChange={(selected) =>
               handleStatusChange(Array.isArray(selected) ? selected[0] : selected)
             }
             options={selectStatusOptions}
             value={filters.status}
           ></IGRPCombobox>
+        </div>
 
+        <div className={cn('w-full sm:w-auto sm:min-w-[12rem]')}>
           <IGRPDatePickerRange
             placeholder={`Selecione uma data`}
             id={`datePickerRange1`}
-
             dateFormat={`dd/MM/yyyy`}
             onDateChange={(date) => handleDateChange(date ?? null)}
             date={getDateRange()}
           />
+        </div>
+
+        <div className={cn('w-full sm:w-auto')}>
           <FilterData onChange={(filters) => handleFiltersChange(filters)}></FilterData>
         </div>
+
         <IGRPButton
           id={`button3`}
           variant={`outline`}
           size={`default`}
           showIcon={true}
           iconName={`Settings2`}
-          className={cn('ml-auto')}
+          className={cn('w-full sm:w-auto')}
           onClick={() => {
             setShowFilter(!showFilter);
           }}

@@ -69,7 +69,7 @@ function FilterData({
         <IGRPButton
           variant="outline"
           size="default"
-          className={`bg-secondary border-border gap-2 ${variableFilters && variableFilters.length > 0 ? "border-primary" : ""}`}
+          className={`w-full sm:w-auto bg-secondary border-border gap-2 ${variableFilters && variableFilters.length > 0 ? "border-primary" : ""}`}
         >
           <IGRPIcon iconName="Funnel" />
           <span>Filtrar por Dados</span>
