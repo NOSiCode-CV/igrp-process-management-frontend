@@ -587,6 +587,7 @@ export default function PageConfigComponent() {
                                           labelTrigger={`Link`}
                                           variant={`ghost`}
                                           icon={`Pencil`}
+                                          className={cn('size-11')}
                                           action={() => openTaskEditor(rowData)}
                                         ></IGRPDataTableButtonLink>
                                       </IGRPDataTableRowAction>

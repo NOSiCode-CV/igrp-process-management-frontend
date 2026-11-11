@@ -247,7 +247,7 @@ export default function PageAvailabletasksComponent() {
                       labelTrigger={`Assumir Tarefa`}
                       variant={`ghost`}
                       icon={`CheckCheck`}
-
+                      className={cn('size-11')}
                       action={() => {
                         onClaimTask(rowData.taskId);
                       }}

@@ -344,7 +344,7 @@ export default function PageProcessinstancesComponent() {
                       href={`/process-instances/${row.original.processInstanceId}`}
                       variant={`ghost`}
                       icon={`Info`}
-
+                      className={cn('size-11')}
                       action={() => {
                         goToProcessRuntime(rowData);
                       }}
@@ -353,7 +353,7 @@ export default function PageProcessinstancesComponent() {
                       labelTrigger={`Consultar Processo`}
                       variant={`ghost`}
                       icon={`FileSpreadsheet`}
-
+                      className={cn('size-11')}
                       action={() => {
                         consultarProcess(rowData);
                       }}
