@@ -2,63 +2,50 @@ import React from "react";
 import { ExtendedArea } from "../types";
 import { NodeActions } from "./node-actions";
 import { Area, Process } from "@igrp/platform-process-management-types";
-import { IGRPBadge } from "@igrp/igrp-framework-react-design-system";
 
 interface NodeContentProps {
   node: ExtendedArea;
-  onStartProcess: (
-    process: Process,
-    processDefinitionId: string,
-    processKey: string,
-    applicationBase: string,
-    businessKey?: string,
-    variables?: Array<{ name: string; value: string }>,
-  ) => void;
 }
 
-export function NodeContent({ node, onStartProcess }: NodeContentProps) {
+export function NodeContent({ node }: NodeContentProps) {
   const isProcess = node.type === "process";
   const isAreaOrSubarea = node.type === "area" || node.type === "subarea";
 
+  const description = isProcess
+    ? (node.data as Process).description
+    : isAreaOrSubarea
+      ? (node.data as Area).description
+      : undefined;
+  // The process code (e.g. P3.4.1) reads as a quiet monospace caption under the
+  // name — always visible and aligned, instead of a pill floating between the
+  // name and the start button.
+  const processKey = isProcess ? (node.data as Process).processKey : undefined;
+
   return (
-    <div className="flex items-center justify-between w-full ">
-      <div className="flex items-center space-x-2 flex-1 min-w-0">
-        <div className="flex-1 justify-between">
-          <div className="font-medium text-sm truncate">
-            {node?.name || "N/A"}
-          </div>
-          {isAreaOrSubarea && (
-            <>
-              <div className="text-xs text-gray-500 truncate">
-                {(node.data as Area).description}
-              </div>
-            </>
-          )}
-          {isProcess && (
-            <>
-              <div className="text-xs text-gray-500 truncate">
-                {(node.data as Process).description}
-              </div>
-            </>
-          )}
+    <div className="flex items-center justify-between w-full gap-2">
+      <div className="min-w-0 flex-1">
+        <div className="font-medium text-sm truncate">
+          {node?.name || "N/A"}
         </div>
-        {isProcess && (
-          <>
-            <div className="text-xs text-gray-500 truncate">
-              {(node.data as Process).description}
-            </div>
-            <IGRPBadge
-              variant="outline"
-              className="text-xs font-mono opacity-0 group-hover/process:opacity-100"
-            >
-              {(node.data as Process).processKey}
-            </IGRPBadge>
-          </>
+        {(processKey || description) && (
+          <div className="flex items-center gap-2 text-xs text-muted-foreground min-w-0">
+            {processKey && (
+              <span className="shrink-0 font-mono text-[11px] tracking-tight">
+                {processKey}
+              </span>
+            )}
+            {processKey && description && (
+              <span aria-hidden="true" className="shrink-0 opacity-40">
+                ·
+              </span>
+            )}
+            {description && <span className="truncate">{description}</span>}
+          </div>
         )}
       </div>
 
       <div className="flex items-center space-x-2 flex-shrink-0">
-        <NodeActions node={node} onStartProcess={onStartProcess} />
+        <NodeActions node={node} />
       </div>
     </div>
   );

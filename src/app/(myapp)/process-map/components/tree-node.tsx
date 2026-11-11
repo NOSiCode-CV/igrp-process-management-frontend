@@ -31,17 +31,55 @@ export function TreeNode({
 
   const isExpanded = expandedNodes.has(id);
   const hasChildren = children && children.length > 0;
+  const isProcess = type === "process";
+
+  const startProcess = () => {
+    if (!node.data) return;
+    const process = node.data as Process;
+    onStartProcess(
+      process,
+      process.releaseId,
+      process.processKey,
+      node.applicationBase,
+      undefined,
+      [],
+    );
+  };
+
+  // A process row is a single, large interactive control: clicking (or
+  // Enter/Space) anywhere on the row starts the process — a forgiving target
+  // (WCAG 2.5.5) for imprecise pointers and fully keyboard-operable. The row is
+  // the ONLY control in a process leaf (the "Iniciar" affordance is decorative
+  // and the expand slot is a placeholder), so there are no nested interactive
+  // elements. Area/subarea rows keep their click-to-toggle behaviour, with the
+  // ExpandButton as the keyboard-reachable control.
+  const processName = node.name ?? "";
+  const rowInteractiveProps = isProcess
+    ? {
+        role: "button" as const,
+        tabIndex: 0,
+        "aria-label": `Iniciar processo: ${processName}`,
+        title: `Iniciar processo: ${processName}`,
+        onClick: startProcess,
+        onKeyDown: (e: React.KeyboardEvent<HTMLDivElement>) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            startProcess();
+          }
+        },
+      }
+    : { onClick: () => onToggle(node) };
 
   return (
     <div className="w-full">
       <div
-        className="flex items-center gap-2 px-3 py-2 hover:bg-muted rounded-md cursor-pointer group/process"
+        className="relative flex items-center gap-2 px-3 py-2 hover:bg-muted rounded-md cursor-pointer group/process focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1"
         style={{ paddingLeft: `${level * 1.5 + 0.75}rem` }}
-        onClick={() => onToggle(node)}
+        {...rowInteractiveProps}
       >
         <ExpandButton
           isExpanded={isExpanded}
-          hasChildren={hasChildren || type === "area"}
+          hasChildren={isProcess ? false : hasChildren || type === "area"}
           onToggle={() => onToggle(node)}
         />
 
@@ -51,7 +89,7 @@ export function TreeNode({
 
         <NodeIcon node={node} isExpanded={isExpanded} />
 
-        <NodeContent node={node} onStartProcess={onStartProcess} />
+        <NodeContent node={node} />
       </div>
 
       {isExpanded && hasChildren && (
