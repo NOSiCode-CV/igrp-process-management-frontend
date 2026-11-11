@@ -416,7 +416,7 @@ export default function PageTaskmanagementComponent() {
                       href={`/task-management/${row.original.taskId}`}
                       variant={`ghost`}
                       icon={`ClipboardList`}
-
+                      className={cn('size-11')}
                       action={() => {}}
                     ></IGRPDataTableButtonLink>
                     {rowData?.status !== 'COMPLETED' && rowData?.status !== 'ASSIGNED' && (
@@ -424,7 +424,7 @@ export default function PageTaskmanagementComponent() {
                         labelTrigger={`Atribuir Tarefa`}
                         variant={`ghost`}
                         icon={`UserCheck`}
-
+                        className={cn('size-11')}
                         action={() => {
                           handleOpenAssignModal(rowData);
                         }}

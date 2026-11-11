@@ -326,7 +326,7 @@ export default function PageMytasksComponent() {
                       labelTrigger={`Executar Tarefa`}
                       variant={`ghost`}
                       icon={`Play`}
-
+                      className={cn('size-11')}
                       action={() => {
                         executeTask(rowData);
                       }}
@@ -335,7 +335,7 @@ export default function PageMytasksComponent() {
                       labelTrigger={`Libertar Tarefa`}
                       variant={`ghost`}
                       icon={`UserX`}
-
+                      className={cn('size-11')}
                       action={() => {
                         handleOpenUnclaimModal(rowData);
                       }}
